@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Stackd - Net Worth Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --bg2: #15171a;
+    --bg3: #1c1f23;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f0ee;
+    --muted: #7a7d82;
+    --accent: #c8f060;
+    --accent2: #8ff0c0;
+    --warn: #f0c060;
+    --danger: #f06060;
+    --cash-color: #60b8f0;
+    --retire-color: #8ff0c0;
+    --broker-color: #c8f060;
+    --crypto-color: #f0a860;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-display); }
+
+  /* ---- AUTH SCREEN ---- */
+  #auth-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  .auth-logo { font-size: 48px; font-weight: 600; letter-spacing: -2px; margin-bottom: 8px; }
+  .auth-logo span { color: var(--accent); }
+  .auth-tagline { color: var(--muted); font-size: 14px; margin-bottom: 3rem; letter-spacing: 0.05em; }
+  .auth-card {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 380px;
+  }
+  .auth-card h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+  .auth-card p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 2rem; }
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px 20px;
+    background: var(--text);
+    color: #111;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .google-btn:hover { opacity: 0.9; }
+  .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .auth-features { margin-top: 2rem; display: flex; flex-direction: column; gap: 10px; }
+  .auth-feature { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); text-align: left; }
+  .auth-feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* ---- SETUP SCREEN ---- */
+  #setup-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .setup-card {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  .setup-spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .setup-card h2 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+  .setup-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+  /* ---- APP ---- */
+  #app-screen { display: none; min-height: 100vh; }
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(14,15,17,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; }
+  .topbar-logo span { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .user-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 12px 6px 6px;
+    font-size: 13px; color: var(--muted);
+  }
+  .user-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: #111;
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .signout-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 12px; cursor: pointer; font-family: var(--font-display);
+    padding: 4px 8px; border-radius: 6px;
+  }
+  .signout-btn:hover { color: var(--text); background: var(--bg3); }
+
+  .main { padding: 24px 20px 80px; max-width: 800px; margin: 0 auto; }
+
+  /* Hero */
+  .hero { margin-bottom: 28px; }
+  .hero-label { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .hero-total { font-size: 52px; font-weight: 600; letter-spacing: -2px; line-height: 1; font-family: var(--font-mono); }
+  .hero-change { font-size: 14px; margin-top: 8px; }
+  .up { color: var(--accent); }
+  .down { color: var(--danger); }
+
+  /* Live prices */
+  .prices-strip {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .price-tag {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 12px;
+    font-size: 12px; font-family: var(--font-mono);
+  }
+  .price-tag .coin { color: var(--muted); }
+  .price-tag .val { color: var(--text); }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px; }
+  @media(min-width:500px){ .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+  .stat-tile {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px;
+  }
+  .stat-tile-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .stat-tile-val { font-size: 20px; font-weight: 500; font-family: var(--font-mono); }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .add-link { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; font-family: var(--font-display); padding: 4px 10px; border-radius: 6px; }
+  .add-link:hover { background: rgba(200,240,96,0.08); }
+
+  /* Account row */
+  .acct-row {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px; transition: border-color 0.15s;
+  }
+  .acct-row:hover { border-color: var(--border2); }
+  .acct-left { display: flex; align-items: center; gap: 12px; }
+  .acct-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .icon-cash { background: rgba(96,184,240,0.12); color: var(--cash-color); }
+  .icon-retire { background: rgba(143,240,192,0.12); color: var(--retire-color); }
+  .icon-broker { background: rgba(200,240,96,0.12); color: var(--broker-color); }
+  .icon-crypto { background: rgba(240,168,96,0.12); color: var(--crypto-color); }
+  .acct-name { font-size: 15px; font-weight: 500; }
+  .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stale1 { color: var(--warn); }
+  .stale2 { color: var(--danger); }
+  .acct-right { display: flex; align-items: center; gap: 12px; }
+  .acct-bal { font-size: 16px; font-weight: 500; font-family: var(--font-mono); text-align: right; }
+  .acct-sub { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
+  .edit-ico { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 6px; border-radius: 8px; line-height: 1; }
+  .edit-ico:hover { background: var(--bg3); color: var(--text); }
+  .empty-row { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; background: var(--bg2); border: 1px dashed var(--border); border-radius: 14px; }
+
+  /* Breakdown */
+  .breakdown-item { margin-bottom: 14px; }
+  .breakdown-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .breakdown-name { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .bdot { width: 8px; height: 8px; border-radius: 2px; }
+  .breakdown-vals { display: flex; gap: 10px; align-items: center; }
+  .breakdown-amt { font-family: var(--font-mono); font-weight: 500; }
+  .breakdown-pct { color: var(--muted); font-size: 12px; }
+  .bar-track { background: var(--bg3); border-radius: 4px; height: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+
+  /* Snapshot */
+  .snapshot-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 28px;
+  }
+  .snapshot-row p { font-size: 13px; color: var(--muted); }
+  .snap-btn {
+    background: var(--accent); color: #111;
+    border: none; border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; font-weight: 500;
+    font-family: var(--font-display); cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .snap-btn:hover { opacity: 0.85; }
+
+  /* History */
+  .hist-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-date { color: var(--muted); }
+  .hist-right { display: flex; gap: 14px; align-items: center; }
+  .hist-val { font-family: var(--font-mono); font-weight: 500; }
+
+  /* Modal */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 200;
+    align-items: flex-end; justify-content: center;
+  }
+  @media(min-width:500px){ .overlay { align-items: center; } }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0; padding: 1.5rem;
+    width: 100%; max-width: 420px;
+    animation: slideup 0.2s ease;
+  }
+  @media(min-width:500px){ .modal { border-radius: 20px; } }
+  @keyframes slideup { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 1.25rem; }
+  @media(min-width:500px){ .modal-handle { display: none; } }
+  .modal h3 { font-size: 18px; font-weight: 500; margin-bottom: 1.25rem; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .field input, .field select {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text); border-radius: 10px; padding: 11px 14px;
+    font-size: 15px; font-family: var(--font-display); outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field select option { background: var(--bg3); }
+  .crypto-hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 1.25rem; }
+  .btn-save {
+    flex: 1; background: var(--accent); color: #111;
+    border: none; border-radius: 10px; padding: 12px;
+    font-size: 15px; font-weight: 500; font-family: var(--font-display); cursor: pointer;
+  }
+  .btn-save:hover { opacity: 0.85; }
+  .btn-cancel2 {
+    flex: 1; background: var(--bg3); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    font-size: 15px; font-family: var(--font-display); cursor: pointer;
+  }
+  .btn-cancel2:hover { color: var(--text); }
+  .btn-delete {
+    width: 100%; margin-top: 10px; background: rgba(240,96,96,0.08);
+    color: var(--danger); border: 1px solid rgba(240,96,96,0.2);
+    border-radius: 10px; padding: 11px;
+    font-size: 14px; font-family: var(--font-display); cursor: pointer;
+  }
+  .btn-delete:hover { background: rgba(240,96,96,0.15); }
+
+  /* Saving indicator */
+  .save-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 100px; padding: 8px 18px;
+    font-size: 13px; color: var(--muted);
+    opacity: 0; transition: opacity 0.2s;
+    pointer-events: none; z-index: 300;
+    white-space: nowrap;
+  }
+  .save-toast.show { opacity: 1; }
+
+  /* Config banner */
+  .config-banner {
+    background: rgba(200,240,96,0.06); border: 1px solid rgba(200,240,96,0.2);
+    border-radius: 14px; padding: 16px; margin-bottom: 28px;
+    font-size: 13px; line-height: 1.6; color: var(--muted);
+  }
+  .config-banner strong { color: var(--accent); font-weight: 500; }
+  .config-banner code { background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-logo">stack<span>d</span></div>
+  <div class="auth-tagline">your money. your data. your google sheet.</div>
+  <div class="auth-card">
+    <h2>track your net worth</h2>
+    <p>sign in with google to get started. your data lives in your own google sheet - nobody else can see it.</p>
+    <button class="google-btn" onclick="signIn()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      continue with google
+    </button>
+    <div class="auth-features">
+      <div class="auth-feature"><div class="auth-feature-dot"></div>your data saves to your own google sheet</div>
+      <div class="auth-feature"><div class="auth-feature-dot"></div>nobody else can see your numbers</div>
+      <div class="auth-feature"><div class="auth-feature-dot"></div>live crypto prices for btc, eth, ada</div>
+      <div class="auth-feature"><div class="auth-feature-dot"></div>share the link - everyone gets their own sheet</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="setup-screen" style="display:none;">
+  <div class="setup-card">
+    <div class="setup-spinner"></div>
+    <h2 id="setup-msg">setting up your sheet...</h2>
+    <p id="setup-sub">creating your personal google sheet. this only happens once.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-logo">stack<span>d</span></div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span id="user-name">...</span>
+      </div>
+      <button class="signout-btn" onclick="signOut()">sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="config-banner" id="config-banner" style="display:none;">
+      <strong>one-time setup needed</strong><br>
+      to connect to google sheets, add your google client id to this file.<br>
+      open <code>index.html</code> and replace <code>YOUR_GOOGLE_CLIENT_ID</code> at the top of the script with your actual client id from google cloud console. see <code>SETUP.md</code> for step-by-step instructions.
+    </div>
+
+    <div class="hero">
+      <div class="hero-label">net worth</div>
+      <div class="hero-total" id="hero-total">$0</div>
+      <div class="hero-change" id="hero-change"></div>
+    </div>
+
+    <div class="prices-strip">
+      <div class="price-tag"><span class="coin">BTC</span><span class="val" id="p-btc">—</span></div>
+      <div class="price-tag"><span class="coin">ETH</span><span class="val" id="p-eth">—</span></div>
+      <div class="price-tag"><span class="coin">ADA</span><span class="val" id="p-ada">—</span></div>
+      <div class="price-tag"><div class="live-dot"></div><span style="color:var(--muted);font-size:11px;">live</span></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-tile-label">cash</div><div class="stat-tile-val" id="s-cash" style="color:var(--cash-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">retirement</div><div class="stat-tile-val" id="s-retire" style="color:var(--retire-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">brokerage</div><div class="stat-tile-val" id="s-broker" style="color:var(--broker-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">crypto</div><div class="stat-tile-val" id="s-crypto" style="color:var(--crypto-color)">$0</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="section-label">cash</span><button class="add-link" onclick="openAdd('cash')">+ add</button></div>
+      <div id="g-cash"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="section-label">retirement</span><button class="add-link" onclick="openAdd('retirement')">+ add</button></div>
+      <div id="g-retirement"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="section-label">brokerage</span><button class="add-link" onclick="openAdd('brokerage')">+ add</button></div>
+      <div id="g-brokerage"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><span class="section-label">crypto</span><button class="add-link" onclick="openAdd('crypto')">+ add</button></div>
+      <div id="g-crypto"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="section-label">breakdown</span></div>
+      <div id="breakdown"></div>
+    </div>
+
+    <div class="snapshot-row">
+      <p>save today's net worth to history</p>
+      <button class="snap-btn" onclick="takeSnapshot()">save snapshot</button>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="section-label">history</span></div>
+      <div id="history"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="modal-title">add account</h3>
+    <div class="field">
+      <label>account name</label>
+      <input type="text" id="f-name" placeholder="e.g. Chase Checking" />
+    </div>
+    <div class="field">
+      <label>type</label>
+      <select id="f-type" onchange="onTypeChange()">
+        <option value="checking">checking</option>
+        <option value="savings">savings</option>
+        <option value="401k">401k</option>
+        <option value="roth">roth ira</option>
+        <option value="brokerage">brokerage</option>
+        <option value="btc">bitcoin (BTC)</option>
+        <option value="eth">ethereum (ETH)</option>
+        <option value="ada">cardano (ADA)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label id="f-val-label">balance ($)</label>
+      <input type="number" id="f-val" placeholder="0.00" step="any" />
+      <div class="crypto-hint" id="f-hint" style="display:none;">enter your coin amount - dollar value updates automatically from live price</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel2" onclick="closeModal()">cancel</button>
+      <button class="btn-save" onclick="saveAccount()">save</button>
+    </div>
+    <button class="btn-delete" id="btn-delete" style="display:none;" onclick="deleteAccount()">remove account</button>
+  </div>
+</div>
+
+<div class="save-toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG - replace with your Google Cloud OAuth Client ID
+// ============================================================
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+// ============================================================
+
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const SHEET_TITLE = 'Stackd - Net Worth Tracker';
+const DEMO_MODE = GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID';
+
+const TYPE_GROUP = {
+  checking:'cash', savings:'cash',
+  '401k':'retirement', roth:'retirement',
+  brokerage:'brokerage',
+  btc:'crypto', eth:'crypto', ada:'crypto'
+};
+const TYPE_LABEL = {
+  checking:'Checking', savings:'Savings', '401k':'401k', roth:'Roth IRA',
+  brokerage:'Brokerage', btc:'Bitcoin', eth:'Ethereum', ada:'Cardano'
+};
+const CRYPTO_COINS = ['btc','eth','ada'];
+const GROUP_COLOR = { cash:'var(--cash-color)', retirement:'var(--retire-color)', brokerage:'var(--broker-color)', crypto:'var(--crypto-color)' };
+const ICON_CLASS = { cash:'icon-cash', retirement:'icon-retire', brokerage:'icon-broker', crypto:'icon-crypto' };
+const BAR_COLOR = { cash:'#60b8f0', retirement:'#8ff0c0', brokerage:'#c8f060', crypto:'#f0a860' };
+
+let state = {
+  user: null,
+  accessToken: null,
+  sheetId: null,
+  accounts: [],
+  history: [],
+  prices: { btc:0, eth:0, ada:0 }
+};
+let editingId = null;
+
+// ---- DEMO MODE (no client ID) ----
+function initDemo() {
+  document.getElementById('config-banner').style.display = 'block';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-avatar').textContent = 'D';
+  document.getElementById('user-name').textContent = 'demo';
+  state.accounts = JSON.parse(localStorage.getItem('stackd_demo_accts') || '[]');
+  state.history = JSON.parse(localStorage.getItem('stackd_demo_hist') || '[]');
+  fetchPrices();
+}
+
+// ---- GOOGLE AUTH ----
+function signIn() {
+  if (DEMO_MODE) { initDemo(); return; }
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: window.location.origin + window.location.pathname,
+    response_type: 'token',
+    scope: SCOPES,
+    prompt: 'select_account'
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+}
+
+function signOut() {
+  localStorage.removeItem('stackd_token');
+  localStorage.removeItem('stackd_sheet');
+  window.location.reload();
+}
+
+async function handleAuthCallback() {
+  const hash = new URLSearchParams(window.location.hash.slice(1));
+  const token = hash.get('access_token');
+  if (token) {
+    localStorage.setItem('stackd_token', token);
+    window.history.replaceState({}, '', window.location.pathname);
+    state.accessToken = token;
+    await initApp();
+    return true;
+  }
+  const saved = localStorage.getItem('stackd_token');
+  if (saved) {
+    state.accessToken = saved;
+    const ok = await initApp();
+    if (!ok) { localStorage.removeItem('stackd_token'); showAuth(); }
+    return true;
+  }
+  return false;
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+async function getUser() {
+  const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: 'Bearer ' + state.accessToken }
+  });
+  if (!r.ok) return null;
+  return r.json();
+}
+
+// ---- SHEET SETUP ----
+async function initApp() {
+  showSetup('signing you in...');
+  const user = await getUser();
+  if (!user) return false;
+  state.user = user;
+
+  const initials = (user.name || user.email).slice(0,2).toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-name').textContent = user.given_name || user.email.split('@')[0];
+
+  showSetup('finding your sheet...');
+  const sheetId = localStorage.getItem('stackd_sheet_' + user.sub);
+
+  if (sheetId) {
+    const exists = await verifySheet(sheetId);
+    if (exists) {
+      state.sheetId = sheetId;
+    } else {
+      localStorage.removeItem('stackd_sheet_' + user.sub);
+      state.sheetId = await createSheet();
+    }
+  } else {
+    state.sheetId = await createSheet();
+  }
+
+  if (!state.sheetId) return false;
+  localStorage.setItem('stackd_sheet_' + user.sub, state.sheetId);
+
+  showSetup('loading your data...');
+  await loadFromSheet();
+  showApp();
+  fetchPrices();
+  return true;
+}
+
+function showSetup(msg, sub) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('setup-msg').textContent = msg;
+  if (sub) document.getElementById('setup-sub').textContent = sub;
+}
+
+function showApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  render();
+}
+
+async function verifySheet(id) {
+  try {
+    const r = await gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}?fields=spreadsheetId`);
+    return r.ok;
+  } catch { return false; }
+}
+
+async function createSheet() {
+  showSetup('creating your sheet...', 'this only happens once - setting up your personal spreadsheet.');
+  try {
+    const r = await gapi('POST', 'https://sheets.googleapis.com/v4/spreadsheets', {
+      properties: { title: SHEET_TITLE },
+      sheets: [
+        { properties: { title: 'Accounts', sheetId: 0 } },
+        { properties: { title: 'History', sheetId: 1 } }
+      ]
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const id = d.spreadsheetId;
+    await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A1:F1?valueInputOption=RAW`, {
+      values: [['id','name','type','balance_or_amount','updated_at','notes']]
+    });
+    await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A1:B1?valueInputOption=RAW`, {
+      values: [['date','total']]
+    });
+    return id;
+  } catch(e) { console.error(e); return null; }
+}
+
+// ---- SHEET I/O ----
+async function gapi(method, url, body) {
+  const opts = {
+    method,
+    headers: {
+      'Authorization': 'Bearer ' + state.accessToken,
+      'Content-Type': 'application/json'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts);
+}
+
+async function loadFromSheet() {
+  if (DEMO_MODE) return;
+  try {
+    const id = state.sheetId;
+    const [ar, hr] = await Promise.all([
+      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A2:F1000`),
+      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A2:B1000`)
+    ]);
+    const ad = await ar.json();
+    const hd = await hr.json();
+    state.accounts = (ad.values || []).map(r => ({
+      id: r[0], name: r[1], type: r[2],
+      balance: parseFloat(r[3]) || 0,
+      amount: parseFloat(r[3]) || 0,
+      updatedAt: parseInt(r[4]) || null
+    }));
+    state.history = (hd.values || []).map(r => ({
+      date: parseInt(r[0]), total: parseFloat(r[1]) || 0
+    }));
+  } catch(e) { console.error('load error', e); }
+}
+
+async function saveAccountsToSheet() {
+  if (DEMO_MODE) {
+    localStorage.setItem('stackd_demo_accts', JSON.stringify(state.accounts));
+    return;
+  }
+  const rows = state.accounts.map(a => [
+    a.id, a.name, a.type,
+    CRYPTO_COINS.includes(a.type) ? a.amount : a.balance,
+    a.updatedAt || '', ''
+  ]);
+  const values = [['id','name','type','balance_or_amount','updated_at','notes'], ...rows];
+  await gapi('PUT',
+    `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A1:F${values.length}?valueInputOption=RAW`,
+    { values }
+  );
+  if (rows.length < 999) {
+    const clearStart = rows.length + 2;
+    await gapi('POST',
+      `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A${clearStart}:F1000:clear`, {}
+    ).catch(()=>{});
+  }
+  showToast('saved to google sheet');
+}
+
+async function saveHistoryToSheet() {
+  if (DEMO_MODE) {
+    localStorage.setItem('stackd_demo_hist', JSON.stringify(state.history));
+    return;
+  }
+  const rows = state.history.map(h => [h.date, h.total]);
+  const values = [['date','total'], ...rows];
+  await gapi('PUT',
+    `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/History!A1:B${values.length}?valueInputOption=RAW`,
+    { values }
+  );
+  showToast('snapshot saved');
+}
+
+// ---- PRICES ----
+async function fetchPrices() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano&vs_currencies=usd');
+    const d = await r.json();
+    state.prices.btc = d.bitcoin?.usd || 0;
+    state.prices.eth = d.ethereum?.usd || 0;
+    state.prices.ada = d.cardano?.usd || 0;
+    document.getElementById('p-btc').textContent = '$' + state.prices.btc.toLocaleString();
+    document.getElementById('p-eth').textContent = '$' + state.prices.eth.toLocaleString();
+    document.getElementById('p-ada').textContent = '$' + state.prices.ada.toFixed(4);
+  } catch(e) {
+    ['p-btc','p-eth','p-ada'].forEach(id => document.getElementById(id).textContent = 'offline');
+  }
+  render();
+}
+
+function getBal(acc) {
+  if (CRYPTO_COINS.includes(acc.type)) return (acc.amount || 0) * (state.prices[acc.type] || 0);
+  return acc.balance || 0;
+}
+
+// ---- RENDER ----
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+
+function staleness(ts) {
+  if (!ts) return null;
+  const days = Math.floor((Date.now() - ts) / 86400000);
+  if (days === 0) return { text: 'updated today', cls: '' };
+  if (days === 1) return { text: 'updated yesterday', cls: '' };
+  if (days <= 7) return { text: `updated ${days}d ago`, cls: '' };
+  if (days <= 14) return { text: `${days}d since update`, cls: 'stale1' };
+  return { text: `${days}d - needs update`, cls: 'stale2' };
+}
+
+function renderGroup(group) {
+  const el = document.getElementById('g-' + group);
+  const accs = state.accounts.filter(a => TYPE_GROUP[a.type] === group);
+  if (!accs.length) {
+    el.innerHTML = '<div class="empty-row">no accounts yet</div>';
+    return;
+  }
+  const isCrypto = group === 'crypto';
+  el.innerHTML = accs.map(acc => {
+    const bal = getBal(acc);
+    const letter = acc.name.charAt(0).toUpperCase();
+    const meta = isCrypto
+      ? `${acc.amount} ${acc.type.toUpperCase()} @ $${(state.prices[acc.type]||0).toLocaleString()}`
+      : (() => { const s = staleness(acc.updatedAt); return s ? `<span class="${s.cls}">${s.text}</span>` : ''; })();
+    return `<div class="acct-row">
+      <div class="acct-left">
+        <div class="acct-icon ${ICON_CLASS[group]}">${letter}</div>
+        <div>
+          <div class="acct-name">${acc.name}</div>
+          <div class="acct-meta">${meta}</div>
+        </div>
+      </div>
+      <div class="acct-right">
+        <div>
+          <div class="acct-bal">${fmt(bal)}</div>
+          ${!isCrypto ? `<div class="acct-sub">${TYPE_LABEL[acc.type]}</div>` : ''}
+        </div>
+        <button class="edit-ico" onclick="openEdit('${acc.id}')">✎</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function render() {
+  ['cash','retirement','brokerage','crypto'].forEach(renderGroup);
+  const totals = { cash:0, retirement:0, brokerage:0, crypto:0 };
+  state.accounts.forEach(a => { totals[TYPE_GROUP[a.type]] += getBal(a); });
+  const total = Object.values(totals).reduce((s,v)=>s+v,0);
+
+  document.getElementById('hero-total').textContent = fmt(total);
+  document.getElementById('s-cash').textContent = fmt(totals.cash);
+  document.getElementById('s-retire').textContent = fmt(totals.retirement);
+  document.getElementById('s-broker').textContent = fmt(totals.brokerage);
+  document.getElementById('s-crypto').textContent = fmt(totals.crypto);
+
+  const last = state.history[state.history.length-1];
+  const changeEl = document.getElementById('hero-change');
+  if (last) {
+    const diff = total - last.total;
+    const sign = diff >= 0 ? '+' : '';
+    changeEl.innerHTML = `<span class="${diff>=0?'up':'down'}">${sign}${fmt(diff)} vs last snapshot</span>`;
+  } else { changeEl.textContent = ''; }
+
+  const bd = document.getElementById('breakdown');
+  const labels = { cash:'Cash & Savings', retirement:'Retirement', brokerage:'Brokerage', crypto:'Crypto' };
+  bd.innerHTML = ['cash','retirement','brokerage','crypto'].map(g => {
+    const pct = total > 0 ? (totals[g]/total*100) : 0;
+    return `<div class="breakdown-item">
+      <div class="breakdown-top">
+        <div class="breakdown-name"><div class="bdot" style="background:${BAR_COLOR[g]}"></div>${labels[g]}</div>
+        <div class="breakdown-vals"><span class="breakdown-amt">${fmt(totals[g])}</span><span class="breakdown-pct">${pct.toFixed(1)}%</span></div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${BAR_COLOR[g]};"></div></div>
+    </div>`;
+  }).join('');
+
+  const histEl = document.getElementById('history');
+  if (!state.history.length) {
+    histEl.innerHTML = '<div class="empty-row">no snapshots yet</div>';
+  } else {
+    histEl.innerHTML = [...state.history].reverse().map((h,i,arr) => {
+      const prev = arr[i+1];
+      let change = '';
+      if (prev) {
+        const d = h.total - prev.total;
+        change = `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</span>`;
+      }
+      return `<div class="hist-row">
+        <span class="hist-date">${new Date(h.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+        <div class="hist-right">${change}<span class="hist-val">${fmt(h.total)}</span></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ---- MODAL ----
+let addingGroup = null;
+function openAdd(group) {
+  addingGroup = group; editingId = null;
+  document.getElementById('modal-title').textContent = 'add account';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-val').value = '';
+  const map = { cash:'checking', retirement:'401k', brokerage:'brokerage', crypto:'btc' };
+  document.getElementById('f-type').value = map[group];
+  onTypeChange();
+  document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function openEdit(id) {
+  const acc = state.accounts.find(a=>a.id===id);
+  if (!acc) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'edit account';
+  document.getElementById('f-name').value = acc.name;
+  document.getElementById('f-type').value = acc.type;
+  document.getElementById('f-val').value = CRYPTO_COINS.includes(acc.type) ? acc.amount : acc.balance;
+  onTypeChange();
+  document.getElementById('btn-delete').style.display = 'block';
+  document.getElementById('overlay').classList.add('open');
+}
+
+function onTypeChange() {
+  const t = document.getElementById('f-type').value;
+  const isCrypto = CRYPTO_COINS.includes(t);
+  document.getElementById('f-val-label').textContent = isCrypto ? 'amount of coins' : 'balance ($)';
+  document.getElementById('f-val').placeholder = isCrypto ? '0.00000000' : '0.00';
+  document.getElementById('f-hint').style.display = isCrypto ? 'block' : 'none';
+}
+
+async function saveAccount() {
+  const name = document.getElementById('f-name').value.trim();
+  const type = document.getElementById('f-type').value;
+  const val = parseFloat(document.getElementById('f-val').value) || 0;
+  if (!name) { document.getElementById('f-name').focus(); return; }
+  const isCrypto = CRYPTO_COINS.includes(type);
+  if (editingId) {
+    const acc = state.accounts.find(a=>a.id===editingId);
+    acc.name = name; acc.type = type;
+    if (isCrypto) { acc.amount = val; }
+    else { acc.balance = val; acc.updatedAt = Date.now(); }
+  } else {
+    const acc = { id: Date.now().toString(), name, type };
+    if (isCrypto) { acc.amount = val; acc.balance = 0; }
+    else { acc.balance = val; acc.amount = 0; acc.updatedAt = Date.now(); }
+    state.accounts.push(acc);
+  }
+  closeModal();
+  render();
+  await saveAccountsToSheet();
+}
+
+async function deleteAccount() {
+  state.accounts = state.accounts.filter(a=>a.id!==editingId);
+  closeModal();
+  render();
+  await saveAccountsToSheet();
+}
+
+function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; }
+function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+async function takeSnapshot() {
+  const total = state.accounts.reduce((s,a)=>s+getBal(a),0);
+  state.history.push({ date: Date.now(), total });
+  render();
+  await saveHistoryToSheet();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ---- BOOT ----
+(async () => {
+  if (DEMO_MODE) {
+    const hasHash = window.location.hash.includes('access_token');
+    if (!hasHash) {
+      showAuth();
+      return;
+    }
+  }
+  const handled = await handleAuthCallback();
+  if (!handled) showAuth();
+})();
+
+setInterval(fetchPrices, 60000);
+</script>
+</body>
+</html>
