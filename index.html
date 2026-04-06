@@ -175,6 +175,11 @@
   .stat-tile-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
   .stat-tile-val { font-size: 20px; font-weight: 500; font-family: var(--font-mono); }
 
+  .section-divider-label {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); padding: 4px 0 10px;
+    border-top: 1px solid var(--border); margin-bottom: 4px; margin-top: 8px;
+  }
   /* Section */
   .section { margin-bottom: 28px; }
   .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -197,9 +202,9 @@
     font-size: 13px; font-weight: 600; flex-shrink: 0;
   }
   .icon-cash { background: rgba(96,184,240,0.12); color: var(--cash-color); }
-  .icon-retire { background: rgba(143,240,192,0.12); color: var(--retire-color); }
-  .icon-broker { background: rgba(200,240,96,0.12); color: var(--broker-color); }
-  .icon-crypto { background: rgba(240,168,96,0.12); color: var(--crypto-color); }
+  .icon-invest { background: rgba(200,240,96,0.12); color: var(--broker-color); }
+  .icon-property { background: rgba(143,240,192,0.12); color: var(--retire-color); }
+  .icon-debt { background: rgba(240,96,96,0.12); color: var(--danger); }
   .acct-name { font-size: 15px; font-weight: 500; }
   .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .stale1 { color: var(--warn); }
@@ -299,6 +304,15 @@
   }
   .btn-delete:hover { background: rgba(240,96,96,0.15); }
 
+  .hist-toggle {
+    width: 100%; padding: 10px; margin-top: 4px;
+    background: none; border: 1px dashed var(--border);
+    border-radius: 10px; color: var(--muted); font-size: 13px;
+    font-family: var(--font-display); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .hist-toggle:hover { border-color: var(--border2); color: var(--text); }
+
   /* Saving indicator */
   .save-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -310,6 +324,37 @@
     white-space: nowrap;
   }
   .save-toast.show { opacity: 1; }
+
+  /* Chart */
+  .chart-section { margin-bottom: 28px; }
+  .chart-filters {
+    display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .cf {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px;
+    padding: 5px 11px; font-size: 12px; font-family: var(--font-display);
+    cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
+  }
+  .cf:hover { border-color: var(--border2); color: var(--text); }
+  .cf.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 500; }
+  .chart-wrap {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 16px 8px;
+    position: relative;
+  }
+  .chart-canvas-wrap { position: relative; height: 180px; }
+  .chart-empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
+  .chart-tooltip {
+    position: absolute; pointer-events: none;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 7px 12px;
+    font-size: 12px; white-space: nowrap; z-index: 10;
+    opacity: 0; transition: opacity 0.1s;
+  }
+  .chart-tooltip.show { opacity: 1; }
+  .chart-tooltip-val { font-family: var(--font-mono); font-weight: 500; color: var(--accent); font-size: 14px; }
+  .chart-tooltip-date { color: var(--muted); margin-top: 2px; }
 
   /* Config banner */
   .config-banner {
@@ -383,6 +428,27 @@
       <div class="hero-change" id="hero-change"></div>
     </div>
 
+    <div class="chart-section">
+      <div class="chart-filters">
+        <button class="cf" onclick="setRange('1m')">1M</button>
+        <button class="cf" onclick="setRange('3m')">3M</button>
+        <button class="cf" onclick="setRange('6m')">6M</button>
+        <button class="cf" onclick="setRange('ytd')">YTD</button>
+        <button class="cf" onclick="setRange('1y')">1Y</button>
+        <button class="cf active" onclick="setRange('all')">All</button>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-canvas-wrap">
+          <canvas id="nw-chart"></canvas>
+          <div class="chart-empty" id="chart-empty" style="display:none;">save your first snapshot to start tracking progress</div>
+        </div>
+        <div class="chart-tooltip" id="chart-tooltip">
+          <div class="chart-tooltip-val" id="tt-val"></div>
+          <div class="chart-tooltip-date" id="tt-date"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="prices-strip">
       <div class="price-tag"><span class="coin">BTC</span><span class="val" id="p-btc">—</span></div>
       <div class="price-tag"><span class="coin">ETH</span><span class="val" id="p-eth">—</span></div>
@@ -392,36 +458,34 @@
 
     <div class="stats-grid">
       <div class="stat-tile"><div class="stat-tile-label">cash</div><div class="stat-tile-val" id="s-cash" style="color:var(--cash-color)">$0</div></div>
-      <div class="stat-tile"><div class="stat-tile-label">retirement</div><div class="stat-tile-val" id="s-retire" style="color:var(--retire-color)">$0</div></div>
-      <div class="stat-tile"><div class="stat-tile-label">brokerage</div><div class="stat-tile-val" id="s-broker" style="color:var(--broker-color)">$0</div></div>
-      <div class="stat-tile"><div class="stat-tile-label">crypto</div><div class="stat-tile-val" id="s-crypto" style="color:var(--crypto-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">investments</div><div class="stat-tile-val" id="s-investments" style="color:var(--broker-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">property</div><div class="stat-tile-val" id="s-property" style="color:var(--retire-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">debt</div><div class="stat-tile-val" id="s-debt" style="color:var(--danger)">$0</div></div>
     </div>
 
+    <div id="stacked-bar-wrap" style="margin-bottom:28px;">
+      <div id="stacked-bar" style="display:flex;height:8px;border-radius:6px;overflow:hidden;gap:2px;"></div>
+      <div id="stacked-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;"></div>
+    </div>
+
+    <div class="section-divider-label">assets</div>
     <div class="section">
       <div class="section-head"><span class="section-label">cash</span><button class="add-link" onclick="openAdd('cash')">+ add</button></div>
       <div id="g-cash"></div>
     </div>
     <div class="section">
-      <div class="section-head"><span class="section-label">retirement</span><button class="add-link" onclick="openAdd('retirement')">+ add</button></div>
-      <div id="g-retirement"></div>
+      <div class="section-head"><span class="section-label">investments</span><button class="add-link" onclick="openAdd('investments')">+ add</button></div>
+      <div id="g-investments"></div>
     </div>
     <div class="section">
-      <div class="section-head"><span class="section-label">brokerage</span><button class="add-link" onclick="openAdd('brokerage')">+ add</button></div>
-      <div id="g-brokerage"></div>
-    </div>
-    <div class="section">
-      <div class="section-head"><span class="section-label">crypto</span><button class="add-link" onclick="openAdd('crypto')">+ add</button></div>
-      <div id="g-crypto"></div>
+      <div class="section-head"><span class="section-label">property</span><button class="add-link" onclick="openAdd('property')">+ add</button></div>
+      <div id="g-property"></div>
     </div>
 
+    <div class="section-divider-label">debt</div>
     <div class="section">
-      <div class="section-head"><span class="section-label">breakdown</span></div>
-      <div id="breakdown"></div>
-    </div>
-
-    <div class="snapshot-row">
-      <p>save today's net worth to history</p>
-      <button class="snap-btn" onclick="takeSnapshot()">save snapshot</button>
+      <div class="section-head"><span class="section-label">liabilities</span><button class="add-link" onclick="openAdd('debt')">+ add</button></div>
+      <div id="g-debt"></div>
     </div>
 
     <div class="section">
@@ -443,14 +507,24 @@
     <div class="field">
       <label>type</label>
       <select id="f-type" onchange="onTypeChange()">
-        <option value="checking">checking</option>
-        <option value="savings">savings</option>
+        <option value="checking">Checking</option>
+        <option value="savings">Savings</option>
+        <option value="other_cash">Other</option>
         <option value="401k">401k</option>
-        <option value="roth">roth ira</option>
-        <option value="brokerage">brokerage</option>
-        <option value="btc">bitcoin (BTC)</option>
-        <option value="eth">ethereum (ETH)</option>
-        <option value="ada">cardano (ADA)</option>
+        <option value="roth">Roth IRA</option>
+        <option value="brokerage">Brokerage</option>
+        <option value="btc">Bitcoin (BTC)</option>
+        <option value="eth">Ethereum (ETH)</option>
+        <option value="ada">Cardano (ADA)</option>
+        <option value="other_invest">Other</option>
+        <option value="property">Real Estate</option>
+        <option value="vehicle">Vehicle</option>
+        <option value="other_property">Other</option>
+        <option value="creditcard">Credit Card</option>
+        <option value="mortgage">Mortgage</option>
+        <option value="loan">Loan</option>
+        <option value="studentloan">Student Loan</option>
+        <option value="other_debt">Other</option>
       </select>
     </div>
     <div class="field">
@@ -480,19 +554,35 @@ const SHEET_TITLE = 'Stackd - Net Worth Tracker';
 const DEMO_MODE = false;
 
 const TYPE_GROUP = {
-  checking:'cash', savings:'cash',
-  '401k':'retirement', roth:'retirement',
-  brokerage:'brokerage',
-  btc:'crypto', eth:'crypto', ada:'crypto'
+  checking:'cash', savings:'cash', other_cash:'cash',
+  '401k':'investments', roth:'investments', brokerage:'investments',
+  btc:'investments', eth:'investments', ada:'investments', other_invest:'investments',
+  property:'property', vehicle:'property', other_property:'property',
+  creditcard:'debt', loan:'debt', mortgage:'debt', studentloan:'debt', other_debt:'debt'
 };
 const TYPE_LABEL = {
-  checking:'Checking', savings:'Savings', '401k':'401k', roth:'Roth IRA',
-  brokerage:'Brokerage', btc:'Bitcoin', eth:'Ethereum', ada:'Cardano'
+  checking:'Checking', savings:'Savings', other_cash:'Other',
+  '401k':'401k', roth:'Roth IRA', brokerage:'Brokerage',
+  btc:'Bitcoin', eth:'Ethereum', ada:'Cardano', other_invest:'Other Investment',
+  property:'Real Estate', vehicle:'Vehicle', other_property:'Other Property',
+  creditcard:'Credit Card', loan:'Loan', mortgage:'Mortgage',
+  studentloan:'Student Loan', other_debt:'Other Debt'
 };
 const CRYPTO_COINS = ['btc','eth','ada'];
-const GROUP_COLOR = { cash:'var(--cash-color)', retirement:'var(--retire-color)', brokerage:'var(--broker-color)', crypto:'var(--crypto-color)' };
-const ICON_CLASS = { cash:'icon-cash', retirement:'icon-retire', brokerage:'icon-broker', crypto:'icon-crypto' };
-const BAR_COLOR = { cash:'#60b8f0', retirement:'#8ff0c0', brokerage:'#c8f060', crypto:'#f0a860' };
+const DEBT_TYPES = ['creditcard','loan','mortgage','studentloan','other_debt'];
+const ASSET_GROUPS = ['cash','investments','property'];
+const ICON_CLASS = { cash:'icon-cash', investments:'icon-invest', property:'icon-property', debt:'icon-debt' };
+const BAR_COLOR = { cash:'#60b8f0', investments:'#c8f060', property:'#8ff0c0', debt:'#f06060' };
+const CRYPTO_ICONS = {
+  btc: `<img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" width="36" height="36" style="border-radius:50%;" />`,
+  eth: `<img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" width="36" height="36" style="border-radius:50%;" />`,
+  ada: `<img src="https://assets.coingecko.com/coins/images/975/small/cardano.png" width="36" height="36" style="border-radius:50%;" />`
+};
+
+const PROPERTY_ICONS = {
+  property: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`,
+  vehicle:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2.5-6h11L19 12v5h-2"/><path d="M5 17h14"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M3 12h18"/></svg>`
+};
 
 let state = {
   user: null,
@@ -599,7 +689,8 @@ async function initApp() {
   showSetup('loading your data...');
   await loadFromSheet();
   showApp();
-  fetchPrices();
+  await fetchPrices();
+  autoSnapshot();
   return true;
 }
 
@@ -735,6 +826,7 @@ async function fetchPrices() {
     ['p-btc','p-eth','p-ada'].forEach(id => document.getElementById(id).textContent = 'offline');
   }
   render();
+  autoSnapshot();
 }
 
 function getBal(acc) {
@@ -757,29 +849,37 @@ function staleness(ts) {
 
 function renderGroup(group) {
   const el = document.getElementById('g-' + group);
+  if (!el) return;
   const accs = state.accounts.filter(a => TYPE_GROUP[a.type] === group);
   if (!accs.length) {
     el.innerHTML = '<div class="empty-row">no accounts yet</div>';
     return;
   }
-  const isCrypto = group === 'crypto';
+  const isDebt = group === 'debt';
   el.innerHTML = accs.map(acc => {
     const bal = getBal(acc);
-    const letter = acc.name.charAt(0).toUpperCase();
+    const isCrypto = CRYPTO_COINS.includes(acc.type);
+    const isProperty = ['property','vehicle','other_property'].includes(acc.type);
+    const iconContent = CRYPTO_ICONS[acc.type]
+      ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
+      : isProperty && PROPERTY_ICONS[acc.type]
+        ? `<div class="acct-icon ${ICON_CLASS[group]}">${PROPERTY_ICONS[acc.type]}</div>`
+        : `<div class="acct-icon ${ICON_CLASS[group]}">${acc.name.charAt(0).toUpperCase()}</div>`;
     const meta = isCrypto
       ? `${acc.amount} ${acc.type.toUpperCase()} @ $${(state.prices[acc.type]||0).toLocaleString()}`
       : (() => { const s = staleness(acc.updatedAt); return s ? `<span class="${s.cls}">${s.text}</span>` : ''; })();
+    const balColor = isDebt ? 'color:var(--danger)' : '';
     return `<div class="acct-row">
       <div class="acct-left">
-        <div class="acct-icon ${ICON_CLASS[group]}">${letter}</div>
+        ${iconContent}
         <div>
           <div class="acct-name">${acc.name}</div>
-          <div class="acct-meta">${meta}</div>
+          <div class="acct-meta">${meta || TYPE_LABEL[acc.type]}</div>
         </div>
       </div>
       <div class="acct-right">
         <div>
-          <div class="acct-bal">${fmt(bal)}</div>
+          <div class="acct-bal" style="${balColor}">${isDebt ? '-' : ''}${fmt(bal)}</div>
           ${!isCrypto ? `<div class="acct-sub">${TYPE_LABEL[acc.type]}</div>` : ''}
         </div>
         <button class="edit-ico" onclick="openEdit('${acc.id}')">✎</button>
@@ -789,43 +889,72 @@ function renderGroup(group) {
 }
 
 function render() {
-  ['cash','retirement','brokerage','crypto'].forEach(renderGroup);
-  const totals = { cash:0, retirement:0, brokerage:0, crypto:0 };
+  ['cash','investments','property','debt'].forEach(renderGroup);
+  const totals = { cash:0, investments:0, property:0, debt:0 };
   state.accounts.forEach(a => { totals[TYPE_GROUP[a.type]] += getBal(a); });
-  const total = Object.values(totals).reduce((s,v)=>s+v,0);
+  const totalAssets = totals.cash + totals.investments + totals.property;
+  const totalDebt = totals.debt;
+  const netWorth = totalAssets - totalDebt;
 
-  document.getElementById('hero-total').textContent = fmt(total);
+  document.getElementById('hero-total').textContent = fmt(netWorth);
   document.getElementById('s-cash').textContent = fmt(totals.cash);
-  document.getElementById('s-retire').textContent = fmt(totals.retirement);
-  document.getElementById('s-broker').textContent = fmt(totals.brokerage);
-  document.getElementById('s-crypto').textContent = fmt(totals.crypto);
+  document.getElementById('s-investments').textContent = fmt(totals.investments);
+  document.getElementById('s-property').textContent = fmt(totals.property);
+  document.getElementById('s-debt').textContent = fmt(totalDebt);
 
-  const last = state.history[state.history.length-1];
   const changeEl = document.getElementById('hero-change');
-  if (last) {
-    const diff = total - last.total;
+  const filtered = getFilteredHistory();
+  if (filtered.length >= 2) {
+    const first = filtered[0];
+    const current = state.accounts.reduce((s,a)=>s+getBal(a),0);
+    const diff = current - first.total;
     const sign = diff >= 0 ? '+' : '';
-    changeEl.innerHTML = `<span class="${diff>=0?'up':'down'}">${sign}${fmt(diff)} vs last snapshot</span>`;
-  } else { changeEl.textContent = ''; }
+    const rangeLabels = { '1m':'past month', '3m':'past 3 months', '6m':'past 6 months', 'ytd':'year to date', '1y':'past year', 'all':'all time' };
+    const label = rangeLabels[chartRange] || 'all time';
+    changeEl.innerHTML = `<span class="${diff>=0?'up':'down'}">${sign}${fmt(diff)}</span> <span style="color:var(--muted);font-size:13px;">${label}</span>`;
+  } else {
+    changeEl.textContent = '';
+  }
 
-  const bd = document.getElementById('breakdown');
-  const labels = { cash:'Cash & Savings', retirement:'Retirement', brokerage:'Brokerage', crypto:'Crypto' };
-  bd.innerHTML = ['cash','retirement','brokerage','crypto'].map(g => {
-    const pct = total > 0 ? (totals[g]/total*100) : 0;
-    return `<div class="breakdown-item">
-      <div class="breakdown-top">
-        <div class="breakdown-name"><div class="bdot" style="background:${BAR_COLOR[g]}"></div>${labels[g]}</div>
-        <div class="breakdown-vals"><span class="breakdown-amt">${fmt(totals[g])}</span><span class="breakdown-pct">${pct.toFixed(1)}%</span></div>
-      </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${BAR_COLOR[g]};"></div></div>
-    </div>`;
-  }).join('');
+  // stacked bar
+  const allGroups = [
+    { label:'Cash', color: BAR_COLOR.cash, val: totals.cash },
+    { label:'Investments', color: BAR_COLOR.investments, val: totals.investments },
+    { label:'Property', color: BAR_COLOR.property, val: totals.property },
+    { label:'Debt', color: BAR_COLOR.debt, val: totals.debt },
+  ].filter(g => g.val > 0);
+  const barTotal = allGroups.reduce((s,g)=>s+g.val,0);
+  const bar = document.getElementById('stacked-bar');
+  const legend = document.getElementById('stacked-legend');
+  if (barTotal > 0) {
+    bar.innerHTML = allGroups.map(g => {
+      const pct = (g.val / barTotal * 100).toFixed(1);
+      return `<div style="flex:${pct};background:${g.color};min-width:3px;transition:flex 0.5s ease;" title="${g.label}: ${pct}%"></div>`;
+    }).join('');
+    legend.innerHTML = allGroups.map(g => {
+      const pct = (g.val / barTotal * 100).toFixed(1);
+      return `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);">
+        <div style="width:8px;height:8px;border-radius:2px;background:${g.color};flex-shrink:0;"></div>
+        ${g.label} <span style="color:var(--text);font-weight:500;">${pct}%</span>
+      </div>`;
+    }).join('');
+  } else {
+    bar.innerHTML = `<div style="flex:1;background:var(--bg3);border-radius:6px;"></div>`;
+    legend.innerHTML = '';
+  }
+
+  renderChart();
 
   const histEl = document.getElementById('history');
   if (!state.history.length) {
     histEl.innerHTML = '<div class="empty-row">no snapshots yet</div>';
   } else {
-    histEl.innerHTML = [...state.history].reverse().map((h,i,arr) => {
+    const reversed = [...state.history].reverse();
+    const showAll = histEl.dataset.expanded === 'true';
+    const visible = showAll ? reversed : reversed.slice(0, 3);
+    const moreCount = reversed.length - 3;
+
+    const rows = visible.map((h,i,arr) => {
       const prev = arr[i+1];
       let change = '';
       if (prev) {
@@ -837,6 +966,12 @@ function render() {
         <div class="hist-right">${change}<span class="hist-val">${fmt(h.total)}</span></div>
       </div>`;
     }).join('');
+
+    const toggleBtn = reversed.length > 3
+      ? `<button class="hist-toggle" onclick="toggleHistory()">${showAll ? 'show less' : `see all ${reversed.length} snapshots`}</button>`
+      : '';
+
+    histEl.innerHTML = rows + toggleBtn;
   }
 }
 
@@ -847,20 +982,37 @@ function openAdd(group) {
   document.getElementById('modal-title').textContent = 'add account';
   document.getElementById('f-name').value = '';
   document.getElementById('f-val').value = '';
-  const map = { cash:'checking', retirement:'401k', brokerage:'brokerage', crypto:'btc' };
-  document.getElementById('f-type').value = map[group];
+  filterTypeOptions(group);
   onTypeChange();
   document.getElementById('btn-delete').style.display = 'none';
   document.getElementById('overlay').classList.add('open');
   setTimeout(() => document.getElementById('f-name').focus(), 100);
 }
 
+function filterTypeOptions(group) {
+  const sel = document.getElementById('f-type');
+  const groupOptions = {
+    cash:        ['checking','savings','other_cash'],
+    investments: ['401k','roth','brokerage','btc','eth','ada','other_invest'],
+    property:    ['property','vehicle','other_property'],
+    debt:        ['creditcard','mortgage','loan','studentloan','other_debt']
+  };
+  const allowed = groupOptions[group] || [];
+  Array.from(sel.options).forEach(opt => {
+    opt.hidden = opt.value && !allowed.includes(opt.value);
+  });
+  const first = Array.from(sel.options).find(o => allowed.includes(o.value));
+  if (first) sel.value = first.value;
+}
+
 function openEdit(id) {
   const acc = state.accounts.find(a=>a.id===id);
   if (!acc) return;
   editingId = id;
+  const group = TYPE_GROUP[acc.type];
   document.getElementById('modal-title').textContent = 'edit account';
   document.getElementById('f-name').value = acc.name;
+  filterTypeOptions(group);
   document.getElementById('f-type').value = acc.type;
   document.getElementById('f-val').value = CRYPTO_COINS.includes(acc.type) ? acc.amount : acc.balance;
   onTypeChange();
@@ -896,6 +1048,7 @@ async function saveAccount() {
   closeModal();
   render();
   await saveAccountsToSheet();
+  autoSnapshot();
 }
 
 async function deleteAccount() {
@@ -903,16 +1056,34 @@ async function deleteAccount() {
   closeModal();
   render();
   await saveAccountsToSheet();
+  autoSnapshot();
 }
 
 function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; }
 function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
 
-async function takeSnapshot() {
+async function autoSnapshot() {
   const total = state.accounts.reduce((s,a)=>s+getBal(a),0);
-  state.history.push({ date: Date.now(), total });
-  render();
+  if (total === 0) return;
+  const todayStr = new Date().toDateString();
+  const lastIdx = state.history.length - 1;
+  const last = state.history[lastIdx];
+  const lastIsToday = last && new Date(last.date).toDateString() === todayStr;
+
+  if (lastIsToday) {
+    if (Math.round(last.total) === Math.round(total)) return;
+    state.history[lastIdx] = { date: Date.now(), total };
+  } else {
+    state.history.push({ date: Date.now(), total });
+  }
   await saveHistoryToSheet();
+  render();
+}
+
+function toggleHistory() {
+  const histEl = document.getElementById('history');
+  histEl.dataset.expanded = histEl.dataset.expanded === 'true' ? 'false' : 'true';
+  render();
 }
 
 function showToast(msg) {
@@ -922,17 +1093,187 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ---- BOOT ----
-(async () => {
-  if (DEMO_MODE) {
-    const hasHash = window.location.hash.includes('access_token');
-    if (!hasHash) {
-      showAuth();
-      return;
-    }
+// ---- CHART ----
+let chartRange = 'all';
+function setRange(r) {
+  chartRange = r;
+  document.querySelectorAll('.cf').forEach(b => {
+    const map = { '1m':'1M','3m':'3M','6m':'6M','ytd':'YTD','1y':'1Y','all':'All' };
+    b.classList.toggle('active', b.textContent.trim() === (map[r] || r.toUpperCase()));
+  });
+  render();
+}
+
+function getFilteredHistory() {
+  const now = Date.now();
+  const ms = { '1m':30, '3m':90, '6m':180, '1y':365 };
+  if (chartRange === 'all') return state.history;
+  if (chartRange === 'ytd') {
+    const jan1 = new Date(new Date().getFullYear(), 0, 1).getTime();
+    return state.history.filter(h => h.date >= jan1);
   }
-  const handled = await handleAuthCallback();
-  if (!handled) showAuth();
+  const days = ms[chartRange];
+  return state.history.filter(h => h.date >= now - days * 86400000);
+}
+
+function renderChart() {
+  const canvas = document.getElementById('nw-chart');
+  const empty = document.getElementById('chart-empty');
+  const data = getFilteredHistory();
+
+  if (data.length < 2) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
+
+  const wrap = canvas.parentElement;
+  const W = wrap.clientWidth || 600;
+  const H = 180;
+  const PR = window.devicePixelRatio || 1;
+  canvas.width = W * PR;
+  canvas.height = H * PR;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(PR, PR);
+
+  const PAD = { top: 12, right: 16, bottom: 28, left: 16 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+
+  const vals = data.map(d => d.total);
+  const minV = Math.min(...vals);
+  const maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+
+  const px = (i) => PAD.left + (i / (data.length - 1)) * cW;
+  const py = (v) => PAD.top + cH - ((v - minV) / range) * cH;
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+  grad.addColorStop(0, 'rgba(200,240,96,0.18)');
+  grad.addColorStop(1, 'rgba(200,240,96,0)');
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(data[0].total));
+  for (let i = 1; i < data.length; i++) {
+    const x0 = px(i-1), y0 = py(data[i-1].total);
+    const x1 = px(i), y1 = py(data[i].total);
+    const cpx = (x0 + x1) / 2;
+    ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+  }
+  ctx.lineTo(px(data.length-1), PAD.top + cH);
+  ctx.lineTo(px(0), PAD.top + cH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(data[0].total));
+  for (let i = 1; i < data.length; i++) {
+    const x0 = px(i-1), y0 = py(data[i-1].total);
+    const x1 = px(i), y1 = py(data[i].total);
+    const cpx = (x0 + x1) / 2;
+    ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+  }
+  ctx.strokeStyle = '#c8f060';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // end dot
+  const lastX = px(data.length-1), lastY = py(data[data.length-1].total);
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
+  ctx.fillStyle = '#c8f060';
+  ctx.fill();
+
+  // x-axis labels
+  ctx.fillStyle = 'rgba(122,125,130,0.8)';
+  ctx.font = `${10 * PR / PR}px DM Mono, monospace`;
+  ctx.textAlign = 'center';
+  const labelCount = Math.min(data.length, 5);
+  for (let i = 0; i < labelCount; i++) {
+    const idx = Math.round(i / (labelCount - 1) * (data.length - 1));
+    const d = new Date(data[idx].date);
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    ctx.fillText(label, px(idx), H - 6);
+  }
+
+  // hover
+  canvas.onmousemove = canvas.ontouchmove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const mx = clientX - rect.left;
+    let closest = 0, minDist = Infinity;
+    for (let i = 0; i < data.length; i++) {
+      const d = Math.abs(px(i) - mx);
+      if (d < minDist) { minDist = d; closest = i; }
+    }
+    const tt = document.getElementById('chart-tooltip');
+    document.getElementById('tt-val').textContent = fmt(data[closest].total);
+    document.getElementById('tt-date').textContent = new Date(data[closest].date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    let tx = px(closest) + 12;
+    if (tx + 140 > W) tx = px(closest) - 150;
+    tt.style.left = tx + 'px';
+    tt.style.top = (py(data[closest].total) - 20) + 'px';
+    tt.classList.add('show');
+  };
+  canvas.onmouseleave = canvas.ontouchend = () => {
+    document.getElementById('chart-tooltip').classList.remove('show');
+  };
+}
+
+// ---- BOOT (PREVIEW MODE) ----
+(async () => {
+  const now = Date.now();
+  const day = 86400000;
+
+  // hardcoded prices for preview (live prices load on real site)
+  state.prices = { btc: 83000, eth: 1800, ada: 0.62 };
+  document.getElementById('p-btc').textContent = '$83,000';
+  document.getElementById('p-eth').textContent = '$1,800';
+  document.getElementById('p-ada').textContent = '$0.6200';
+
+  state.accounts = [
+    { id:'1', name:'Chase Checking', type:'checking', balance:4200, amount:0, updatedAt: now - day },
+    { id:'2', name:'Ally Savings', type:'savings', balance:18500, amount:0, updatedAt: now - 3*day },
+    { id:'3', name:'Fidelity 401k', type:'401k', balance:94000, amount:0, updatedAt: now - 10*day },
+    { id:'4', name:'Roth IRA', type:'roth', balance:31200, amount:0, updatedAt: now - 10*day },
+    { id:'5', name:'Robinhood', type:'brokerage', balance:12800, amount:0, updatedAt: now - 20*day },
+    { id:'6', name:'Bitcoin', type:'btc', balance:0, amount:0.45 },
+    { id:'7', name:'Ethereum', type:'eth', balance:0, amount:3.2 },
+    { id:'8', name:'Cardano', type:'ada', balance:0, amount:1800 },
+    { id:'9', name:'Primary Home', type:'property', balance:420000, amount:0, updatedAt: now - 30*day },
+  ];
+
+  const base = 140000;
+  state.history = [
+    { date: now - 365*day, total: base * 0.72 },
+    { date: now - 330*day, total: base * 0.75 },
+    { date: now - 300*day, total: base * 0.74 },
+    { date: now - 270*day, total: base * 0.78 },
+    { date: now - 240*day, total: base * 0.81 },
+    { date: now - 210*day, total: base * 0.80 },
+    { date: now - 180*day, total: base * 0.84 },
+    { date: now - 150*day, total: base * 0.87 },
+    { date: now - 120*day, total: base * 0.91 },
+    { date: now - 90*day,  total: base * 0.89 },
+    { date: now - 60*day,  total: base * 0.94 },
+    { date: now - 30*day,  total: base * 0.97 },
+    { date: now - 7*day,   total: base * 0.99 },
+  ];
+
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-avatar').textContent = 'EJ';
+  document.getElementById('user-name').textContent = 'Edwin';
+
+  render();
+  autoSnapshot();
 })();
 
 setInterval(fetchPrices, 60000);
