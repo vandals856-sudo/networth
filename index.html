@@ -374,7 +374,7 @@
     <div class="config-banner" id="config-banner" style="display:none;">
       <strong>one-time setup needed</strong><br>
       to connect to google sheets, add your google client id to this file.<br>
-      open <code>index.html</code> and replace <code>YOUR_GOOGLE_CLIENT_ID</code> at the top of the script with your actual client id from google cloud console. see <code>SETUP.md</code> for step-by-step instructions.
+      open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl5hlc274hukml.apps.googleusercontent.com</code> at the top of the script with your actual client id from google cloud console. see <code>SETUP.md</code> for step-by-step instructions.
     </div>
 
     <div class="hero">
@@ -472,12 +472,12 @@
 // ============================================================
 // CONFIG - replace with your Google Cloud OAuth Client ID
 // ============================================================
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+const GOOGLE_CLIENT_ID = '888736831379-tnffoch56c3shfcu6erl5hlc274hukml.apps.googleusercontent.com';
 // ============================================================
 
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
 const SHEET_TITLE = 'Stackd - Net Worth Tracker';
-const DEMO_MODE = GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID';
+const DEMO_MODE = false;
 
 const TYPE_GROUP = {
   checking:'cash', savings:'cash',
