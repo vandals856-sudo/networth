@@ -1623,8 +1623,10 @@ function renderMilestones(netWorth) {
   const bar = document.getElementById('milestone-bar');
   if (!bar) return;
 
-  // hide if no accounts or zero net worth
-  if (netWorth <= 0 || state.accounts.length === 0) { bar.style.display = 'none'; return; }
+  // hide if no accounts
+  if (state.accounts.length === 0) { bar.style.display = 'none'; return; }
+  // hide if deeply negative (debt user hasn't crossed $1 yet - show progress toward it)
+  if (netWorth < 0 && !hasDebt) { bar.style.display = 'none'; return; }
 
   const unlocked = MILESTONES.filter(m => netWorth >= m.val);
   const next = MILESTONES.find(m => netWorth < m.val);
