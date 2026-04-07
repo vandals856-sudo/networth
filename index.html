@@ -2003,13 +2003,17 @@ function renderChart() {
   const vals = chartData.map(d => d.total);
   const minV = Math.min(...vals);
   const maxV = Math.max(...vals);
-  const range = maxV - minV || 1;
+  const rawRange = maxV - minV;
+  const padding = rawRange < maxV * 0.01 ? (maxV * 0.05 || 1000) : 0;
+  const paddedMin = Math.max(0, minV - padding);
+  const paddedMax = maxV + padding;
+  const range = paddedMax - paddedMin || 1;
 
   const px = (i) => PAD.left + (i / (chartData.length - 1)) * cW;
-  const py = (v) => PAD.top + cH - ((v - minV) / range) * cH;
+  const py = (v) => PAD.top + cH - ((v - paddedMin) / range) * cH;
 
   // y-axis labels
-  const yLabels = [minV, minV + range * 0.5, maxV];
+  const yLabels = [paddedMin, paddedMin + range * 0.5, paddedMax];
   ctx.fillStyle = 'rgba(122,125,130,0.7)';
   ctx.font = `10px Fira Code, monospace`;
   ctx.textAlign = 'right';
