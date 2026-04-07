@@ -38,42 +38,52 @@
     justify-content: center;
     padding: 2rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
   }
-  .auth-logo { font-size: 48px; font-weight: 600; letter-spacing: -2px; margin-bottom: 8px; }
-  .auth-logo span { color: var(--accent); }
-  .auth-tagline { color: var(--muted); font-size: 14px; margin-bottom: 3rem; letter-spacing: 0.05em; }
-  .auth-card {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    padding: 2.5rem 2rem;
-    width: 100%;
-    max-width: 380px;
+  .auth-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200,240,96,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,240,96,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+    pointer-events: none;
   }
-  .auth-card h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
-  .auth-card p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 2rem; }
+  .auth-wordmark {
+    font-size: 96px; font-weight: 600; letter-spacing: -6px;
+    line-height: 1; margin-bottom: 20px; position: relative;
+  }
+  .auth-wordmark span { color: var(--accent); }
+  .auth-headline {
+    font-size: clamp(16px, 4vw, 22px); color: var(--muted);
+    font-weight: 400; margin-bottom: 48px;
+    letter-spacing: -0.3px; position: relative;
+  }
+  .auth-headline em { color: var(--text); font-style: normal; }
   .google-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    width: 100%;
-    padding: 13px 20px;
+    padding: 14px 28px;
     background: var(--text);
     color: #111;
     border: none;
-    border-radius: 12px;
+    border-radius: 100px;
     font-family: var(--font-display);
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     transition: opacity 0.15s;
+    position: relative;
   }
-  .google-btn:hover { opacity: 0.9; }
-  .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-  .auth-features { margin-top: 2rem; display: flex; flex-direction: column; gap: 10px; }
-  .auth-feature { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); text-align: left; }
-  .auth-feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .google-btn:hover { opacity: 0.92; }
+  .google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .auth-sub {
+    margin-top: 28px; font-size: 12px; color: var(--muted);
+    position: relative; letter-spacing: 0.02em;
+  }
 
   /* ---- SETUP SCREEN ---- */
   #setup-screen {
@@ -125,6 +135,16 @@
     border-radius: 100px; padding: 6px 12px 6px 6px;
     font-size: 13px; color: var(--muted);
   }
+  .user-menu { position: relative; cursor: pointer; }
+  .user-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 12px 6px 6px;
+    font-size: 13px; color: var(--muted);
+    user-select: none; transition: border-color 0.15s;
+  }
+  .user-pill:hover { border-color: var(--border2); }
+  .user-menu.open .user-pill { border-color: var(--border2); }
   .user-avatar {
     width: 24px; height: 24px; border-radius: 50%;
     background: var(--accent); color: #111;
@@ -132,12 +152,29 @@
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
+  .user-dropdown {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 6px; min-width: 160px;
+    z-index: 100; animation: fadedown 0.15s ease;
+  }
+  @keyframes fadedown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .user-menu.open .user-dropdown { display: block; }
+  .dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; color: var(--muted); cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+  }
+  .dropdown-item:hover { background: var(--bg3); color: var(--text); }
+  .dropdown-item.danger:hover { background: rgba(240,96,96,0.08); color: var(--danger); }
+  .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
   .signout-btn {
     background: none; border: none; color: var(--muted);
     font-size: 12px; cursor: pointer; font-family: var(--font-display);
     padding: 4px 8px; border-radius: 6px;
   }
-  .signout-btn:hover { color: var(--text); background: var(--bg3); }
 
   .main { padding: 24px 20px 80px; max-width: 800px; margin: 0 auto; }
 
@@ -149,20 +186,14 @@
   .up { color: var(--accent); }
   .down { color: var(--danger); }
 
-  /* Live prices */
-  .prices-strip {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    margin-bottom: 24px;
+  .price-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--muted);
+    margin-left: 4px;
+    vertical-align: middle;
   }
-  .price-tag {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 100px; padding: 5px 12px;
-    font-size: 12px; font-family: var(--font-mono);
-  }
-  .price-tag .coin { color: var(--muted); }
-  .price-tag .val { color: var(--text); }
-  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; display: inline-block; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   /* Stats */
@@ -175,15 +206,23 @@
   .stat-tile-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
   .stat-tile-val { font-size: 20px; font-weight: 500; font-family: var(--font-mono); }
 
-  .section-divider-label {
-    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--muted); padding: 4px 0 10px;
-    border-top: 1px solid var(--border); margin-bottom: 4px; margin-top: 8px;
-  }
+  .collapsible { cursor: pointer; user-select: none; }
+  .collapsible:hover .section-label { color: var(--text); }
+  .section-caret { font-size: 13px; color: var(--muted); transition: transform 0.2s; display: inline-block; }
+  .section-caret.collapsed { transform: rotate(-90deg); }
+  .section-total { font-size: 14px; font-family: var(--font-mono); color: var(--muted); }
+  .section-body { overflow: hidden; transition: max-height 0.25s ease; }
+  .section-body.collapsed { max-height: 0 !important; }
+
+  .cat-header { display:flex; align-items:center; justify-content:space-between; padding: 24px 0 12px; margin-top: 4px; }
+  .cat-header-left { display:flex; align-items:baseline; gap:12px; }
+  .cat-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); }
+  .cat-total { font-size: 16px; font-family: var(--font-mono); color: var(--muted); }
+
   /* Section */
-  .section { margin-bottom: 28px; }
-  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .section-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .section { margin-bottom: 20px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 6px 0; }
+  .section-label { font-size: 13px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
   .add-link { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; font-family: var(--font-display); padding: 4px 10px; border-radius: 6px; }
   .add-link:hover { background: rgba(200,240,96,0.08); }
 
@@ -207,6 +246,8 @@
   .icon-debt { background: rgba(240,96,96,0.12); color: var(--danger); }
   .acct-name { font-size: 15px; font-weight: 500; }
   .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stale-tap { cursor: pointer; color: var(--muted); opacity: 0.6; display: inline-flex; align-items: center; vertical-align: middle; }
+  .stale-tap:hover { opacity: 1; color: var(--text); }
   .stale1 { color: var(--warn); }
   .stale2 { color: var(--danger); }
   .acct-right { display: flex; align-items: center; gap: 12px; }
@@ -277,9 +318,14 @@
   .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
   .field input, .field select {
     width: 100%; background: var(--bg3); border: 1px solid var(--border2);
-    color: var(--text); border-radius: 10px; padding: 11px 14px;
+    color: var(--text); border-radius: 10px; padding: 11px 36px 11px 14px;
     font-size: 15px; font-family: var(--font-display); outline: none;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%237a7d82' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
   }
+  .field input { background-image: none; padding: 11px 14px; }
   .field input:focus, .field select:focus { border-color: var(--accent); }
   .field select option { background: var(--bg3); }
   .crypto-hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
@@ -303,6 +349,16 @@
     font-size: 14px; font-family: var(--font-display); cursor: pointer;
   }
   .btn-delete:hover { background: rgba(240,96,96,0.15); }
+
+  .type-btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .type-btn {
+    padding: 7px 14px; border-radius: 8px; font-size: 13px;
+    font-family: var(--font-display); cursor: pointer;
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--muted); transition: all 0.15s;
+  }
+  .type-btn:hover { color: var(--text); border-color: var(--border2); }
+  .type-btn.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 500; }
 
   .hist-toggle {
     width: 100%; padding: 10px; margin-top: 4px;
@@ -370,27 +426,19 @@
 
 <!-- AUTH -->
 <div id="auth-screen">
-  <div class="auth-logo">stack<span>d</span></div>
-  <div class="auth-tagline">your money. your data. your google sheet.</div>
-  <div class="auth-card">
-    <h2>track your net worth</h2>
-    <p>sign in with google to get started. your data lives in your own google sheet - nobody else can see it.</p>
-    <button class="google-btn" onclick="signIn()">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      continue with google
-    </button>
-    <div class="auth-features">
-      <div class="auth-feature"><div class="auth-feature-dot"></div>your data saves to your own google sheet</div>
-      <div class="auth-feature"><div class="auth-feature-dot"></div>nobody else can see your numbers</div>
-      <div class="auth-feature"><div class="auth-feature-dot"></div>live crypto prices for btc, eth, ada</div>
-      <div class="auth-feature"><div class="auth-feature-dot"></div>share the link - everyone gets their own sheet</div>
-    </div>
-  </div>
+  <div class="auth-grid"></div>
+  <div class="auth-wordmark">stack<span>d</span></div>
+  <div class="auth-headline">Your wealth. <em>Finally in one place.</em></div>
+  <button class="google-btn" onclick="signIn()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Continue with Google
+  </button>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default.</div>
 </div>
 
 <!-- SETUP -->
@@ -407,11 +455,23 @@
   <div class="topbar">
     <div class="topbar-logo">stack<span>d</span></div>
     <div class="topbar-right">
-      <div class="user-pill">
-        <div class="user-avatar" id="user-avatar">?</div>
-        <span id="user-name">...</span>
+      <div class="user-menu" id="user-menu" onclick="toggleUserMenu()">
+        <div class="user-pill">
+          <div class="user-avatar" id="user-avatar">EJ</div>
+          <span id="user-name">Edwin</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="margin-left:2px;"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="user-dropdown" id="user-dropdown">
+          <div style="padding:10px 12px 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);" id="dropdown-name">Edwin</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="dropdown-email"></div>
+          </div>
+          <div class="dropdown-item danger" onclick="signOut()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            sign out
+          </div>
+        </div>
       </div>
-      <button class="signout-btn" onclick="signOut()">sign out</button>
     </div>
   </div>
 
@@ -449,13 +509,6 @@
       </div>
     </div>
 
-    <div class="prices-strip">
-      <div class="price-tag"><span class="coin">BTC</span><span class="val" id="p-btc">—</span></div>
-      <div class="price-tag"><span class="coin">ETH</span><span class="val" id="p-eth">—</span></div>
-      <div class="price-tag"><span class="coin">ADA</span><span class="val" id="p-ada">—</span></div>
-      <div class="price-tag"><div class="live-dot"></div><span style="color:var(--muted);font-size:11px;">live</span></div>
-    </div>
-
     <div class="stats-grid">
       <div class="stat-tile"><div class="stat-tile-label">cash</div><div class="stat-tile-val" id="s-cash" style="color:var(--cash-color)">$0</div></div>
       <div class="stat-tile"><div class="stat-tile-label">investments</div><div class="stat-tile-val" id="s-investments" style="color:var(--broker-color)">$0</div></div>
@@ -468,27 +521,54 @@
       <div id="stacked-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;"></div>
     </div>
 
-    <div class="section-divider-label">assets</div>
-    <div class="section">
-      <div class="section-head"><span class="section-label">cash</span><button class="add-link" onclick="openAdd('cash')">+ add</button></div>
+    <div class="cat-header">
+      <div class="cat-header-left">
+        <span class="cat-title">assets</span>
+        <span class="cat-total" id="cat-total-assets"></span>
+      </div>
+      <button class="add-link" onclick="openAddCategory('assets')">+ add</button>
+    </div>
+    <div id="section-cash" class="section">
+      <div class="section-head collapsible" onclick="toggleSection('cash')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="section-caret" id="caret-cash">▾</span>
+          <span class="section-label">cash</span>
+        </div>
+        <span class="section-total" id="st-cash"></span>
+      </div>
       <div id="g-cash"></div>
     </div>
-    <div class="section">
-      <div class="section-head"><span class="section-label">investments</span><button class="add-link" onclick="openAdd('investments')">+ add</button></div>
+    <div id="section-investments" class="section">
+      <div class="section-head collapsible" onclick="toggleSection('investments')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="section-caret" id="caret-investments">▾</span>
+          <span class="section-label">investments</span>
+        </div>
+        <span class="section-total" id="st-investments"></span>
+      </div>
       <div id="g-investments"></div>
     </div>
-    <div class="section">
-      <div class="section-head"><span class="section-label">property</span><button class="add-link" onclick="openAdd('property')">+ add</button></div>
+    <div id="section-property" class="section">
+      <div class="section-head collapsible" onclick="toggleSection('property')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="section-caret" id="caret-property">▾</span>
+          <span class="section-label">property</span>
+        </div>
+        <span class="section-total" id="st-property"></span>
+      </div>
       <div id="g-property"></div>
     </div>
 
-    <div class="section-divider-label">debt</div>
-    <div class="section">
-      <div class="section-head"><span class="section-label">liabilities</span><button class="add-link" onclick="openAdd('debt')">+ add</button></div>
-      <div id="g-debt"></div>
+    <div id="cat-header-debt" class="cat-header" style="margin-top:12px;">
+      <div class="cat-header-left">
+        <span class="cat-title">debt</span>
+        <span class="cat-total" id="cat-total-debt"></span>
+      </div>
+      <button class="add-link" onclick="openAddCategory('debt')">+ add</button>
     </div>
+    <div id="debt-subcategories"></div>
 
-    <div class="section">
+    <div class="section" style="margin-top:40px;">
       <div class="section-head"><span class="section-label">history</span></div>
       <div id="history"></div>
     </div>
@@ -500,11 +580,13 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <h3 id="modal-title">add account</h3>
-    <div class="field">
-      <label>account name</label>
-      <input type="text" id="f-name" placeholder="e.g. Chase Checking" />
+
+    <div class="field" id="f-category-picker" style="display:none;">
+      <label>category</label>
+      <div class="type-btn-row" id="category-btn-row"></div>
     </div>
-    <div class="field">
+
+    <div class="field" id="f-type-picker">
       <label>type</label>
       <select id="f-type" onchange="onTypeChange()">
         <option value="checking">Checking</option>
@@ -523,9 +605,13 @@
         <option value="creditcard">Credit Card</option>
         <option value="mortgage">Mortgage</option>
         <option value="loan">Loan</option>
-        <option value="studentloan">Student Loan</option>
         <option value="other_debt">Other</option>
       </select>
+    </div>
+
+    <div class="field">
+      <label>account name</label>
+      <input type="text" id="f-name" placeholder="e.g. Chase Checking" />
     </div>
     <div class="field">
       <label id="f-val-label">balance ($)</label>
@@ -558,30 +644,46 @@ const TYPE_GROUP = {
   '401k':'investments', roth:'investments', brokerage:'investments',
   btc:'investments', eth:'investments', ada:'investments', other_invest:'investments',
   property:'property', vehicle:'property', other_property:'property',
-  creditcard:'debt', loan:'debt', mortgage:'debt', studentloan:'debt', other_debt:'debt'
+  creditcard:'debt', loan:'debt', mortgage:'debt', other_debt:'debt'
 };
 const TYPE_LABEL = {
   checking:'Checking', savings:'Savings', other_cash:'Other',
   '401k':'401k', roth:'Roth IRA', brokerage:'Brokerage',
-  btc:'Bitcoin', eth:'Ethereum', ada:'Cardano', other_invest:'Other Investment',
-  property:'Real Estate', vehicle:'Vehicle', other_property:'Other Property',
-  creditcard:'Credit Card', loan:'Loan', mortgage:'Mortgage',
-  studentloan:'Student Loan', other_debt:'Other Debt'
+  btc:'Bitcoin', eth:'Ethereum', ada:'Cardano', other_invest:'Other',
+  property:'Real Estate', vehicle:'Vehicle', other_property:'Other',
+  creditcard:'Credit Card', loan:'Loan', mortgage:'Mortgage', other_debt:'Other'
 };
 const CRYPTO_COINS = ['btc','eth','ada'];
-const DEBT_TYPES = ['creditcard','loan','mortgage','studentloan','other_debt'];
+const DEBT_TYPES = ['creditcard','loan','mortgage','other_debt'];
+
+const GROUP_TYPES = {
+  cash:        [['checking','Checking'],['savings','Savings'],['other_cash','Other']],
+  investments: [['401k','401k'],['roth','Roth IRA'],['brokerage','Brokerage'],['btc','Bitcoin'],['eth','Ethereum'],['ada','Cardano'],['other_invest','Other']],
+  property:    [['property','Real Estate'],['vehicle','Vehicle'],['other_property','Other']],
+  debt:        [['creditcard','Credit Card'],['mortgage','Mortgage'],['loan','Loan'],['other_debt','Other']]
+};
 const ASSET_GROUPS = ['cash','investments','property'];
 const ICON_CLASS = { cash:'icon-cash', investments:'icon-invest', property:'icon-property', debt:'icon-debt' };
 const BAR_COLOR = { cash:'#60b8f0', investments:'#c8f060', property:'#8ff0c0', debt:'#f06060' };
 const CRYPTO_ICONS = {
-  btc: `<img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" width="36" height="36" style="border-radius:50%;" />`,
-  eth: `<img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" width="36" height="36" style="border-radius:50%;" />`,
-  ada: `<img src="https://assets.coingecko.com/coins/images/975/small/cardano.png" width="36" height="36" style="border-radius:50%;" />`
+  btc: `<img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  eth: `<img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  ada: `<img src="https://assets.coingecko.com/coins/images/975/small/cardano.png" width="36" height="36" style="border-radius:50%;display:block;" />`
 };
 
-const PROPERTY_ICONS = {
-  property: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`,
-  vehicle:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2.5-6h11L19 12v5h-2"/><path d="M5 17h14"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M3 12h18"/></svg>`
+const REFRESH_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-bottom:1px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`;
+
+const TYPE_ICONS = {
+  checking:    `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+  savings:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>`,
+  brokerage:   `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
+  '401k':      `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  roth:        `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+  property:    `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`,
+  vehicle:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2.5-6h11L19 12v5h-2"/><path d="M5 17h14"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M3 12h18"/></svg>`,
+  creditcard:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>`,
+  mortgage:    `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><line x1="9" y1="21" x2="9" y2="14"/><line x1="15" y1="21" x2="15" y2="14"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`,
+  loan:        `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
 };
 
 let state = {
@@ -667,6 +769,8 @@ async function initApp() {
   const initials = (user.name || user.email).slice(0,2).toUpperCase();
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('user-name').textContent = user.given_name || user.email.split('@')[0];
+  document.getElementById('dropdown-name').textContent = user.name || user.email.split('@')[0];
+  document.getElementById('dropdown-email').textContent = user.email;
 
   showSetup('finding your sheet...');
   const sheetId = localStorage.getItem('stackd_sheet_' + user.sub);
@@ -819,9 +923,6 @@ async function fetchPrices() {
     state.prices.btc = d.bitcoin?.usd || 0;
     state.prices.eth = d.ethereum?.usd || 0;
     state.prices.ada = d.cardano?.usd || 0;
-    document.getElementById('p-btc').textContent = '$' + state.prices.btc.toLocaleString();
-    document.getElementById('p-eth').textContent = '$' + state.prices.eth.toLocaleString();
-    document.getElementById('p-ada').textContent = '$' + state.prices.ada.toFixed(4);
   } catch(e) {
     ['p-btc','p-eth','p-ada'].forEach(id => document.getElementById(id).textContent = 'offline');
   }
@@ -840,56 +941,76 @@ function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
 function staleness(ts) {
   if (!ts) return null;
   const days = Math.floor((Date.now() - ts) / 86400000);
-  if (days === 0) return { text: 'updated today', cls: '' };
-  if (days === 1) return { text: 'updated yesterday', cls: '' };
-  if (days <= 7) return { text: `updated ${days}d ago`, cls: '' };
-  if (days <= 14) return { text: `${days}d since update`, cls: 'stale1' };
-  return { text: `${days}d - needs update`, cls: 'stale2' };
+  if (days === 0) return { text: 'updated today', cls: '', tappable: false };
+  if (days === 1) return { text: 'updated 1d ago', cls: '', tappable: false };
+  if (days <= 7) return { text: `updated ${days}d ago`, cls: '', tappable: false };
+  if (days <= 14) return { text: `updated ${days}d ago`, cls: 'stale1', tappable: true };
+  return { text: `updated ${days}d ago`, cls: 'stale2', tappable: true };
 }
 
 function renderGroup(group) {
   const el = document.getElementById('g-' + group);
   if (!el) return;
-  const accs = state.accounts.filter(a => TYPE_GROUP[a.type] === group);
+  const accs = state.accounts
+    .filter(a => TYPE_GROUP[a.type] === group)
+    .sort((a, b) => getBal(b) - getBal(a));
+
+  const stEl = document.getElementById('st-' + group);
+  if (stEl) stEl.textContent = accs.length ? fmt(accs.reduce((s,a)=>s+getBal(a),0)) : '';
+
   if (!accs.length) {
     el.innerHTML = '<div class="empty-row">no accounts yet</div>';
+    el.style.maxHeight = '';
+    el.style.overflow = '';
     return;
   }
   const isDebt = group === 'debt';
   el.innerHTML = accs.map(acc => {
     const bal = getBal(acc);
     const isCrypto = CRYPTO_COINS.includes(acc.type);
-    const isProperty = ['property','vehicle','other_property'].includes(acc.type);
     const iconContent = CRYPTO_ICONS[acc.type]
       ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
-      : isProperty && PROPERTY_ICONS[acc.type]
-        ? `<div class="acct-icon ${ICON_CLASS[group]}">${PROPERTY_ICONS[acc.type]}</div>`
+      : TYPE_ICONS[acc.type]
+        ? `<div class="acct-icon ${ICON_CLASS[group]}">${TYPE_ICONS[acc.type]}</div>`
         : `<div class="acct-icon ${ICON_CLASS[group]}">${acc.name.charAt(0).toUpperCase()}</div>`;
+    const price = state.prices[acc.type];
     const meta = isCrypto
-      ? `${acc.amount} ${acc.type.toUpperCase()} @ $${(state.prices[acc.type]||0).toLocaleString()}`
-      : (() => { const s = staleness(acc.updatedAt); return s ? `<span class="${s.cls}">${s.text}</span>` : ''; })();
+      ? `<span>${acc.amount} ${acc.type.toUpperCase()} · <span class="price-badge">Price: ${price ? '$' + price.toLocaleString() : '—'}</span></span>`
+      : (() => {
+          const s = staleness(acc.updatedAt);
+          if (!s) return TYPE_LABEL[acc.type];
+          if (s.tappable) return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span> <span class="stale-tap" onclick="markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</span>`;
+          return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
+        })();
     const balColor = isDebt ? 'color:var(--danger)' : '';
     return `<div class="acct-row">
       <div class="acct-left">
         ${iconContent}
         <div>
           <div class="acct-name">${acc.name}</div>
-          <div class="acct-meta">${meta || TYPE_LABEL[acc.type]}</div>
+          <div class="acct-meta">${meta}</div>
         </div>
       </div>
       <div class="acct-right">
         <div>
           <div class="acct-bal" style="${balColor}">${isDebt ? '-' : ''}${fmt(bal)}</div>
-          ${!isCrypto ? `<div class="acct-sub">${TYPE_LABEL[acc.type]}</div>` : ''}
         </div>
         <button class="edit-ico" onclick="openEdit('${acc.id}')">✎</button>
       </div>
     </div>`;
   }).join('');
+
+  if (collapsedSections.has(group)) {
+    el.style.maxHeight = '0';
+    el.style.overflow = 'hidden';
+  } else {
+    el.style.maxHeight = '';
+    el.style.overflow = '';
+  }
 }
 
 function render() {
-  ['cash','investments','property','debt'].forEach(renderGroup);
+  ['cash','investments','property'].forEach(renderGroup);
   const totals = { cash:0, investments:0, property:0, debt:0 };
   state.accounts.forEach(a => { totals[TYPE_GROUP[a.type]] += getBal(a); });
   const totalAssets = totals.cash + totals.investments + totals.property;
@@ -901,6 +1022,61 @@ function render() {
   document.getElementById('s-investments').textContent = fmt(totals.investments);
   document.getElementById('s-property').textContent = fmt(totals.property);
   document.getElementById('s-debt').textContent = fmt(totalDebt);
+
+  // category totals
+  document.getElementById('cat-total-assets').textContent = fmt(totalAssets);
+  document.getElementById('cat-total-debt').textContent = fmt(totalDebt);
+
+  // hide/show empty asset subsections
+  ['cash','investments','property'].forEach(group => {
+    const hasAccounts = state.accounts.some(a => TYPE_GROUP[a.type] === group);
+    const sec = document.getElementById('section-' + group);
+    if (sec) sec.style.display = hasAccounts ? '' : 'none';
+  });
+
+  // render debt subcategories dynamically
+  const debtTypeLabels = {
+    creditcard:'Credit Cards', mortgage:'Mortgages',
+    loan:'Loans', other_debt:'Other Debt'
+  };
+  const debtAccounts = state.accounts.filter(a => DEBT_TYPES.includes(a.type));
+  const debtByType = {};
+  debtAccounts.forEach(a => {
+    if (!debtByType[a.type]) debtByType[a.type] = [];
+    debtByType[a.type].push(a);
+  });
+  const debtContainer = document.getElementById('debt-subcategories');
+  if (!debtAccounts.length) {
+    debtContainer.innerHTML = '';
+  } else {
+    debtContainer.innerHTML = Object.entries(debtByType).map(([type, accs]) => {
+      const sorted = [...accs].sort((a,b) => getBal(b)-getBal(a));
+      const subtotal = sorted.reduce((s,a)=>s+getBal(a),0);
+      const rows = sorted.map(acc => `<div class="acct-row">
+        <div class="acct-left">
+          <div class="acct-icon icon-debt">${TYPE_ICONS[acc.type] || acc.name.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="acct-name">${acc.name}</div>
+          </div>
+        </div>
+        <div class="acct-right">
+          <div class="acct-bal" style="color:var(--danger)">-${fmt(getBal(acc))}</div>
+          <button class="edit-ico" onclick="openEdit('${acc.id}')">✎</button>
+        </div>
+      </div>`).join('');
+      const groupId = 'debt-' + type;
+      return `<div class="section" id="section-${groupId}">
+        <div class="section-head collapsible" onclick="toggleSection('${groupId}')">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-caret" id="caret-${groupId}">▾</span>
+            <span class="section-label">${debtTypeLabels[type] || type}</span>
+          </div>
+          <span class="section-total" style="color:var(--danger)">-${fmt(subtotal)}</span>
+        </div>
+        <div id="g-${groupId}">${rows}</div>
+      </div>`;
+    }).join('');
+  }
 
   const changeEl = document.getElementById('hero-change');
   const filtered = getFilteredHistory();
@@ -943,6 +1119,11 @@ function render() {
     legend.innerHTML = '';
   }
 
+  // show crypto refresh btn only if user has crypto
+  const hasCrypto = state.accounts.some(a => CRYPTO_COINS.includes(a.type));
+  const cryptoBtn = document.getElementById('crypto-refresh-btn');
+  if (cryptoBtn) cryptoBtn.style.display = hasCrypto ? 'inline-flex' : 'none';
+
   renderChart();
 
   const histEl = document.getElementById('history');
@@ -977,17 +1158,6 @@ function render() {
 
 // ---- MODAL ----
 let addingGroup = null;
-function openAdd(group) {
-  addingGroup = group; editingId = null;
-  document.getElementById('modal-title').textContent = 'add account';
-  document.getElementById('f-name').value = '';
-  document.getElementById('f-val').value = '';
-  filterTypeOptions(group);
-  onTypeChange();
-  document.getElementById('btn-delete').style.display = 'none';
-  document.getElementById('overlay').classList.add('open');
-  setTimeout(() => document.getElementById('f-name').focus(), 100);
-}
 
 function filterTypeOptions(group) {
   const sel = document.getElementById('f-type');
@@ -995,7 +1165,7 @@ function filterTypeOptions(group) {
     cash:        ['checking','savings','other_cash'],
     investments: ['401k','roth','brokerage','btc','eth','ada','other_invest'],
     property:    ['property','vehicle','other_property'],
-    debt:        ['creditcard','mortgage','loan','studentloan','other_debt']
+    debt:        ['creditcard','mortgage','loan','other_debt']
   };
   const allowed = groupOptions[group] || [];
   Array.from(sel.options).forEach(opt => {
@@ -1003,17 +1173,59 @@ function filterTypeOptions(group) {
   });
   const first = Array.from(sel.options).find(o => allowed.includes(o.value));
   if (first) sel.value = first.value;
+  onTypeChange();
+}
+
+function selectCategory(group, btn) {
+  addingGroup = group;
+  document.querySelectorAll('#category-btn-row .type-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterTypeOptions(group);
+}
+
+function openAddCategory(category) {
+  addingGroup = null; editingId = null;
+  document.getElementById('modal-title').textContent = 'add account';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-val').value = '';
+  document.getElementById('btn-delete').style.display = 'none';
+
+  if (category === 'debt') {
+    document.getElementById('f-category-picker').style.display = 'none';
+    addingGroup = 'debt';
+    filterTypeOptions('debt');
+  } else {
+    const catPicker = document.getElementById('f-category-picker');
+    catPicker.style.display = 'block';
+    const catRow = document.getElementById('category-btn-row');
+    const groups = [['cash','Cash'],['investments','Investments'],['property','Property']];
+    catRow.innerHTML = groups.map((g,i) =>
+      `<button class="type-btn ${i===0?'active':''}" onclick="selectCategory('${g[0]}',this)">${g[1]}</button>`
+    ).join('');
+    selectCategory('cash', catRow.querySelector('.active'));
+  }
+
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function selectCategory(group, btn) {
+  addingGroup = group;
+  document.querySelectorAll('#category-btn-row .type-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterTypeOptions(group);
 }
 
 function openEdit(id) {
   const acc = state.accounts.find(a=>a.id===id);
   if (!acc) return;
   editingId = id;
-  const group = TYPE_GROUP[acc.type];
+  addingGroup = TYPE_GROUP[acc.type];
   document.getElementById('modal-title').textContent = 'edit account';
-  document.getElementById('f-name').value = acc.name;
-  filterTypeOptions(group);
+  document.getElementById('f-category-picker').style.display = 'none';
+  filterTypeOptions(addingGroup);
   document.getElementById('f-type').value = acc.type;
+  document.getElementById('f-name').value = acc.name;
   document.getElementById('f-val').value = CRYPTO_COINS.includes(acc.type) ? acc.amount : acc.balance;
   onTypeChange();
   document.getElementById('btn-delete').style.display = 'block';
@@ -1080,11 +1292,50 @@ async function autoSnapshot() {
   render();
 }
 
+const collapsedSections = new Set();
+
+function toggleSection(group) {
+  if (collapsedSections.has(group)) {
+    collapsedSections.delete(group);
+  } else {
+    collapsedSections.add(group);
+  }
+  const el = document.getElementById('g-' + group);
+  const caret = document.getElementById('caret-' + group);
+  if (collapsedSections.has(group)) {
+    el.style.maxHeight = '0';
+    el.style.overflow = 'hidden';
+    caret.classList.add('collapsed');
+  } else {
+    el.style.maxHeight = el.scrollHeight + 'px';
+    el.style.overflow = '';
+    setTimeout(() => { if (!collapsedSections.has(group)) el.style.maxHeight = ''; }, 250);
+    caret.classList.remove('collapsed');
+  }
+}
+
+async function markUpdated(id) {
+  const acc = state.accounts.find(a => a.id === id);
+  if (!acc) return;
+  acc.updatedAt = Date.now();
+  render();
+  await saveAccountsToSheet();
+  showToast('marked as updated');
+}
+
 function toggleHistory() {
   const histEl = document.getElementById('history');
   histEl.dataset.expanded = histEl.dataset.expanded === 'true' ? 'false' : 'true';
   render();
 }
+
+function toggleUserMenu() {
+  document.getElementById('user-menu').classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if (menu && !menu.contains(e.target)) menu.classList.remove('open');
+});
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -1226,54 +1477,10 @@ function renderChart() {
   };
 }
 
-// ---- BOOT (PREVIEW MODE) ----
+// ---- BOOT ----
 (async () => {
-  const now = Date.now();
-  const day = 86400000;
-
-  // hardcoded prices for preview (live prices load on real site)
-  state.prices = { btc: 83000, eth: 1800, ada: 0.62 };
-  document.getElementById('p-btc').textContent = '$83,000';
-  document.getElementById('p-eth').textContent = '$1,800';
-  document.getElementById('p-ada').textContent = '$0.6200';
-
-  state.accounts = [
-    { id:'1', name:'Chase Checking', type:'checking', balance:4200, amount:0, updatedAt: now - day },
-    { id:'2', name:'Ally Savings', type:'savings', balance:18500, amount:0, updatedAt: now - 3*day },
-    { id:'3', name:'Fidelity 401k', type:'401k', balance:94000, amount:0, updatedAt: now - 10*day },
-    { id:'4', name:'Roth IRA', type:'roth', balance:31200, amount:0, updatedAt: now - 10*day },
-    { id:'5', name:'Robinhood', type:'brokerage', balance:12800, amount:0, updatedAt: now - 20*day },
-    { id:'6', name:'Bitcoin', type:'btc', balance:0, amount:0.45 },
-    { id:'7', name:'Ethereum', type:'eth', balance:0, amount:3.2 },
-    { id:'8', name:'Cardano', type:'ada', balance:0, amount:1800 },
-    { id:'9', name:'Primary Home', type:'property', balance:420000, amount:0, updatedAt: now - 30*day },
-  ];
-
-  const base = 140000;
-  state.history = [
-    { date: now - 365*day, total: base * 0.72 },
-    { date: now - 330*day, total: base * 0.75 },
-    { date: now - 300*day, total: base * 0.74 },
-    { date: now - 270*day, total: base * 0.78 },
-    { date: now - 240*day, total: base * 0.81 },
-    { date: now - 210*day, total: base * 0.80 },
-    { date: now - 180*day, total: base * 0.84 },
-    { date: now - 150*day, total: base * 0.87 },
-    { date: now - 120*day, total: base * 0.91 },
-    { date: now - 90*day,  total: base * 0.89 },
-    { date: now - 60*day,  total: base * 0.94 },
-    { date: now - 30*day,  total: base * 0.97 },
-    { date: now - 7*day,   total: base * 0.99 },
-  ];
-
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-avatar').textContent = 'EJ';
-  document.getElementById('user-name').textContent = 'Edwin';
-
-  render();
-  autoSnapshot();
+  const handled = await handleAuthCallback();
+  if (!handled) showAuth();
 })();
 
 setInterval(fetchPrices, 60000);
