@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Stackd - Net Worth Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0e0f11;
@@ -24,7 +24,7 @@
     --broker-color: #c8f060;
     --crypto-color: #f0a860;
     --font-display: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-display); }
@@ -478,7 +478,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.7</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.8</div>
 </div>
 
 <!-- SETUP -->
@@ -1501,14 +1501,15 @@ function renderMilestones(netWorth) {
     nextEl.innerHTML = `Next: <strong>${next.label}</strong> &nbsp;·&nbsp; ${pct.toFixed(0)}% there`;
     fillEl.style.width = pct.toFixed(1) + '%';
   } else {
-    nextEl.innerHTML = `<strong>All milestones unlocked! 🎉</strong>`;
+    nextEl.innerHTML = streak
+      ? `<strong>All milestones unlocked!</strong> &nbsp;·&nbsp; 📈 3 months of growth`
+      : `<strong>All milestones unlocked!</strong>`;
     fillEl.style.width = '100%';
   }
 
-  const streakBadges = streak ? `<div class="milestone-badge">📈 3 months growth</div>` : '';
-  unlockedEl.innerHTML = unlocked.map(m =>
-    `<div class="milestone-badge">✓ ${m.label}</div>`
-  ).join('') + streakBadges;
+  unlockedEl.innerHTML = streak && next
+    ? `<div class="milestone-badge">📈 3 months growth streak</div>`
+    : '';
 }
 
 // ---- CHART ----
@@ -1573,7 +1574,7 @@ function renderChart() {
   // y-axis labels
   const yLabels = [minV, minV + range * 0.5, maxV];
   ctx.fillStyle = 'rgba(122,125,130,0.7)';
-  ctx.font = `10px DM Mono, monospace`;
+  ctx.font = `10px IBM Plex Mono, monospace`;
   ctx.textAlign = 'right';
   yLabels.forEach(v => {
     const y = py(v);
@@ -1630,7 +1631,7 @@ function renderChart() {
 
   // x-axis labels
   ctx.fillStyle = 'rgba(122,125,130,0.8)';
-  ctx.font = `${10 * PR / PR}px DM Mono, monospace`;
+  ctx.font = `${10 * PR / PR}px IBM Plex Mono, monospace`;
   ctx.textAlign = 'center';
   const labelCount = Math.min(data.length, 5);
   for (let i = 0; i < labelCount; i++) {
@@ -1653,8 +1654,10 @@ function renderChart() {
     const tt = document.getElementById('chart-tooltip');
     document.getElementById('tt-val').textContent = fmt(data[closest].total);
     document.getElementById('tt-date').textContent = new Date(data[closest].date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    let tx = px(closest) + 12;
-    if (tx + 140 > W) tx = px(closest) - 150;
+    const ttW = 130;
+    const pointX = px(closest);
+    let tx = pointX + 12;
+    if (tx + ttW > W) tx = pointX - ttW - 12;
     tt.style.left = tx + 'px';
     tt.style.top = (py(data[closest].total) - 20) + 'px';
     tt.classList.add('show');
