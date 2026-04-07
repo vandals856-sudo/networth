@@ -462,7 +462,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.4</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.6</div>
 </div>
 
 <!-- SETUP -->
@@ -566,7 +566,7 @@
           <div class="welcome-title">Start by adding your first account</div>
           <div class="welcome-sub">Add your cash, investments, property, or debt below. Your net worth updates automatically as you go.</div>
         </div>
-        <div class="welcome-icon">→</div>
+        <div class="welcome-icon">↓</div>
       </div>
     </div>
     <div class="cat-header">
@@ -1152,7 +1152,7 @@ function render() {
   const filtered = getFilteredHistory();
   if (filtered.length >= 2) {
     const first = filtered[0];
-    const current = state.accounts.reduce((s,a)=>s+getBal(a),0);
+    const current = getNetWorth();
     const diff = current - first.total;
     const sign = diff >= 0 ? '+' : '';
     const rangeLabels = { '1m':'past month', '3m':'past 3 months', '6m':'past 6 months', 'ytd':'year to date', '1y':'past year', 'all':'all time' };
@@ -1348,8 +1348,17 @@ async function deleteAccount() {
 function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; }
 function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
 
+function getNetWorth() {
+  let assets = 0, debt = 0;
+  state.accounts.forEach(a => {
+    if (DEBT_TYPES.includes(a.type)) debt += getBal(a);
+    else assets += getBal(a);
+  });
+  return assets - debt;
+}
+
 async function autoSnapshot() {
-  const total = state.accounts.reduce((s,a)=>s+getBal(a),0);
+  const total = getNetWorth();
   if (total === 0) return;
   const todayStr = new Date().toDateString();
   const lastIdx = state.history.length - 1;
