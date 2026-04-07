@@ -178,6 +178,22 @@
 
   .main { padding: 24px 20px 80px; max-width: 800px; margin: 0 auto; }
 
+  /* Milestones */
+  .milestone-next { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .milestone-next strong { color: var(--text); font-weight: 500; }
+  .milestone-track { background: var(--bg3); border-radius: 4px; height: 4px; overflow: hidden; margin-bottom: 8px; }
+  .milestone-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.6s ease; }
+  .milestone-unlocked { display: flex; flex-wrap: wrap; gap: 6px; }
+  .milestone-badge {
+    font-size: 11px; font-family: var(--font-mono);
+    background: rgba(200,240,96,0.08); color: var(--accent);
+    border: 1px solid rgba(200,240,96,0.2);
+    border-radius: 20px; padding: 2px 9px;
+  }
+
+  /* Account note */
+  .acct-note { font-size: 11px; color: var(--muted); margin-top: 2px; font-style: italic; opacity: 0.7; }
+
   /* Hero */
   .hero { margin-bottom: 28px; }
   .hero-label { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
@@ -462,7 +478,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.6</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.7</div>
 </div>
 
 <!-- SETUP -->
@@ -510,6 +526,11 @@
       <div class="hero-label">net worth</div>
       <div class="hero-total" id="hero-total">$0</div>
       <div class="hero-change" id="hero-change"></div>
+      <div id="milestone-bar" style="display:none;margin-top:14px;">
+        <div class="milestone-next" id="milestone-next"></div>
+        <div class="milestone-track"><div class="milestone-fill" id="milestone-fill"></div></div>
+        <div class="milestone-unlocked" id="milestone-unlocked"></div>
+      </div>
     </div>
 
     <div class="chart-section">
@@ -665,6 +686,10 @@
       <label id="f-val-label">balance ($)</label>
       <input type="number" id="f-val" placeholder="0.00" step="any" />
       <div class="crypto-hint" id="f-hint" style="display:none;">enter your coin amount - dollar value updates automatically from live price</div>
+    </div>
+    <div class="field">
+      <label>note <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></label>
+      <input type="text" id="f-note" placeholder="e.g. got bonus, opened new account..." maxlength="120" />
     </div>
     <div class="modal-actions">
       <button class="btn-cancel2" onclick="closeModal()">cancel</button>
@@ -939,7 +964,8 @@ async function loadFromSheet() {
       id: r[0], name: r[1], type: r[2],
       balance: parseFloat(r[3]) || 0,
       amount: parseFloat(r[3]) || 0,
-      updatedAt: parseInt(r[4]) || null
+      updatedAt: parseInt(r[4]) || null,
+      note: r[5] || ''
     }));
     state.history = (hd.values || []).map(r => ({
       date: parseInt(r[0]), total: parseFloat(r[1]) || 0
@@ -955,7 +981,7 @@ async function saveAccountsToSheet() {
   const rows = state.accounts.map(a => [
     a.id, a.name, a.type,
     CRYPTO_COINS.includes(a.type) ? a.amount : a.balance,
-    a.updatedAt || '', ''
+    a.updatedAt || '', a.note || ''
   ]);
   const values = [['id','name','type','balance_or_amount','updated_at','notes'], ...rows];
   await gapi('PUT',
@@ -1059,6 +1085,7 @@ function renderGroup(group) {
         <div>
           <div class="acct-name">${acc.name}</div>
           <div class="acct-meta">${meta}</div>
+          ${acc.note ? `<div class="acct-note">${acc.note}</div>` : ''}
         </div>
       </div>
       <div class="acct-right">
@@ -1088,6 +1115,7 @@ function render() {
   const netWorth = totalAssets - totalDebt;
 
   document.getElementById('hero-total').textContent = fmt(netWorth);
+  renderMilestones(netWorth);
   document.getElementById('s-cash').textContent = fmt(totals.cash);
   document.getElementById('s-investments').textContent = fmt(totals.investments);
   document.getElementById('s-property').textContent = fmt(totals.property);
@@ -1262,6 +1290,7 @@ function openAddCategory(category) {
   document.getElementById('modal-title').textContent = 'add account';
   document.getElementById('f-name').value = '';
   document.getElementById('f-val').value = '';
+  document.getElementById('f-note').value = '';
   document.getElementById('btn-delete').style.display = 'none';
 
   if (category === 'debt') {
@@ -1301,6 +1330,7 @@ function openEdit(id) {
   document.getElementById('f-type').value = acc.type;
   document.getElementById('f-name').value = acc.name;
   document.getElementById('f-val').value = CRYPTO_COINS.includes(acc.type) ? acc.amount : acc.balance;
+  document.getElementById('f-note').value = acc.note || '';
   onTypeChange();
   document.getElementById('btn-delete').style.display = 'block';
   document.getElementById('overlay').classList.add('open');
@@ -1318,15 +1348,16 @@ async function saveAccount() {
   const name = document.getElementById('f-name').value.trim();
   const type = document.getElementById('f-type').value;
   const val = parseFloat(document.getElementById('f-val').value) || 0;
+  const note = document.getElementById('f-note').value.trim();
   if (!name) { document.getElementById('f-name').focus(); return; }
   const isCrypto = CRYPTO_COINS.includes(type);
   if (editingId) {
     const acc = state.accounts.find(a=>a.id===editingId);
-    acc.name = name; acc.type = type;
+    acc.name = name; acc.type = type; acc.note = note;
     if (isCrypto) { acc.amount = val; }
     else { acc.balance = val; acc.updatedAt = Date.now(); }
   } else {
-    const acc = { id: Date.now().toString(), name, type };
+    const acc = { id: Date.now().toString(), name, type, note };
     if (isCrypto) { acc.amount = val; acc.balance = 0; }
     else { acc.balance = val; acc.amount = 0; acc.updatedAt = Date.now(); }
     state.accounts.push(acc);
@@ -1427,6 +1458,59 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+function renderMilestones(netWorth) {
+  const MILESTONES = [
+    { val: 1, label: 'First $1' },
+    { val: 1000, label: '$1K' },
+    { val: 5000, label: '$5K' },
+    { val: 10000, label: '$10K' },
+    { val: 25000, label: '$25K' },
+    { val: 50000, label: '$50K' },
+    { val: 100000, label: '$100K' },
+    { val: 250000, label: '$250K' },
+    { val: 500000, label: '$500K' },
+    { val: 1000000, label: '$1M' },
+  ];
+
+  const bar = document.getElementById('milestone-bar');
+  if (!bar) return;
+
+  // check 3 months growth streak
+  const streak = (() => {
+    if (state.history.length < 4) return false;
+    const recent = [...state.history].sort((a,b) => a.date - b.date).slice(-4);
+    return recent[1].total > recent[0].total &&
+           recent[2].total > recent[1].total &&
+           recent[3].total > recent[2].total;
+  })();
+
+  const unlocked = MILESTONES.filter(m => netWorth >= m.val);
+  const next = MILESTONES.find(m => netWorth < m.val);
+
+  if (!next && !streak) { bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+
+  const nextEl = document.getElementById('milestone-next');
+  const fillEl = document.getElementById('milestone-fill');
+  const unlockedEl = document.getElementById('milestone-unlocked');
+
+  if (next) {
+    const prev = unlocked[unlocked.length - 1];
+    const base = prev ? prev.val : 0;
+    const pct = Math.min(100, ((netWorth - base) / (next.val - base)) * 100);
+    nextEl.innerHTML = `Next: <strong>${next.label}</strong> &nbsp;·&nbsp; ${pct.toFixed(0)}% there`;
+    fillEl.style.width = pct.toFixed(1) + '%';
+  } else {
+    nextEl.innerHTML = `<strong>All milestones unlocked! 🎉</strong>`;
+    fillEl.style.width = '100%';
+  }
+
+  const streakBadges = streak ? `<div class="milestone-badge">📈 3 months growth</div>` : '';
+  unlockedEl.innerHTML = unlocked.map(m =>
+    `<div class="milestone-badge">✓ ${m.label}</div>`
+  ).join('') + streakBadges;
+}
+
 // ---- CHART ----
 let chartRange = 'all';
 function setRange(r) {
@@ -1474,7 +1558,7 @@ function renderChart() {
   const ctx = canvas.getContext('2d');
   ctx.scale(PR, PR);
 
-  const PAD = { top: 12, right: 16, bottom: 28, left: 16 };
+  const PAD = { top: 12, right: 16, bottom: 28, left: 56 };
   const cW = W - PAD.left - PAD.right;
   const cH = H - PAD.top - PAD.bottom;
 
@@ -1485,6 +1569,26 @@ function renderChart() {
 
   const px = (i) => PAD.left + (i / (data.length - 1)) * cW;
   const py = (v) => PAD.top + cH - ((v - minV) / range) * cH;
+
+  // y-axis labels
+  const yLabels = [minV, minV + range * 0.5, maxV];
+  ctx.fillStyle = 'rgba(122,125,130,0.7)';
+  ctx.font = `10px DM Mono, monospace`;
+  ctx.textAlign = 'right';
+  yLabels.forEach(v => {
+    const y = py(v);
+    const label = v >= 1000000 ? `$${(v/1000000).toFixed(1)}M`
+      : v >= 1000 ? `$${Math.round(v/1000)}K`
+      : `$${Math.round(v)}`;
+    ctx.fillText(label, PAD.left - 6, y + 3);
+    // subtle grid line
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(122,125,130,0.08)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(PAD.left, y);
+    ctx.lineTo(W - PAD.right, y);
+    ctx.stroke();
+  });
 
   // gradient fill
   const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
