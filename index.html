@@ -483,13 +483,14 @@
   /* Chart */
   .chart-section { margin-bottom: 28px; }
   .chart-filters {
-    display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap;
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
   }
   .cf {
     background: none; border: 1px solid var(--border);
     color: var(--muted); border-radius: 8px;
-    padding: 5px 11px; font-size: 12px; font-family: var(--font-display);
+    padding: 8px 14px; font-size: 13px; font-family: var(--font-display);
     cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
+    min-width: 44px; text-align: center;
   }
   .cf:hover { border-color: var(--border2); color: var(--text); }
   .cf.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 500; }
@@ -552,7 +553,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.34</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.35</div>
 </div>
 
 <!-- SETUP -->
@@ -569,9 +570,6 @@
   <div class="topbar">
     <div class="topbar-logo">stack<span>d</span></div>
     <div class="topbar-right">
-      <button class="privacy-btn" id="privacy-btn" onclick="togglePrivacy()" title="toggle balance visibility">
-        <svg id="privacy-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
       <div class="user-menu" id="user-menu" onclick="toggleUserMenu()">
         <div class="user-pill">
           <div class="user-avatar" id="user-avatar">EJ</div>
@@ -606,7 +604,12 @@
 
     <div class="hero">
       <div class="hero-label">net worth</div>
-      <div class="hero-total" id="hero-total">$0</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="hero-total" id="hero-total">$0</div>
+        <button class="privacy-btn" id="privacy-btn" onclick="togglePrivacy()" title="toggle balance visibility">
+          <svg id="privacy-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
       <div class="hero-change" id="hero-change"></div>
       <div id="milestone-bar" style="display:none;margin-top:14px;">
         <div class="milestone-track"><div class="milestone-fill" id="milestone-fill"></div></div>
