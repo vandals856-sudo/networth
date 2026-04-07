@@ -516,7 +516,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.7</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.8</div>
 </div>
 
 <!-- SETUP -->
@@ -758,7 +758,7 @@
 const GOOGLE_CLIENT_ID = '888736831379-tnffoch56c3shfcu6erl5hlc274hukml.apps.googleusercontent.com';
 // ============================================================
 
-const SCOPES = 'openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const SCOPES = 'openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly';
 const SHEET_TITLE = 'Stackd - Net Worth Tracker';
 const DEMO_MODE = false;
 
@@ -918,18 +918,18 @@ async function initApp() {
   document.getElementById('dropdown-email').textContent = user.email;
 
   showSetup('finding your sheet...');
-  const sheetId = localStorage.getItem('stackd_sheet_' + user.sub);
+  const cachedId = localStorage.getItem('stackd_sheet_' + user.sub);
 
-  if (sheetId) {
-    const exists = await verifySheet(sheetId);
+  if (cachedId) {
+    const exists = await verifySheet(cachedId);
     if (exists) {
-      state.sheetId = sheetId;
+      state.sheetId = cachedId;
     } else {
       localStorage.removeItem('stackd_sheet_' + user.sub);
-      state.sheetId = await createSheet();
+      state.sheetId = await findOrCreateSheet();
     }
   } else {
-    state.sheetId = await createSheet();
+    state.sheetId = await findOrCreateSheet();
   }
 
   if (!state.sheetId) return false;
@@ -964,7 +964,20 @@ async function verifySheet(id) {
   } catch { return false; }
 }
 
-async function createSheet() {
+async function findOrCreateSheet() {
+  try {
+    // search Drive for existing Stackd sheet
+    const q = encodeURIComponent(`name='${SHEET_TITLE}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`);
+    const r = await gapi('GET', `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=1`);
+    if (r.ok) {
+      const d = await r.json();
+      if (d.files && d.files.length > 0) {
+        return d.files[0].id;
+      }
+    }
+  } catch(e) { console.error('drive search error', e); }
+  return await createSheet();
+}
   showSetup('creating your sheet...', 'this only happens once - setting up your personal spreadsheet.');
   try {
     const r = await gapi('POST', 'https://sheets.googleapis.com/v4/spreadsheets', {
