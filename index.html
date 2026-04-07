@@ -214,6 +214,15 @@
   .section-body { overflow: hidden; transition: max-height 0.25s ease; }
   .section-body.collapsed { max-height: 0 !important; }
 
+  .welcome-banner {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: rgba(200,240,96,0.05); border: 1px solid rgba(200,240,96,0.15);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 8px;
+  }
+  .welcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+  .welcome-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .welcome-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
   .cat-header { display:flex; align-items:center; justify-content:space-between; padding: 24px 0 12px; margin-top: 4px; }
   .cat-header-left { display:flex; align-items:baseline; gap:12px; }
   .cat-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); }
@@ -438,7 +447,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.1</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.2</div>
 </div>
 
 <!-- SETUP -->
@@ -500,7 +509,10 @@
       <div class="chart-wrap">
         <div class="chart-canvas-wrap">
           <canvas id="nw-chart"></canvas>
-          <div class="chart-empty" id="chart-empty" style="display:none;">save your first snapshot to start tracking progress</div>
+          <div class="chart-empty" id="chart-empty" style="display:none;">
+            <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;">Your growth chart will appear here</div>
+            <div style="font-size:13px;">Add your accounts below to start tracking</div>
+          </div>
         </div>
         <div class="chart-tooltip" id="chart-tooltip">
           <div class="chart-tooltip-val" id="tt-val"></div>
@@ -521,6 +533,15 @@
       <div id="stacked-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;"></div>
     </div>
 
+    <div id="welcome-banner" style="display:none;">
+      <div class="welcome-banner">
+        <div class="welcome-icon">↓</div>
+        <div class="welcome-text">
+          <div class="welcome-title">Start by adding your first account</div>
+          <div class="welcome-sub">Add your cash, investments, property, or debt below. Your net worth updates automatically as you go.</div>
+        </div>
+      </div>
+    </div>
     <div class="cat-header">
       <div class="cat-header-left">
         <span class="cat-title">assets</span>
@@ -988,7 +1009,7 @@ function renderGroup(group) {
   if (stEl) stEl.textContent = accs.length ? fmt(accs.reduce((s,a)=>s+getBal(a),0)) : '';
 
   if (!accs.length) {
-    el.innerHTML = '<div class="empty-row">no accounts yet</div>';
+    el.innerHTML = '<div class="empty-row">nothing here yet - tap + add above</div>';
     el.style.maxHeight = '';
     el.style.overflow = '';
     return;
@@ -1148,6 +1169,10 @@ function render() {
     legend.innerHTML = '';
   }
 
+  // show welcome banner if no accounts
+  const welcomeBanner = document.getElementById('welcome-banner');
+  if (welcomeBanner) welcomeBanner.style.display = state.accounts.length === 0 ? 'block' : 'none';
+
   // show crypto refresh btn only if user has crypto
   const hasCrypto = state.accounts.some(a => CRYPTO_COINS.includes(a.type));
   const cryptoBtn = document.getElementById('crypto-refresh-btn');
@@ -1157,7 +1182,7 @@ function render() {
 
   const histEl = document.getElementById('history');
   if (!state.history.length) {
-    histEl.innerHTML = '<div class="empty-row">no snapshots yet</div>';
+    histEl.innerHTML = '<div class="empty-row">your net worth history will appear here as you update your accounts over time</div>';
   } else {
     const reversed = [...state.history].reverse();
     const showAll = histEl.dataset.expanded === 'true';
