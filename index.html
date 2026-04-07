@@ -516,7 +516,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.8</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.9</div>
 </div>
 
 <!-- SETUP -->
@@ -978,7 +978,8 @@ async function findOrCreateSheet() {
   } catch(e) { console.error('drive search error', e); }
   return await createSheet();
 }
-  showSetup('creating your sheet...', 'this only happens once - setting up your personal spreadsheet.');
+
+async function createSheet() {
   try {
     const r = await gapi('POST', 'https://sheets.googleapis.com/v4/spreadsheets', {
       properties: { title: SHEET_TITLE },
