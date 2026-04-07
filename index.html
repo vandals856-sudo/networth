@@ -733,13 +733,18 @@ async function handleAuthCallback() {
   const token = hash.get('access_token');
   const expiresIn = hash.get('expires_in');
 
+  console.log('hash token found:', !!token);
+  console.log('saved token:', !!localStorage.getItem('stackd_token'));
+
   if (token) {
     const expiry = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
     localStorage.setItem('stackd_token', token);
     localStorage.setItem('stackd_token_expiry', expiry);
     window.history.replaceState({}, '', window.location.pathname);
     state.accessToken = token;
+    console.log('token saved, calling initApp...');
     const ok = await initApp();
+    console.log('initApp result:', ok);
     if (!ok) { localStorage.removeItem('stackd_token'); showAuth(); }
     return true;
   }
@@ -747,6 +752,8 @@ async function handleAuthCallback() {
   const saved = localStorage.getItem('stackd_token');
   const expiry = parseInt(localStorage.getItem('stackd_token_expiry') || '0');
   const isExpired = expiry && Date.now() > expiry - 60000;
+
+  console.log('saved token exists:', !!saved, 'isExpired:', isExpired);
 
   if (saved && !isExpired) {
     state.accessToken = saved;
