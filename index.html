@@ -543,7 +543,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.31</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.32</div>
 </div>
 
 <!-- SETUP -->
@@ -1974,11 +1974,14 @@ function renderChart() {
   const empty = document.getElementById('chart-empty');
   const data = getFilteredHistory();
 
-  if (data.length < 2) {
+  if (data.length < 1) {
     canvas.style.display = 'none';
     empty.style.display = 'block';
     return;
   }
+
+  // if only one point, duplicate it to draw a flat line
+  const chartData = data.length === 1 ? [data[0], { ...data[0], date: Date.now() }] : data;
   canvas.style.display = 'block';
   empty.style.display = 'none';
 
@@ -1997,12 +2000,12 @@ function renderChart() {
   const cW = W - PAD.left - PAD.right;
   const cH = H - PAD.top - PAD.bottom;
 
-  const vals = data.map(d => d.total);
+  const vals = chartData.map(d => d.total);
   const minV = Math.min(...vals);
   const maxV = Math.max(...vals);
   const range = maxV - minV || 1;
 
-  const px = (i) => PAD.left + (i / (data.length - 1)) * cW;
+  const px = (i) => PAD.left + (i / (chartData.length - 1)) * cW;
   const py = (v) => PAD.top + cH - ((v - minV) / range) * cH;
 
   // y-axis labels
@@ -2030,14 +2033,14 @@ function renderChart() {
   grad.addColorStop(0, 'rgba(200,240,96,0.18)');
   grad.addColorStop(1, 'rgba(200,240,96,0)');
   ctx.beginPath();
-  ctx.moveTo(px(0), py(data[0].total));
-  for (let i = 1; i < data.length; i++) {
-    const x0 = px(i-1), y0 = py(data[i-1].total);
-    const x1 = px(i), y1 = py(data[i].total);
+  ctx.moveTo(px(0), py(chartData[0].total));
+  for (let i = 1; i < chartData.length; i++) {
+    const x0 = px(i-1), y0 = py(chartData[i-1].total);
+    const x1 = px(i), y1 = py(chartData[i].total);
     const cpx = (x0 + x1) / 2;
     ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
   }
-  ctx.lineTo(px(data.length-1), PAD.top + cH);
+  ctx.lineTo(px(chartData.length-1), PAD.top + cH);
   ctx.lineTo(px(0), PAD.top + cH);
   ctx.closePath();
   ctx.fillStyle = grad;
@@ -2045,10 +2048,10 @@ function renderChart() {
 
   // line
   ctx.beginPath();
-  ctx.moveTo(px(0), py(data[0].total));
-  for (let i = 1; i < data.length; i++) {
-    const x0 = px(i-1), y0 = py(data[i-1].total);
-    const x1 = px(i), y1 = py(data[i].total);
+  ctx.moveTo(px(0), py(chartData[0].total));
+  for (let i = 1; i < chartData.length; i++) {
+    const x0 = px(i-1), y0 = py(chartData[i-1].total);
+    const x1 = px(i), y1 = py(chartData[i].total);
     const cpx = (x0 + x1) / 2;
     ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
   }
@@ -2057,7 +2060,7 @@ function renderChart() {
   ctx.stroke();
 
   // end dot
-  const lastX = px(data.length-1), lastY = py(data[data.length-1].total);
+  const lastX = px(chartData.length-1), lastY = py(chartData[chartData.length-1].total);
   ctx.beginPath();
   ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
   ctx.fillStyle = '#c8f060';
@@ -2067,10 +2070,10 @@ function renderChart() {
   ctx.fillStyle = 'rgba(122,125,130,0.8)';
   ctx.font = `${10 * PR / PR}px Fira Code, monospace`;
   ctx.textAlign = 'center';
-  const labelCount = Math.min(data.length, 5);
+  const labelCount = Math.min(chartData.length, 5);
   for (let i = 0; i < labelCount; i++) {
-    const idx = Math.round(i / (labelCount - 1) * (data.length - 1));
-    const d = new Date(data[idx].date);
+    const idx = Math.round(i / (labelCount - 1) * (chartData.length - 1));
+    const d = new Date(chartData[idx].date);
     const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     ctx.fillText(label, px(idx), H - 6);
   }
@@ -2081,18 +2084,18 @@ function renderChart() {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const mx = clientX - rect.left;
     let closest = 0, minDist = Infinity;
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < chartData.length; i++) {
       const d = Math.abs(px(i) - mx);
       if (d < minDist) { minDist = d; closest = i; }
     }
     const tt = document.getElementById('chart-tooltip');
-    document.getElementById('tt-val').textContent = fmt(data[closest].total);
-    document.getElementById('tt-date').textContent = new Date(data[closest].date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    document.getElementById('tt-val').textContent = fmt(chartData[closest].total);
+    document.getElementById('tt-date').textContent = new Date(chartData[closest].date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const ttW = tt.offsetWidth || 130;
     let tx = mx + 24;
     if (tx + ttW > W) tx = mx - ttW + 16;
     tt.style.left = tx + 'px';
-    tt.style.top = (py(data[closest].total) - 20) + 'px';
+    tt.style.top = (py(chartData[closest].total) - 20) + 'px';
     tt.classList.add('show');
   };
   canvas.onmouseleave = canvas.ontouchend = () => {
