@@ -723,6 +723,7 @@ function signIn() {
 
 function signOut() {
   localStorage.removeItem('stackd_token');
+  localStorage.removeItem('stackd_token_expiry');
   localStorage.removeItem('stackd_sheet');
   window.location.reload();
 }
@@ -730,25 +731,46 @@ function signOut() {
 async function handleAuthCallback() {
   const hash = new URLSearchParams(window.location.hash.slice(1));
   const token = hash.get('access_token');
+  const expiresIn = hash.get('expires_in');
+
   if (token) {
+    const expiry = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
     localStorage.setItem('stackd_token', token);
+    localStorage.setItem('stackd_token_expiry', expiry);
     window.history.replaceState({}, '', window.location.pathname);
     state.accessToken = token;
-    await initApp();
-    return true;
-  }
-  const saved = localStorage.getItem('stackd_token');
-  if (saved) {
-    state.accessToken = saved;
     const ok = await initApp();
     if (!ok) { localStorage.removeItem('stackd_token'); showAuth(); }
     return true;
   }
+
+  const saved = localStorage.getItem('stackd_token');
+  const expiry = parseInt(localStorage.getItem('stackd_token_expiry') || '0');
+  const isExpired = expiry && Date.now() > expiry - 60000;
+
+  if (saved && !isExpired) {
+    state.accessToken = saved;
+    const ok = await initApp();
+    if (!ok) {
+      localStorage.removeItem('stackd_token');
+      localStorage.removeItem('stackd_token_expiry');
+      showAuth();
+    }
+    return true;
+  }
+
+  if (saved) {
+    localStorage.removeItem('stackd_token');
+    localStorage.removeItem('stackd_token_expiry');
+  }
+
   return false;
 }
 
 function showAuth() {
   document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'none';
 }
 
 async function getUser() {
