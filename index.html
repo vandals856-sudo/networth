@@ -243,20 +243,12 @@
   .celebrate-emoji { font-size: 48px; margin-bottom: 12px; line-height: 1; }
   .celebrate-headline { font-size: 28px; font-weight: 600; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
   .celebrate-sub { font-size: 14px; color: var(--muted); margin-bottom: 16px; }
-  .celebrate-amount { font-size: 13px; color: var(--accent); font-family: var(--font-mono); margin-bottom: 1.5rem; }
+  .celebrate-amount { font-size: 15px; color: var(--text); font-family: var(--font-mono); font-weight: 500; margin-bottom: 1.5rem; }
   .celebrate-actions { display: flex; gap: 10px; }
-  .celebrate-share {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
-    background: var(--bg3); border: 1px solid var(--border2);
-    color: var(--text); border-radius: 12px; padding: 12px;
-    font-size: 14px; font-family: var(--font-display); cursor: pointer;
-    transition: background 0.15s;
-  }
-  .celebrate-share:hover { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
   .celebrate-next {
-    flex: 1.5; background: var(--accent); color: #111;
-    border: none; border-radius: 12px; padding: 12px;
-    font-size: 14px; font-weight: 500; font-family: var(--font-display); cursor: pointer;
+    width: 100%; background: var(--accent); color: #111;
+    border: none; border-radius: 12px; padding: 14px;
+    font-size: 15px; font-weight: 500; font-family: var(--font-display); cursor: pointer;
     transition: opacity 0.15s;
   }
   .celebrate-next:hover { opacity: 0.88; }
@@ -561,7 +553,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.3</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.4</div>
 </div>
 
 <!-- SETUP -->
@@ -742,21 +734,15 @@
 </div>
 
 <!-- CELEBRATION -->
-<div id="celebrate-overlay" style="display:none;">
+<div id="celebrate-overlay" style="display:none;" onclick="closeCelebration()">
   <canvas id="confetti-canvas"></canvas>
-  <div class="celebrate-card" id="celebrate-card">
+  <div class="celebrate-card" id="celebrate-card" onclick="event.stopPropagation()">
     <div class="celebrate-logo">stack<span>d</span></div>
     <div class="celebrate-emoji">🎉</div>
     <div class="celebrate-headline" id="celebrate-headline">You hit $25K!</div>
     <div class="celebrate-sub">Net worth milestone unlocked</div>
     <div class="celebrate-amount" id="celebrate-amount"></div>
-    <div class="celebrate-actions">
-      <button class="celebrate-share" onclick="shareCard()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-        Share
-      </button>
-      <button class="celebrate-next" onclick="closeCelebration()">Keep going →</button>
-    </div>
+    <button class="celebrate-next" onclick="closeCelebration()">Keep going →</button>
   </div>
 </div>
 
@@ -1702,19 +1688,6 @@ function stopConfetti() {
   if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
   const ctx = document.getElementById('confetti-canvas').getContext('2d');
   ctx.clearRect(0, 0, 9999, 9999);
-}
-
-function shareCard() {
-  const card = document.getElementById('celebrate-card');
-  if (!card) return;
-  import('https://esm.sh/html2canvas@1.4.1').then(m => {
-    m.default(card, { backgroundColor: '#15171a', scale: 2 }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = 'stackd-milestone.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-  }).catch(() => showToast('sharing not supported in this browser'));
 }
 
 // ---- CHART ----
