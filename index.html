@@ -296,11 +296,11 @@
   .section-body.collapsed { max-height: 0 !important; }
 
   .welcome-banner {
-    display: flex; align-items: center; gap: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
     background: rgba(200,240,96,0.05); border: 1px solid rgba(200,240,96,0.15);
     border-radius: 14px; padding: 18px 20px; margin-bottom: 8px;
   }
-  .welcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; color: var(--accent); }
+  .welcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; color: var(--accent); margin-right: 4px; }
   .welcome-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
   .welcome-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
@@ -1605,7 +1605,6 @@ function showToast(msg) {
 
 function renderMilestones(netWorth) {
   const MILESTONES = [
-    { val: 1, label: 'First $1' },
     { val: 1000, label: '$1K' },
     { val: 5000, label: '$5K' },
     { val: 10000, label: '$10K' },
@@ -1617,8 +1616,15 @@ function renderMilestones(netWorth) {
     { val: 1000000, label: '$1M' },
   ];
 
+  // add "first positive net worth" milestone only if user has debt
+  const hasDebt = state.accounts.some(a => DEBT_TYPES.includes(a.type));
+  if (hasDebt) MILESTONES.unshift({ val: 1, label: 'positive net worth' });
+
   const bar = document.getElementById('milestone-bar');
   if (!bar) return;
+
+  // hide if no accounts or zero net worth
+  if (netWorth <= 0 || state.accounts.length === 0) { bar.style.display = 'none'; return; }
 
   const unlocked = MILESTONES.filter(m => netWorth >= m.val);
   const next = MILESTONES.find(m => netWorth < m.val);
@@ -1643,11 +1649,13 @@ function renderMilestones(netWorth) {
 }
 
 // ---- CELEBRATION ----
-const MILESTONE_VALUES = [1, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
+const MILESTONE_VALUES = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
 let confettiAnim = null;
 
 function checkMilestone(prevTotal, newTotal) {
-  const crossed = MILESTONE_VALUES.find(m => prevTotal < m && newTotal >= m);
+  const hasDebt = state.accounts.some(a => DEBT_TYPES.includes(a.type));
+  const values = hasDebt ? [1, ...MILESTONE_VALUES] : MILESTONE_VALUES;
+  const crossed = values.find(m => prevTotal < m && newTotal >= m);
   if (!crossed) return;
   const seenKey = 'stackd_milestone_' + crossed;
   if (localStorage.getItem(seenKey)) return;
@@ -1656,10 +1664,13 @@ function checkMilestone(prevTotal, newTotal) {
 }
 
 function showCelebration(milestone, netWorth) {
-  const label = milestone >= 1000000 ? `$${milestone/1000000}M`
+  const label = milestone === 1 ? 'positive net worth!'
+    : milestone >= 1000000 ? `$${milestone/1000000}M`
     : milestone >= 1000 ? `$${milestone/1000}K`
     : `$${milestone}`;
-  document.getElementById('celebrate-headline').textContent = `You hit ${label}!`;
+  document.getElementById('celebrate-headline').textContent = milestone === 1
+    ? `You're in the green! 🎉`
+    : `You hit ${label}!`;
   const el = document.getElementById('celebrate-overlay');
   el.style.display = 'flex';
   el.style.pointerEvents = 'all';
