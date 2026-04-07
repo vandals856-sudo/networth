@@ -128,6 +128,15 @@
   }
   .topbar-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; }
   .topbar-logo span { color: var(--accent); }
+  .privacy-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); padding: 6px; border-radius: 8px;
+    display: flex; align-items: center; transition: color 0.15s;
+  }
+  .privacy-btn:hover { color: var(--text); background: var(--bg3); }
+  .privacy-btn.active { color: var(--accent); }
+  .private-val { filter: blur(8px); user-select: none; transition: filter 0.2s; }
+
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-pill {
     display: flex; align-items: center; gap: 8px;
@@ -543,7 +552,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.32</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.34</div>
 </div>
 
 <!-- SETUP -->
@@ -560,6 +569,9 @@
   <div class="topbar">
     <div class="topbar-logo">stack<span>d</span></div>
     <div class="topbar-right">
+      <button class="privacy-btn" id="privacy-btn" onclick="togglePrivacy()" title="toggle balance visibility">
+        <svg id="privacy-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
       <div class="user-menu" id="user-menu" onclick="toggleUserMenu()">
         <div class="user-pill">
           <div class="user-avatar" id="user-avatar">EJ</div>
@@ -1371,6 +1383,8 @@ function render() {
 
   renderChart();
 
+  if (privacyOn) applyPrivacy();
+
   const histEl = document.getElementById('history');
   if (!state.history.length) {
     histEl.innerHTML = '<div class="empty-row">your net worth history will appear here as you update your accounts over time</div>';
@@ -1725,6 +1739,37 @@ function stopConfetti() {
   if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
   const ctx = document.getElementById('confetti-canvas').getContext('2d');
   ctx.clearRect(0, 0, 9999, 9999);
+}
+
+// ---- PRIVACY ----
+let privacyOn = false;
+const PRIVACY_SELECTORS = [
+  '#hero-total', '#hero-change', '#s-cash', '#s-investments',
+  '#s-property', '#s-debt', '#cat-total-assets', '#cat-total-debt',
+  '.acct-bal', '.acct-sub', '.hist-val', '.stat-tile-val',
+  '.section-total', '.breakdown-amt', '.milestone-next strong',
+  '.milestone-next', '#milestone-next'
+];
+
+function togglePrivacy() {
+  privacyOn = !privacyOn;
+  const btn = document.getElementById('privacy-btn');
+  btn.classList.toggle('active', privacyOn);
+  btn.innerHTML = privacyOn
+    ? `<svg id="privacy-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+    : `<svg id="privacy-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  applyPrivacy();
+}
+
+function applyPrivacy() {
+  PRIVACY_SELECTORS.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.classList.toggle('private-val', privacyOn);
+    });
+  });
+  // also blur chart canvas
+  const canvas = document.getElementById('nw-chart');
+  if (canvas) canvas.style.filter = privacyOn ? 'blur(8px)' : '';
 }
 
 // ---- PROFILE ----
