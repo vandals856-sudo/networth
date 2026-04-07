@@ -183,44 +183,6 @@
     position: fixed; inset: 0; z-index: 500;
     background: rgba(0,0,0,0.85);
     display: flex; align-items: center; justify-content: center;
-    animation: fadein 0.3s ease;
-  }
-  @keyframes fadein { from { opacity:0; } to { opacity:1; } }
-  #confetti-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  #celebrate-card {
-    position: relative; z-index: 1;
-    background: var(--bg2); border: 1px solid rgba(200,240,96,0.3);
-    border-radius: 24px; padding: 2.5rem 2rem;
-    text-align: center; width: 300px; max-width: 90vw;
-    animation: popin 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-  }
-  @keyframes popin { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
-  .celebrate-emoji { font-size: 52px; margin-bottom: 12px; }
-  .celebrate-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 8px; }
-  .celebrate-amount { font-size: 48px; font-weight: 600; letter-spacing: -2px; color: var(--accent); font-family: var(--font-mono); line-height: 1; margin-bottom: 8px; }
-  .celebrate-date { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-  .celebrate-nw { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-  .celebrate-share {
-    width: 100%; padding: 12px; margin-bottom: 10px;
-    background: var(--accent); color: #111;
-    border: none; border-radius: 12px;
-    font-size: 15px; font-weight: 500;
-    font-family: var(--font-display); cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .celebrate-share:hover { opacity: 0.85; }
-  .celebrate-dismiss {
-    width: 100%; padding: 10px;
-    background: none; border: none; color: var(--muted);
-    font-size: 14px; font-family: var(--font-display); cursor: pointer;
-  }
-  .celebrate-dismiss:hover { color: var(--text); }
-
-  /* Celebration */
-  #celebrate-overlay {
-    position: fixed; inset: 0; z-index: 500;
-    background: rgba(0,0,0,0.85);
-    display: flex; align-items: center; justify-content: center;
     padding: 20px;
   }
   #confetti-canvas {
@@ -553,7 +515,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.4</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.5</div>
 </div>
 
 <!-- SETUP -->
@@ -716,20 +678,6 @@
       <div class="section-head"><span class="section-label">history</span></div>
       <div id="history"></div>
     </div>
-  </div>
-</div>
-
-<!-- CELEBRATION -->
-<div id="celebrate-overlay" style="display:none;">
-  <canvas id="confetti-canvas"></canvas>
-  <div id="celebrate-card">
-    <div class="celebrate-emoji">🎉</div>
-    <div class="celebrate-label">Milestone reached</div>
-    <div class="celebrate-amount" id="celebrate-amount">$100K</div>
-    <div class="celebrate-date" id="celebrate-date"></div>
-    <div class="celebrate-nw" id="celebrate-nw"></div>
-    <button class="celebrate-share" onclick="shareMilestone()">Share</button>
-    <button class="celebrate-dismiss" onclick="dismissCelebration()">Keep going →</button>
   </div>
 </div>
 
