@@ -184,6 +184,7 @@
     background: rgba(0,0,0,0.85);
     display: flex; align-items: center; justify-content: center;
     padding: 20px;
+    pointer-events: all;
   }
   #confetti-canvas {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -515,7 +516,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.6</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.7</div>
 </div>
 
 <!-- SETUP -->
@@ -682,7 +683,7 @@
 </div>
 
 <!-- CELEBRATION -->
-<div id="celebrate-overlay" style="display:none;" onclick="closeCelebration()">
+<div id="celebrate-overlay" style="display:none;pointer-events:none;" onclick="closeCelebration()">
   <canvas id="confetti-canvas"></canvas>
   <div class="celebrate-card" id="celebrate-card" onclick="event.stopPropagation()">
     <div class="celebrate-emoji">🎉</div>
@@ -1585,13 +1586,16 @@ function showCelebration(milestone, netWorth) {
     : milestone >= 1000 ? `$${milestone/1000}K`
     : `$${milestone}`;
   document.getElementById('celebrate-headline').textContent = `You hit ${label}!`;
-  document.getElementById('celebrate-amount').textContent = `Current net worth: ${fmt(netWorth)}`;
-  document.getElementById('celebrate-overlay').style.display = 'flex';
+  const el = document.getElementById('celebrate-overlay');
+  el.style.display = 'flex';
+  el.style.pointerEvents = 'all';
   startConfetti();
 }
 
 function closeCelebration() {
-  document.getElementById('celebrate-overlay').style.display = 'none';
+  const el = document.getElementById('celebrate-overlay');
+  el.style.display = 'none';
+  el.style.pointerEvents = 'none';
   stopConfetti();
 }
 
