@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Stackd - Net Worth Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0e0f11;
@@ -24,7 +24,7 @@
     --broker-color: #c8f060;
     --crypto-color: #f0a860;
     --font-display: 'Syne', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
+    --font-mono: 'Fira Code', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-display); }
@@ -71,7 +71,7 @@
     color: #111;
     border: none;
     border-radius: 100px;
-    font-family: var(--font-display);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
@@ -478,7 +478,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.8</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.0</div>
 </div>
 
 <!-- SETUP -->
@@ -527,8 +527,8 @@
       <div class="hero-total" id="hero-total">$0</div>
       <div class="hero-change" id="hero-change"></div>
       <div id="milestone-bar" style="display:none;margin-top:14px;">
-        <div class="milestone-next" id="milestone-next"></div>
         <div class="milestone-track"><div class="milestone-fill" id="milestone-fill"></div></div>
+        <div class="milestone-next" id="milestone-next" style="margin-top:6px;margin-bottom:0;"></div>
         <div class="milestone-unlocked" id="milestone-unlocked"></div>
       </div>
     </div>
@@ -592,7 +592,7 @@
     </div>
     <div class="cat-header">
       <div class="cat-header-left">
-        <span class="cat-title">assets</span>
+        <span class="cat-title">Assets</span>
         <span class="cat-total" id="cat-total-assets"></span>
       </div>
       <button class="add-link" onclick="openAddCategory('assets')">+ add</button>
@@ -630,7 +630,7 @@
 
     <div id="cat-header-debt" class="cat-header" style="margin-top:12px;">
       <div class="cat-header-left">
-        <span class="cat-title">debt</span>
+        <span class="cat-title">Debt</span>
         <span class="cat-total" id="cat-total-debt"></span>
       </div>
       <button class="add-link" onclick="openAddCategory('debt')">+ add</button>
@@ -1574,7 +1574,7 @@ function renderChart() {
   // y-axis labels
   const yLabels = [minV, minV + range * 0.5, maxV];
   ctx.fillStyle = 'rgba(122,125,130,0.7)';
-  ctx.font = `10px IBM Plex Mono, monospace`;
+  ctx.font = `10px Fira Code, monospace`;
   ctx.textAlign = 'right';
   yLabels.forEach(v => {
     const y = py(v);
@@ -1631,7 +1631,7 @@ function renderChart() {
 
   // x-axis labels
   ctx.fillStyle = 'rgba(122,125,130,0.8)';
-  ctx.font = `${10 * PR / PR}px IBM Plex Mono, monospace`;
+  ctx.font = `${10 * PR / PR}px Fira Code, monospace`;
   ctx.textAlign = 'center';
   const labelCount = Math.min(data.length, 5);
   for (let i = 0; i < labelCount; i++) {
@@ -1655,9 +1655,8 @@ function renderChart() {
     document.getElementById('tt-val').textContent = fmt(data[closest].total);
     document.getElementById('tt-date').textContent = new Date(data[closest].date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const ttW = 130;
-    const pointX = px(closest);
-    let tx = pointX + 12;
-    if (tx + ttW > W) tx = pointX - ttW - 12;
+    let tx = mx + 12;
+    if (tx + ttW > W) tx = mx - ttW - 12;
     tt.style.left = tx + 'px';
     tt.style.top = (py(data[closest].total) - 20) + 'px';
     tt.classList.add('show');
