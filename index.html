@@ -178,6 +178,89 @@
 
   .main { padding: 24px 20px 80px; max-width: 800px; margin: 0 auto; }
 
+  /* Celebration */
+  #celebrate-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    animation: fadein 0.3s ease;
+  }
+  @keyframes fadein { from { opacity:0; } to { opacity:1; } }
+  #confetti-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #celebrate-card {
+    position: relative; z-index: 1;
+    background: var(--bg2); border: 1px solid rgba(200,240,96,0.3);
+    border-radius: 24px; padding: 2.5rem 2rem;
+    text-align: center; width: 300px; max-width: 90vw;
+    animation: popin 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes popin { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .celebrate-emoji { font-size: 52px; margin-bottom: 12px; }
+  .celebrate-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 8px; }
+  .celebrate-amount { font-size: 48px; font-weight: 600; letter-spacing: -2px; color: var(--accent); font-family: var(--font-mono); line-height: 1; margin-bottom: 8px; }
+  .celebrate-date { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .celebrate-nw { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .celebrate-share {
+    width: 100%; padding: 12px; margin-bottom: 10px;
+    background: var(--accent); color: #111;
+    border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 500;
+    font-family: var(--font-display); cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .celebrate-share:hover { opacity: 0.85; }
+  .celebrate-dismiss {
+    width: 100%; padding: 10px;
+    background: none; border: none; color: var(--muted);
+    font-size: 14px; font-family: var(--font-display); cursor: pointer;
+  }
+  .celebrate-dismiss:hover { color: var(--text); }
+
+  /* Celebration */
+  #celebrate-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #confetti-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .celebrate-card {
+    background: var(--bg2); border: 1px solid rgba(200,240,96,0.3);
+    border-radius: 24px; padding: 2.5rem 2rem;
+    width: 100%; max-width: 340px;
+    text-align: center; position: relative; z-index: 1;
+    animation: celebrate-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes celebrate-in {
+    from { opacity: 0; transform: scale(0.8) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .celebrate-logo { font-size: 18px; font-weight: 600; letter-spacing: -1px; color: var(--muted); margin-bottom: 1.5rem; }
+  .celebrate-logo span { color: var(--accent); }
+  .celebrate-emoji { font-size: 48px; margin-bottom: 12px; line-height: 1; }
+  .celebrate-headline { font-size: 28px; font-weight: 600; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
+  .celebrate-sub { font-size: 14px; color: var(--muted); margin-bottom: 16px; }
+  .celebrate-amount { font-size: 13px; color: var(--accent); font-family: var(--font-mono); margin-bottom: 1.5rem; }
+  .celebrate-actions { display: flex; gap: 10px; }
+  .celebrate-share {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text); border-radius: 12px; padding: 12px;
+    font-size: 14px; font-family: var(--font-display); cursor: pointer;
+    transition: background 0.15s;
+  }
+  .celebrate-share:hover { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
+  .celebrate-next {
+    flex: 1.5; background: var(--accent); color: #111;
+    border: none; border-radius: 12px; padding: 12px;
+    font-size: 14px; font-weight: 500; font-family: var(--font-display); cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .celebrate-next:hover { opacity: 0.88; }
+
   /* Milestones */
   .milestone-next { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
   .milestone-next strong { color: var(--text); font-weight: 500; }
@@ -478,7 +561,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.1</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v2.3</div>
 </div>
 
 <!-- SETUP -->
@@ -644,7 +727,41 @@
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- CELEBRATION -->
+<div id="celebrate-overlay" style="display:none;">
+  <canvas id="confetti-canvas"></canvas>
+  <div id="celebrate-card">
+    <div class="celebrate-emoji">🎉</div>
+    <div class="celebrate-label">Milestone reached</div>
+    <div class="celebrate-amount" id="celebrate-amount">$100K</div>
+    <div class="celebrate-date" id="celebrate-date"></div>
+    <div class="celebrate-nw" id="celebrate-nw"></div>
+    <button class="celebrate-share" onclick="shareMilestone()">Share</button>
+    <button class="celebrate-dismiss" onclick="dismissCelebration()">Keep going →</button>
+  </div>
+</div>
+
+<!-- CELEBRATION -->
+<div id="celebrate-overlay" style="display:none;">
+  <canvas id="confetti-canvas"></canvas>
+  <div class="celebrate-card" id="celebrate-card">
+    <div class="celebrate-logo">stack<span>d</span></div>
+    <div class="celebrate-emoji">🎉</div>
+    <div class="celebrate-headline" id="celebrate-headline">You hit $25K!</div>
+    <div class="celebrate-sub">Net worth milestone unlocked</div>
+    <div class="celebrate-amount" id="celebrate-amount"></div>
+    <div class="celebrate-actions">
+      <button class="celebrate-share" onclick="shareCard()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        Share
+      </button>
+      <button class="celebrate-next" onclick="closeCelebration()">Keep going →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE CANVAS (offscreen) -->
+<canvas id="share-canvas" style="display:none;"></canvas>
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1395,6 +1512,7 @@ async function autoSnapshot() {
   const lastIdx = state.history.length - 1;
   const last = state.history[lastIdx];
   const lastIsToday = last && new Date(last.date).toDateString() === todayStr;
+  const prevTotal = last ? last.total : 0;
 
   if (lastIsToday) {
     if (Math.round(last.total) === Math.round(total)) return;
@@ -1402,6 +1520,7 @@ async function autoSnapshot() {
   } else {
     state.history.push({ date: Date.now(), total });
   }
+  checkMilestone(prevTotal, total);
   await saveHistoryToSheet();
   render();
 }
@@ -1498,7 +1617,11 @@ function renderMilestones(netWorth) {
     const prev = unlocked[unlocked.length - 1];
     const base = prev ? prev.val : 0;
     const pct = Math.min(100, ((netWorth - base) / (next.val - base)) * 100);
-    nextEl.innerHTML = `Next: <strong>${next.label}</strong> &nbsp;·&nbsp; ${pct.toFixed(0)}% there`;
+    const remaining = next.val - netWorth;
+    const remainingFmt = remaining >= 1000000 ? `$${(remaining/1000000).toFixed(1)}M`
+      : remaining >= 1000 ? `$${Math.round(remaining/1000)}K`
+      : `$${Math.round(remaining)}`;
+    nextEl.innerHTML = `<strong>${remainingFmt} away</strong> from your next milestone of ${next.label}`;
     fillEl.style.width = pct.toFixed(1) + '%';
   } else {
     nextEl.innerHTML = streak
@@ -1510,6 +1633,88 @@ function renderMilestones(netWorth) {
   unlockedEl.innerHTML = streak && next
     ? `<div class="milestone-badge">📈 3 months growth streak</div>`
     : '';
+}
+
+// ---- CELEBRATION ----
+const MILESTONE_VALUES = [1, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
+let confettiAnim = null;
+
+function checkMilestone(prevTotal, newTotal) {
+  const crossed = MILESTONE_VALUES.find(m => prevTotal < m && newTotal >= m);
+  if (!crossed) return;
+  const seenKey = 'stackd_milestone_' + crossed;
+  if (localStorage.getItem(seenKey)) return;
+  localStorage.setItem(seenKey, '1');
+  showCelebration(crossed, newTotal);
+}
+
+function showCelebration(milestone, netWorth) {
+  const label = milestone >= 1000000 ? `$${milestone/1000000}M`
+    : milestone >= 1000 ? `$${milestone/1000}K`
+    : `$${milestone}`;
+  document.getElementById('celebrate-headline').textContent = `You hit ${label}!`;
+  document.getElementById('celebrate-amount').textContent = `Current net worth: ${fmt(netWorth)}`;
+  document.getElementById('celebrate-overlay').style.display = 'flex';
+  startConfetti();
+}
+
+function closeCelebration() {
+  document.getElementById('celebrate-overlay').style.display = 'none';
+  stopConfetti();
+}
+
+function startConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 6 + 3,
+    d: Math.random() * 3 + 1,
+    color: ['#c8f060','#8ff0c0','#60b8f0','#f0a860','#f06090','#fff'][Math.floor(Math.random()*6)],
+    tilt: Math.random() * 10 - 5,
+    tiltSpeed: Math.random() * 0.1 + 0.05,
+    angle: Math.random() * Math.PI * 2,
+  }));
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.beginPath();
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r * 2);
+      ctx.restore();
+      p.y += p.d;
+      p.x += Math.sin(p.angle) * 1.5;
+      p.angle += p.tiltSpeed;
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+    });
+    confettiAnim = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function stopConfetti() {
+  if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
+  const ctx = document.getElementById('confetti-canvas').getContext('2d');
+  ctx.clearRect(0, 0, 9999, 9999);
+}
+
+function shareCard() {
+  const card = document.getElementById('celebrate-card');
+  if (!card) return;
+  import('https://esm.sh/html2canvas@1.4.1').then(m => {
+    m.default(card, { backgroundColor: '#15171a', scale: 2 }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'stackd-milestone.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }).catch(() => showToast('sharing not supported in this browser'));
 }
 
 // ---- CHART ----
