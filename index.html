@@ -215,11 +215,11 @@
   .section-body.collapsed { max-height: 0 !important; }
 
   .welcome-banner {
-    display: flex; align-items: flex-start; gap: 16px;
+    display: flex; align-items: center; gap: 16px;
     background: rgba(200,240,96,0.05); border: 1px solid rgba(200,240,96,0.15);
     border-radius: 14px; padding: 18px 20px; margin-bottom: 8px;
   }
-  .welcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+  .welcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; color: var(--accent); }
   .welcome-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
   .welcome-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
@@ -409,7 +409,22 @@
     position: relative;
   }
   .chart-canvas-wrap { position: relative; height: 180px; }
-  .chart-empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
+  .chart-empty {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .chart-placeholder {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .chart-empty-text {
+    position: relative; z-index: 1;
+    background: rgba(14,15,17,0.7);
+    padding: 12px 20px; border-radius: 10px;
+    backdrop-filter: blur(4px);
+  }
   .chart-tooltip {
     position: absolute; pointer-events: none;
     background: var(--bg3); border: 1px solid var(--border2);
@@ -447,7 +462,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.2</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.4</div>
 </div>
 
 <!-- SETUP -->
@@ -510,8 +525,20 @@
         <div class="chart-canvas-wrap">
           <canvas id="nw-chart"></canvas>
           <div class="chart-empty" id="chart-empty" style="display:none;">
-            <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;">Your growth chart will appear here</div>
-            <div style="font-size:13px;">Add your accounts below to start tracking</div>
+            <svg class="chart-placeholder" viewBox="0 0 600 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#c8f060" stop-opacity="0.12"/>
+                  <stop offset="100%" stop-color="#c8f060" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 140 C60 130 80 120 120 105 C160 90 180 95 220 80 C260 65 280 70 320 55 C360 40 380 48 420 35 C460 22 500 28 540 18 L600 10 L600 160 L0 160 Z" fill="url(#pg)"/>
+              <path d="M0 140 C60 130 80 120 120 105 C160 90 180 95 220 80 C260 65 280 70 320 55 C360 40 380 48 420 35 C460 22 500 28 540 18 L600 10" fill="none" stroke="#c8f060" stroke-width="2" stroke-opacity="0.2"/>
+            </svg>
+            <div class="chart-empty-text">
+              <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px;">Your growth chart will appear here</div>
+              <div style="font-size:13px;">Add your accounts below to start tracking</div>
+            </div>
           </div>
         </div>
         <div class="chart-tooltip" id="chart-tooltip">
@@ -535,11 +562,11 @@
 
     <div id="welcome-banner" style="display:none;">
       <div class="welcome-banner">
-        <div class="welcome-icon">↓</div>
         <div class="welcome-text">
           <div class="welcome-title">Start by adding your first account</div>
           <div class="welcome-sub">Add your cash, investments, property, or debt below. Your net worth updates automatically as you go.</div>
         </div>
+        <div class="welcome-icon">→</div>
       </div>
     </div>
     <div class="cat-header">
@@ -754,18 +781,13 @@ async function handleAuthCallback() {
   const token = hash.get('access_token');
   const expiresIn = hash.get('expires_in');
 
-  console.log('hash token found:', !!token);
-  console.log('saved token:', !!localStorage.getItem('stackd_token'));
-
   if (token) {
     const expiry = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
     localStorage.setItem('stackd_token', token);
     localStorage.setItem('stackd_token_expiry', expiry);
     window.history.replaceState({}, '', window.location.pathname);
     state.accessToken = token;
-    console.log('token saved, calling initApp...');
     const ok = await initApp();
-    console.log('initApp result:', ok);
     if (!ok) { localStorage.removeItem('stackd_token'); showAuth(); }
     return true;
   }
@@ -773,8 +795,6 @@ async function handleAuthCallback() {
   const saved = localStorage.getItem('stackd_token');
   const expiry = parseInt(localStorage.getItem('stackd_token_expiry') || '0');
   const isExpired = expiry && Date.now() > expiry - 60000;
-
-  console.log('saved token exists:', !!saved, 'isExpired:', isExpired);
 
   if (saved && !isExpired) {
     state.accessToken = saved;
