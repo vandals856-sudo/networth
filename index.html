@@ -2019,9 +2019,15 @@ function renderChart() {
   ctx.textAlign = 'right';
   yLabels.forEach(v => {
     const y = py(v);
-    const label = v >= 1000000 ? `$${(v/1000000).toFixed(1)}M`
-      : v >= 1000 ? `$${Math.round(v/1000)}K`
-      : `$${Math.round(v)}`;
+    let label;
+    if (v >= 1000000) {
+      label = `$${(v/1000000).toFixed(1)}M`;
+    } else if (v >= 1000) {
+      const k = v / 1000;
+      label = k % 1 === 0 ? `$${k}K` : `$${k.toFixed(1)}K`;
+    } else {
+      label = `$${Math.round(v)}`;
+    }
     ctx.fillText(label, PAD.left - 6, y + 3);
     // subtle grid line
     ctx.beginPath();
