@@ -1016,6 +1016,7 @@ async function initApp() {
   showApp();
   await fetchPrices();
   autoSnapshot();
+  maybeShowInsight(getNetWorth());
   maybePromptProfile();
   return true;
 }
@@ -1257,7 +1258,6 @@ function render() {
 
   document.getElementById('hero-total').textContent = fmt(netWorth);
   renderMilestones(netWorth);
-  maybeShowInsight(netWorth);
   document.getElementById('s-cash').textContent = fmt(totals.cash);
   document.getElementById('s-investments').textContent = fmt(totals.investments);
   document.getElementById('s-property').textContent = fmt(totals.property);
