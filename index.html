@@ -555,7 +555,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.38</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.39</div>
 </div>
 
 <!-- SETUP -->
@@ -792,6 +792,14 @@
       <div class="type-btn-row" id="category-btn-row"></div>
     </div>
 
+    <div class="field" id="invest-sub-row" style="display:none;">
+      <label>investment type</label>
+      <div class="type-btn-row">
+        <button class="type-btn active" data-sub="traditional" onclick="selectInvestSub('traditional',this)">Traditional</button>
+        <button class="type-btn" data-sub="crypto" onclick="selectInvestSub('crypto',this)">Crypto</button>
+      </div>
+    </div>
+
     <div class="field" id="f-type-picker">
       <label>type</label>
       <select id="f-type" onchange="onTypeChange()">
@@ -817,7 +825,7 @@
 
     <div class="field">
       <label>account name</label>
-      <input type="text" id="f-name" placeholder="e.g. Chase Checking" />
+      <input type="text" id="f-name" placeholder="Account name" />
     </div>
     <div class="field">
       <label id="f-val-label">balance ($)</label>
@@ -1497,13 +1505,22 @@ function render() {
 // ---- MODAL ----
 let addingGroup = null;
 
+const TYPE_DEFAULT_NAME = {
+  checking: 'Checking Account', savings: 'Savings Account', other_cash: 'Cash',
+  '401k': '401k', roth: 'Roth IRA', brokerage: 'Brokerage', other_invest: 'Investment Account',
+  btc: 'Bitcoin', eth: 'Ethereum', ada: 'Cardano',
+  property: 'Primary Home', vehicle: 'Vehicle', other_property: 'Property',
+  creditcard: 'Credit Card', mortgage: 'Mortgage', loan: 'Loan', other_debt: 'Debt',
+};
+
 function filterTypeOptions(group) {
   const sel = document.getElementById('f-type');
   const groupOptions = {
-    cash:        ['checking','savings','other_cash'],
-    investments: ['401k','roth','brokerage','btc','eth','ada','other_invest'],
-    property:    ['property','vehicle','other_property'],
-    debt:        ['creditcard','mortgage','loan','other_debt']
+    cash:               ['checking','savings','other_cash'],
+    investments:        ['401k','roth','brokerage','other_invest'],
+    investments_crypto: ['btc','eth','ada'],
+    property:           ['property','vehicle','other_property'],
+    debt:               ['creditcard','mortgage','loan','other_debt']
   };
   const allowed = groupOptions[group] || [];
   Array.from(sel.options).forEach(opt => {
@@ -1514,11 +1531,25 @@ function filterTypeOptions(group) {
   onTypeChange();
 }
 
+function selectInvestSub(sub, btn) {
+  document.querySelectorAll('#invest-sub-row .type-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  filterTypeOptions(sub === 'crypto' ? 'investments_crypto' : 'investments');
+}
+
 function selectCategory(group, btn) {
   addingGroup = group;
   document.querySelectorAll('#category-btn-row .type-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  filterTypeOptions(group);
+  const subRow = document.getElementById('invest-sub-row');
+  if (group === 'investments') {
+    subRow.style.display = 'flex';
+    const firstSubBtn = subRow.querySelector('[data-sub="traditional"]');
+    selectInvestSub('traditional', firstSubBtn);
+  } else {
+    subRow.style.display = 'none';
+    filterTypeOptions(group);
+  }
 }
 
 function openAddCategory(category) {
@@ -1528,6 +1559,8 @@ function openAddCategory(category) {
   document.getElementById('f-val').value = '';
   document.getElementById('f-note').value = '';
   document.getElementById('btn-delete').style.display = 'none';
+  const subRow = document.getElementById('invest-sub-row');
+  if (subRow) subRow.style.display = 'none';
 
   if (category === 'debt') {
     document.getElementById('f-category-picker').style.display = 'none';
@@ -1546,13 +1579,6 @@ function openAddCategory(category) {
 
   document.getElementById('overlay').classList.add('open');
   setTimeout(() => document.getElementById('f-name').focus(), 100);
-}
-
-function selectCategory(group, btn) {
-  addingGroup = group;
-  document.querySelectorAll('#category-btn-row .type-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  filterTypeOptions(group);
 }
 
 function openEdit(id) {
@@ -1578,6 +1604,13 @@ function onTypeChange() {
   document.getElementById('f-val-label').textContent = isCrypto ? 'amount of coins' : 'balance ($)';
   document.getElementById('f-val').placeholder = isCrypto ? '0.00000000' : '0.00';
   document.getElementById('f-hint').style.display = isCrypto ? 'block' : 'none';
+  // auto-fill name if adding new and name is empty or matches a known default
+  if (!editingId) {
+    const nameEl = document.getElementById('f-name');
+    const current = nameEl.value.trim();
+    const isDefault = current === '' || Object.values(TYPE_DEFAULT_NAME).includes(current);
+    if (isDefault && TYPE_DEFAULT_NAME[t]) nameEl.value = TYPE_DEFAULT_NAME[t];
+  }
 }
 
 async function saveAccount() {
