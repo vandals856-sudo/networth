@@ -265,6 +265,33 @@
   .coin-btn:hover { border-color: var(--border2); color: var(--text); }
   .coin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,0.07); }
 
+  .coin-combo { position: relative; }
+  .coin-combo input {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 10px; color: var(--text);
+    font-family: var(--font-display); font-size: 14px;
+    outline: none;
+  }
+  .coin-combo input:focus { border-color: var(--accent); }
+  .coin-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 10px; z-index: 100; max-height: 200px; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .coin-option {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; cursor: pointer; font-size: 13px;
+    transition: background 0.1s;
+  }
+  .coin-option:hover { background: var(--bg3); }
+  .coin-option:first-child { border-radius: 10px 10px 0 0; }
+  .coin-option:last-child { border-radius: 0 0 10px 10px; }
+  .coin-option-ticker { font-family: var(--font-mono); font-weight: 500; color: var(--text); }
+  .coin-option-name { color: var(--muted); font-size: 12px; }
+  .coin-option-badge { font-size: 10px; color: var(--accent); background: rgba(200,240,96,0.1); padding: 2px 6px; border-radius: 4px; }
+
   /* Milestones */
   .milestone-next { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
   .milestone-next strong { color: var(--text); font-weight: 500; }
@@ -582,7 +609,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.72</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.74</div>
 </div>
 
 <!-- SETUP -->
@@ -848,25 +875,12 @@
 
     <div class="field" id="f-coin-picker" style="display:none;">
       <label>coin</label>
-      <div class="coin-grid" id="coin-btn-row">
-        <button class="coin-btn active" data-coin="btc" onclick="selectCoin('btc',this)">BTC</button>
-        <button class="coin-btn" data-coin="eth" onclick="selectCoin('eth',this)">ETH</button>
-        <button class="coin-btn" data-coin="sol" onclick="selectCoin('sol',this)">SOL</button>
-        <button class="coin-btn" data-coin="xrp" onclick="selectCoin('xrp',this)">XRP</button>
-        <button class="coin-btn" data-coin="doge" onclick="selectCoin('doge',this)">DOGE</button>
-        <button class="coin-btn" data-coin="ada" onclick="selectCoin('ada',this)">ADA</button>
-        <button class="coin-btn" data-coin="avax" onclick="selectCoin('avax',this)">AVAX</button>
-        <button class="coin-btn" data-coin="link" onclick="selectCoin('link',this)">LINK</button>
-        <button class="coin-btn" data-coin="dot" onclick="selectCoin('dot',this)">DOT</button>
-        <button class="coin-btn" data-coin="matic" onclick="selectCoin('matic',this)">MATIC</button>
-        <button class="coin-btn" data-coin="other_crypto" onclick="selectCoin('other_crypto',this)">+ Other</button>
+      <div class="coin-combo" id="coin-combo">
+        <input type="text" id="coin-search" placeholder="Search or type ticker (e.g. BTC, SHIB...)"
+          autocomplete="off" oninput="filterCoins(this.value)" onfocus="openCoinDropdown()" />
+        <div class="coin-dropdown" id="coin-dropdown" style="display:none;"></div>
       </div>
-      <div id="f-custom-ticker" style="display:none;margin-top:10px;">
-        <input type="text" id="f-ticker" placeholder="Ticker symbol e.g. SHIB" maxlength="12"
-          style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font-mono);font-size:14px;text-transform:uppercase;"
-          oninput="this.value=this.value.toUpperCase();onTickerInput(this.value)" />
-        <div style="font-size:11px;color:var(--muted);margin-top:5px;">No live price — you'll update the balance manually.</div>
-      </div>
+      <div id="coin-selected-info" style="font-size:11px;color:var(--muted);margin-top:5px;display:none;"></div>
     </div>
 
     <div class="field">
@@ -1097,7 +1111,6 @@ async function initApp() {
   await fetchPrices();
   autoSnapshot();
   maybeShowInsight(getNetWorth());
-  maybePromptProfile();
   return true;
 }
 
@@ -1596,32 +1609,85 @@ function filterTypeOptions(group) {
   onTypeChange();
 }
 
-function selectCoin(coin, btn) {
-  document.querySelectorAll('#coin-btn-row .coin-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  document.getElementById('f-coin-picker').dataset.selected = coin;
-  const customTicker = document.getElementById('f-custom-ticker');
-  customTicker.style.display = coin === 'other_crypto' ? 'block' : 'none';
-  if (coin !== 'other_crypto') {
-    const nameEl = document.getElementById('f-name');
-    nameEl.value = '';
-    const placeholders = { btc:'e.g. My Bitcoin', eth:'e.g. My Ethereum', ada:'e.g. My Cardano', sol:'e.g. My Solana', xrp:'e.g. My XRP', doge:'e.g. My Dogecoin', avax:'e.g. My Avalanche', link:'e.g. My Chainlink', dot:'e.g. My Polkadot', matic:'e.g. My Polygon' };
-    nameEl.placeholder = placeholders[coin] || 'e.g. My Crypto';
-    document.getElementById('f-val-label').textContent = 'amount of coins';
-    document.getElementById('f-val').placeholder = '0.00000000';
-    document.getElementById('f-hint').style.display = 'block';
-  } else {
-    document.getElementById('f-name').value = '';
+const KNOWN_COINS = [
+  { ticker: 'btc',  name: 'Bitcoin',   live: true },
+  { ticker: 'eth',  name: 'Ethereum',  live: true },
+  { ticker: 'sol',  name: 'Solana',    live: true },
+  { ticker: 'xrp',  name: 'XRP',       live: true },
+  { ticker: 'doge', name: 'Dogecoin',  live: true },
+  { ticker: 'ada',  name: 'Cardano',   live: true },
+  { ticker: 'avax', name: 'Avalanche', live: true },
+  { ticker: 'link', name: 'Chainlink', live: true },
+  { ticker: 'dot',  name: 'Polkadot',  live: true },
+  { ticker: 'matic',name: 'Polygon',   live: true },
+];
+
+function openCoinDropdown() {
+  filterCoins('');
+  document.getElementById('coin-dropdown').style.display = 'block';
+}
+
+function filterCoins(query) {
+  const q = query.trim().toLowerCase();
+  const dropdown = document.getElementById('coin-dropdown');
+  const matches = KNOWN_COINS.filter(c =>
+    c.ticker.includes(q) || c.name.toLowerCase().includes(q)
+  );
+
+  let html = matches.map(c => `
+    <div class="coin-option" onclick="pickCoin('${c.ticker}','${c.name}',true)">
+      <span class="coin-option-ticker">${c.ticker.toUpperCase()}</span>
+      <span class="coin-option-name">${c.name}</span>
+      <span class="coin-option-badge">live price</span>
+    </div>`).join('');
+
+  // if typed something not in list, offer it as custom
+  if (q && !KNOWN_COINS.some(c => c.ticker === q)) {
+    html += `<div class="coin-option" onclick="pickCoin('${q.toUpperCase()}','${q.toUpperCase()}',false)">
+      <span class="coin-option-ticker">${q.toUpperCase()}</span>
+      <span class="coin-option-name">Custom ticker</span>
+      <span class="coin-option-badge" style="color:var(--muted);background:var(--bg3);">manual</span>
+    </div>`;
+  }
+
+  dropdown.innerHTML = html || `<div class="coin-option"><span class="coin-option-name">No matches — keep typing for custom</span></div>`;
+  dropdown.style.display = 'block';
+}
+
+function pickCoin(ticker, name, hasLivePrice) {
+  const lower = ticker.toLowerCase();
+  document.getElementById('f-coin-picker').dataset.selected = lower;
+  document.getElementById('coin-search').value = ticker.toUpperCase() + ' — ' + name;
+  document.getElementById('coin-dropdown').style.display = 'none';
+
+  const infoEl = document.getElementById('coin-selected-info');
+  if (!hasLivePrice) {
+    infoEl.textContent = 'No live price — balance will be updated manually.';
+    infoEl.style.display = 'block';
     document.getElementById('f-val-label').textContent = 'balance ($)';
     document.getElementById('f-val').placeholder = '0.00';
     document.getElementById('f-hint').style.display = 'none';
+  } else {
+    infoEl.style.display = 'none';
+    document.getElementById('f-val-label').textContent = 'amount of coins';
+    document.getElementById('f-val').placeholder = '0.00000000';
+    document.getElementById('f-hint').style.display = 'block';
   }
+
+  // update name placeholder
+  const nameEl = document.getElementById('f-name');
+  nameEl.value = '';
+  nameEl.placeholder = `e.g. My ${name}`;
 }
 
-function onTickerInput(val) {
-  const nameEl = document.getElementById('f-name');
-  if (val) nameEl.value = val;
-}
+// close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const combo = document.getElementById('coin-combo');
+  const dropdown = document.getElementById('coin-dropdown');
+  if (combo && dropdown && !combo.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
 
 function selectInvestSub(sub, btn) {
   document.querySelectorAll('#invest-sub-row .type-btn').forEach(b => b.classList.remove('active'));
@@ -1646,7 +1712,14 @@ function openAddCategory(category) {
   const subRow = document.getElementById('invest-sub-row');
   if (subRow) subRow.style.display = 'none';
   const coinPicker = document.getElementById('f-coin-picker');
-  if (coinPicker) coinPicker.style.display = 'none';
+  if (coinPicker) {
+    coinPicker.style.display = 'none';
+    coinPicker.dataset.selected = '';
+  }
+  const searchEl = document.getElementById('coin-search');
+  if (searchEl) searchEl.value = '';
+  const infoEl = document.getElementById('coin-selected-info');
+  if (infoEl) infoEl.style.display = 'none';
 
   if (category === 'debt') {
     document.getElementById('f-category-picker').style.display = 'none';
@@ -1696,8 +1769,16 @@ function onTypeChange() {
   if (isCryptoGroup) {
     document.getElementById('f-name').value = '';
     document.getElementById('f-name').placeholder = 'Account name';
-    const firstBtn = coinPicker.querySelector('[data-coin="btc"]');
-    selectCoin('btc', firstBtn);
+    // reset combobox
+    const searchEl = document.getElementById('coin-search');
+    if (searchEl) { searchEl.value = ''; }
+    const infoEl = document.getElementById('coin-selected-info');
+    if (infoEl) infoEl.style.display = 'none';
+    document.getElementById('f-coin-picker').dataset.selected = '';
+    // default val label
+    document.getElementById('f-val-label').textContent = 'amount of coins';
+    document.getElementById('f-val').placeholder = '0.00000000';
+    document.getElementById('f-hint').style.display = 'block';
   }
 
   document.getElementById('f-val-label').textContent = (isCryptoGroup || isCrypto) ? 'amount of coins' : 'balance ($)';
@@ -1720,14 +1801,9 @@ function onTypeChange() {
 
 async function saveAccount() {
   let type = document.getElementById('f-type').value;
-  // resolve crypto_group to selected coin or custom ticker
+  // resolve crypto_group to selected coin from combobox
   if (type === 'crypto_group') {
-    const selected = document.getElementById('f-coin-picker').dataset.selected || 'btc';
-    if (selected === 'other_crypto') {
-      type = document.getElementById('f-ticker').value.trim().toLowerCase() || 'crypto';
-    } else {
-      type = selected;
-    }
+    type = (document.getElementById('f-coin-picker').dataset.selected || '').toLowerCase() || 'crypto';
   }
   const name = document.getElementById('f-name').value.trim();
   const val = parseFloat(document.getElementById('f-val').value) || 0;
