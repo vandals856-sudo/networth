@@ -582,7 +582,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.70</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.71</div>
 </div>
 
 <!-- SETUP -->
@@ -2074,7 +2074,11 @@ function dismissWelcome() {
 function shouldShowWelcome() {
   if (localStorage.getItem('stackd_welcome_dismissed')) return false;
   const { hasAssets, hasDebt, hasAge } = getWelcomeProgress();
-  return !(hasAssets && hasDebt && hasAge);
+  if (hasAssets && hasDebt && hasAge) return false;
+  // hide if they have history older than 2 days — they know what they're doing
+  const oldEnough = state.history.some(h => (Date.now() - h.date) > 2 * 86400000);
+  if (oldEnough) return false;
+  return true;
 }
 
 // ---- AI INSIGHT ----
