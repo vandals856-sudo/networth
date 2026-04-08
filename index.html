@@ -483,14 +483,16 @@
   /* Chart */
   .chart-section { margin-bottom: 28px; }
   .chart-filters {
-    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+    display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap;
   }
   .cf {
     background: none; border: 1px solid var(--border);
     color: var(--muted); border-radius: 8px;
-    padding: 8px 14px; font-size: 13px; font-family: var(--font-display);
+    padding: 5px 11px; font-size: 12px; font-family: var(--font-display);
     cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
-    min-width: 44px; text-align: center;
+  }
+  @media(max-width:500px) {
+    .chart-filters { gap: 10px; }
   }
   .cf:hover { border-color: var(--border2); color: var(--text); }
   .cf.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 500; }
@@ -553,7 +555,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.35</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.38</div>
 </div>
 
 <!-- SETUP -->
@@ -1204,6 +1206,80 @@ function staleness(ts) {
 function renderGroup(group) {
   const el = document.getElementById('g-' + group);
   if (!el) return;
+
+  // investments: split into traditional and crypto subcategories
+  if (group === 'investments') {
+    const allInvest = state.accounts
+      .filter(a => TYPE_GROUP[a.type] === 'investments')
+      .sort((a, b) => getBal(b) - getBal(a));
+    const stEl = document.getElementById('st-investments');
+    if (stEl) stEl.textContent = allInvest.length ? fmt(allInvest.reduce((s,a)=>s+getBal(a),0)) : '';
+
+    if (!allInvest.length) {
+      el.innerHTML = '<div class="empty-row">nothing here yet - tap + add above</div>';
+      el.style.maxHeight = ''; el.style.overflow = ''; return;
+    }
+
+    const traditional = allInvest.filter(a => !CRYPTO_COINS.includes(a.type));
+    const crypto = allInvest.filter(a => CRYPTO_COINS.includes(a.type));
+
+    const makeRow = (acc) => {
+      const bal = getBal(acc);
+      const isCrypto = CRYPTO_COINS.includes(acc.type);
+      const iconContent = CRYPTO_ICONS[acc.type]
+        ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
+        : TYPE_ICONS[acc.type]
+          ? `<div class="acct-icon icon-invest">${TYPE_ICONS[acc.type]}</div>`
+          : `<div class="acct-icon icon-invest">${acc.name.charAt(0).toUpperCase()}</div>`;
+      const price = state.prices[acc.type];
+      const meta = isCrypto
+        ? `<span>${acc.amount} ${acc.type.toUpperCase()} · <span class="price-badge">Price: ${price ? '$' + price.toLocaleString() : '—'}</span></span>`
+        : (() => {
+            const s = staleness(acc.updatedAt);
+            if (!s) return TYPE_LABEL[acc.type];
+            if (s.tappable) return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span> <span class="stale-tap" onclick="markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</span>`;
+            return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
+          })();
+      return `<div class="acct-row">
+        <div class="acct-left">${iconContent}<div>
+          <div class="acct-name">${acc.name}</div>
+          <div class="acct-meta">${meta}</div>
+          ${acc.note ? `<div class="acct-note">${acc.note}</div>` : ''}
+        </div></div>
+        <div class="acct-right"><div>
+          <div class="acct-bal">${fmt(bal)}</div>
+        </div><button class="edit-ico" onclick="openEdit('${acc.id}')">✎</button></div>
+      </div>`;
+    };
+
+    let html = '';
+
+    if (traditional.length) {
+      html += traditional.map(makeRow).join('');
+    }
+
+    if (crypto.length) {
+      const cryptoTotal = crypto.reduce((s,a)=>s+getBal(a),0);
+      const groupId = 'invest-crypto';
+      const isCollapsed = collapsedSections.has(groupId);
+      html += `<div class="section" id="section-${groupId}" style="margin-bottom:0;margin-top:${traditional.length?'8px':'0'};">
+        <div class="section-head collapsible" onclick="toggleSection('${groupId}')">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-caret ${isCollapsed?'collapsed':''}" id="caret-${groupId}">▾</span>
+            <span class="section-label">crypto</span>
+          </div>
+          <span class="section-total">${fmt(cryptoTotal)}</span>
+        </div>
+        <div id="g-${groupId}" ${isCollapsed?'style="max-height:0;overflow:hidden;"':''}>${crypto.map(makeRow).join('')}</div>
+      </div>`;
+    }
+
+    el.innerHTML = html || '<div class="empty-row">nothing here yet - tap + add above</div>';
+    if (collapsedSections.has(group)) { el.style.maxHeight = '0'; el.style.overflow = 'hidden'; }
+    else { el.style.maxHeight = ''; el.style.overflow = ''; }
+    return;
+  }
+
   const accs = state.accounts
     .filter(a => TYPE_GROUP[a.type] === group)
     .sort((a, b) => getBal(b) - getBal(a));
