@@ -582,7 +582,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.71</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.72</div>
 </div>
 
 <!-- SETUP -->
@@ -2108,6 +2108,9 @@ function shouldShowInsight(netWorth) {
 async function maybeShowInsight(netWorth) {
   if (netWorth === 0 || state.history.length < 2) return;
 
+  // don't show insight while welcome card is visible
+  if (shouldShowWelcome()) return;
+
   const card = document.getElementById('insight-card');
   const textEl = document.getElementById('insight-text');
   const loadingEl = document.getElementById('insight-loading');
@@ -2267,7 +2270,7 @@ async function maybeShowInsight(netWorth) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: `You are a friendly financial coach inside a net worth tracker called Stackd. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} If their history is short or their balance recently jumped due to adding accounts, briefly acknowledge they're getting started and focus on something positive — do not dwell on or repeat concerns about data mismatches. Never use bullet points. Keep it warm, specific, and human.`,
         messages: [{ role: 'user', content: fullContext }]
@@ -2275,6 +2278,7 @@ async function maybeShowInsight(netWorth) {
     });
 
     const data = await response.json();
+    console.log('Insight response status:', response.status, 'data:', JSON.stringify(data).slice(0, 300));
 
     if (data.type === 'error' || !data.content?.[0]?.text) {
       showFallbackTip(textEl, loadingEl);
