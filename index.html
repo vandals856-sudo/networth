@@ -555,7 +555,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.39</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.42</div>
 </div>
 
 <!-- SETUP -->
@@ -792,35 +792,34 @@
       <div class="type-btn-row" id="category-btn-row"></div>
     </div>
 
-    <div class="field" id="invest-sub-row" style="display:none;">
-      <label>investment type</label>
-      <div class="type-btn-row">
-        <button class="type-btn active" data-sub="traditional" onclick="selectInvestSub('traditional',this)">Traditional</button>
-        <button class="type-btn" data-sub="crypto" onclick="selectInvestSub('crypto',this)">Crypto</button>
-      </div>
-    </div>
-
     <div class="field" id="f-type-picker">
       <label>type</label>
       <select id="f-type" onchange="onTypeChange()">
         <option value="checking">Checking</option>
         <option value="savings">Savings</option>
-        <option value="other_cash">Other</option>
+        <option value="other_cash">Other Cash</option>
         <option value="401k">401k</option>
         <option value="roth">Roth IRA</option>
         <option value="brokerage">Brokerage</option>
-        <option value="btc">Bitcoin (BTC)</option>
-        <option value="eth">Ethereum (ETH)</option>
-        <option value="ada">Cardano (ADA)</option>
-        <option value="other_invest">Other</option>
+        <option value="crypto_group">Crypto</option>
+        <option value="other_invest">Other Investment</option>
         <option value="property">Real Estate</option>
         <option value="vehicle">Vehicle</option>
-        <option value="other_property">Other</option>
+        <option value="other_property">Other Property</option>
         <option value="creditcard">Credit Card</option>
         <option value="mortgage">Mortgage</option>
         <option value="loan">Loan</option>
-        <option value="other_debt">Other</option>
+        <option value="other_debt">Other Debt</option>
       </select>
+    </div>
+
+    <div class="field" id="f-coin-picker" style="display:none;">
+      <label>coin</label>
+      <div class="type-btn-row" id="coin-btn-row">
+        <button class="type-btn active" data-coin="btc" onclick="selectCoin('btc',this)">₿ Bitcoin</button>
+        <button class="type-btn" data-coin="eth" onclick="selectCoin('eth',this)">Ξ Ethereum</button>
+        <button class="type-btn" data-coin="ada" onclick="selectCoin('ada',this)">₳ Cardano</button>
+      </div>
     </div>
 
     <div class="field">
@@ -1516,11 +1515,10 @@ const TYPE_DEFAULT_NAME = {
 function filterTypeOptions(group) {
   const sel = document.getElementById('f-type');
   const groupOptions = {
-    cash:               ['checking','savings','other_cash'],
-    investments:        ['401k','roth','brokerage','other_invest'],
-    investments_crypto: ['btc','eth','ada'],
-    property:           ['property','vehicle','other_property'],
-    debt:               ['creditcard','mortgage','loan','other_debt']
+    cash:        ['checking','savings','other_cash'],
+    investments: ['401k','roth','brokerage','crypto_group','other_invest'],
+    property:    ['property','vehicle','other_property'],
+    debt:        ['creditcard','mortgage','loan','other_debt']
   };
   const allowed = groupOptions[group] || [];
   Array.from(sel.options).forEach(opt => {
@@ -1529,6 +1527,18 @@ function filterTypeOptions(group) {
   const first = Array.from(sel.options).find(o => allowed.includes(o.value));
   if (first) sel.value = first.value;
   onTypeChange();
+}
+
+function selectCoin(coin, btn) {
+  document.querySelectorAll('#coin-btn-row .type-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // store selected coin in a data attr
+  document.getElementById('f-coin-picker').dataset.selected = coin;
+  // auto-fill name
+  const nameEl = document.getElementById('f-name');
+  const current = nameEl.value.trim();
+  const isDefault = current === '' || Object.values(TYPE_DEFAULT_NAME).includes(current);
+  if (isDefault) nameEl.value = TYPE_DEFAULT_NAME[coin] || coin.toUpperCase();
 }
 
 function selectInvestSub(sub, btn) {
@@ -1541,15 +1551,7 @@ function selectCategory(group, btn) {
   addingGroup = group;
   document.querySelectorAll('#category-btn-row .type-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const subRow = document.getElementById('invest-sub-row');
-  if (group === 'investments') {
-    subRow.style.display = 'flex';
-    const firstSubBtn = subRow.querySelector('[data-sub="traditional"]');
-    selectInvestSub('traditional', firstSubBtn);
-  } else {
-    subRow.style.display = 'none';
-    filterTypeOptions(group);
-  }
+  filterTypeOptions(group);
 }
 
 function openAddCategory(category) {
@@ -1561,6 +1563,8 @@ function openAddCategory(category) {
   document.getElementById('btn-delete').style.display = 'none';
   const subRow = document.getElementById('invest-sub-row');
   if (subRow) subRow.style.display = 'none';
+  const coinPicker = document.getElementById('f-coin-picker');
+  if (coinPicker) coinPicker.style.display = 'none';
 
   if (category === 'debt') {
     document.getElementById('f-category-picker').style.display = 'none';
@@ -1600,12 +1604,25 @@ function openEdit(id) {
 
 function onTypeChange() {
   const t = document.getElementById('f-type').value;
+  const isCryptoGroup = t === 'crypto_group';
   const isCrypto = CRYPTO_COINS.includes(t);
-  document.getElementById('f-val-label').textContent = isCrypto ? 'amount of coins' : 'balance ($)';
-  document.getElementById('f-val').placeholder = isCrypto ? '0.00000000' : '0.00';
-  document.getElementById('f-hint').style.display = isCrypto ? 'block' : 'none';
-  // auto-fill name if adding new and name is empty or matches a known default
-  if (!editingId) {
+  const coinPicker = document.getElementById('f-coin-picker');
+  if (!coinPicker) return;
+
+  // show coin picker only when crypto_group selected
+  coinPicker.style.display = isCryptoGroup ? 'block' : 'none';
+  if (isCryptoGroup) {
+    // default to btc
+    const firstBtn = coinPicker.querySelector('[data-coin="btc"]');
+    selectCoin('btc', firstBtn);
+  }
+
+  document.getElementById('f-val-label').textContent = (isCryptoGroup || isCrypto) ? 'amount of coins' : 'balance ($)';
+  document.getElementById('f-val').placeholder = (isCryptoGroup || isCrypto) ? '0.00000000' : '0.00';
+  document.getElementById('f-hint').style.display = (isCryptoGroup || isCrypto) ? 'block' : 'none';
+
+  // auto-fill name if adding new and not crypto (crypto handled by selectCoin)
+  if (!editingId && !isCryptoGroup) {
     const nameEl = document.getElementById('f-name');
     const current = nameEl.value.trim();
     const isDefault = current === '' || Object.values(TYPE_DEFAULT_NAME).includes(current);
@@ -1614,8 +1631,12 @@ function onTypeChange() {
 }
 
 async function saveAccount() {
+  let type = document.getElementById('f-type').value;
+  // resolve crypto_group to the selected coin
+  if (type === 'crypto_group') {
+    type = document.getElementById('f-coin-picker').dataset.selected || 'btc';
+  }
   const name = document.getElementById('f-name').value.trim();
-  const type = document.getElementById('f-type').value;
   const val = parseFloat(document.getElementById('f-val').value) || 0;
   const note = document.getElementById('f-note').value.trim();
   if (!name) { document.getElementById('f-name').focus(); return; }
@@ -2270,10 +2291,57 @@ function renderChart() {
   };
 }
 
-// ---- BOOT ----
+// ---- BOOT (PREVIEW MODE) ----
 (async () => {
-  const handled = await handleAuthCallback();
-  if (!handled) showAuth();
+  const now = Date.now();
+  const day = 86400000;
+
+  // clear cached state for preview
+  localStorage.removeItem('stackd_insight_dismissed');
+  localStorage.removeItem('stackd_insight_cache');
+  localStorage.removeItem('stackd_insight_nw');
+  localStorage.removeItem('stackd_age_skipped');
+  localStorage.removeItem('stackd_profile');
+
+  state.prices = { btc: 83000, eth: 1800, ada: 0.62 };
+
+  state.accounts = [
+    { id:'1', name:'Chase Checking', type:'checking', balance:4200, amount:0, updatedAt: now - day, note:'' },
+    { id:'2', name:'Ally Savings', type:'savings', balance:18500, amount:0, updatedAt: now - 3*day, note:'emergency fund' },
+    { id:'3', name:'Fidelity 401k', type:'401k', balance:94000, amount:0, updatedAt: now - 10*day, note:'' },
+    { id:'4', name:'Roth IRA', type:'roth', balance:31200, amount:0, updatedAt: now - 10*day, note:'' },
+    { id:'5', name:'Robinhood', type:'brokerage', balance:12800, amount:0, updatedAt: now - 20*day, note:'' },
+    { id:'6', name:'Bitcoin', type:'btc', balance:0, amount:0.45, note:'' },
+    { id:'7', name:'Ethereum', type:'eth', balance:0, amount:3.2, note:'' },
+    { id:'8', name:'Cardano', type:'ada', balance:0, amount:1800, note:'' },
+    { id:'9', name:'Primary Home', type:'property', balance:420000, amount:0, updatedAt: now - 30*day, note:'appraised 2024' },
+    { id:'10', name:'Tesla Model 3', type:'vehicle', balance:28000, amount:0, updatedAt: now - 60*day, note:'' },
+    { id:'11', name:'Chase Visa', type:'creditcard', balance:2400, amount:0, updatedAt: now - 2*day, note:'' },
+  ];
+
+  const base = 140000;
+  state.history = [
+    { date: now - 365*day, total: base * 0.72 },
+    { date: now - 300*day, total: base * 0.78 },
+    { date: now - 240*day, total: base * 0.81 },
+    { date: now - 180*day, total: base * 0.84 },
+    { date: now - 120*day, total: base * 0.91 },
+    { date: now - 90*day,  total: base * 0.89 },
+    { date: now - 60*day,  total: base * 0.94 },
+    { date: now - 30*day,  total: base * 0.97 },
+    { date: now - 7*day,   total: base * 0.99 },
+  ];
+
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-avatar').textContent = 'EJ';
+  document.getElementById('user-name').textContent = 'Edwin';
+  document.getElementById('dropdown-name').textContent = 'Edwin Rodriguez';
+  document.getElementById('dropdown-email').textContent = 'vandals856@gmail.com';
+
+  render();
+  autoSnapshot();
 })();
 
 setInterval(fetchPrices, 60000);
