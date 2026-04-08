@@ -582,7 +582,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.69</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.70</div>
 </div>
 
 <!-- SETUP -->
@@ -2067,12 +2067,12 @@ function renderWelcomeSteps() {
 }
 
 function dismissWelcome() {
-  sessionStorage.setItem('stackd_welcome_dismissed', '1');
+  localStorage.setItem('stackd_welcome_dismissed', '1');
   document.getElementById('welcome-banner').style.display = 'none';
 }
 
 function shouldShowWelcome() {
-  if (sessionStorage.getItem('stackd_welcome_dismissed')) return false;
+  if (localStorage.getItem('stackd_welcome_dismissed')) return false;
   const { hasAssets, hasDebt, hasAge } = getWelcomeProgress();
   return !(hasAssets && hasDebt && hasAge);
 }
