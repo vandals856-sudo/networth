@@ -252,6 +252,19 @@
   .insight-dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dot-pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
 
+  .coin-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  .coin-btn {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 4px; font-size: 12px;
+    font-family: var(--font-mono); color: var(--muted);
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .coin-btn:hover { border-color: var(--border2); color: var(--text); }
+  .coin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,0.07); }
+
   /* Milestones */
   .milestone-next { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
   .milestone-next strong { color: var(--text); font-weight: 500; }
@@ -304,12 +317,26 @@
   .section-body { overflow: hidden; transition: max-height 0.25s ease; }
   .section-body.collapsed { max-height: 0 !important; }
 
-  .welcome-banner {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    background: rgba(200,240,96,0.05); border: 1px solid rgba(200,240,96,0.15);
-    border-radius: 14px; padding: 18px 20px; margin-bottom: 8px;
+  .welcome-card {
+    background: var(--bg2); border: 1px solid rgba(200,240,96,0.2);
+    border-radius: 16px; padding: 20px; margin-bottom: 24px;
   }
-  .welcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; color: var(--accent); margin-right: 4px; }
+  .welcome-greeting { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .welcome-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .welcome-steps { display: flex; flex-direction: column; gap: 10px; }
+  .welcome-step { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .welcome-step strong { color: var(--text); }
+  .welcome-step-num {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(200,240,96,0.15); color: var(--accent);
+    font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .welcome-step.done .welcome-step-num {
+    background: var(--accent); color: #111;
+  }
+  .welcome-step.done > div:last-child { color: var(--muted); text-decoration: none; }
+  .welcome-step.done > div:last-child strong { color: var(--muted); }
   .welcome-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
   .welcome-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
@@ -555,7 +582,7 @@
     </svg>
     Continue with Google
   </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.42</div>
+  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.69</div>
 </div>
 
 <!-- SETUP -->
@@ -604,6 +631,17 @@
       open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl5hlc274hukml.apps.googleusercontent.com</code> at the top of the script with your actual client id from google cloud console. see <code>SETUP.md</code> for step-by-step instructions.
     </div>
 
+    <div id="welcome-banner" style="display:none;">
+      <div class="welcome-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+          <div class="welcome-greeting" id="welcome-greeting">Welcome! 👋</div>
+          <button class="insight-dismiss" onclick="dismissWelcome()" style="margin-top:2px;">✕</button>
+        </div>
+        <div class="welcome-sub">Complete these steps to get the most out of Stackd.</div>
+        <div class="welcome-steps" id="welcome-steps"></div>
+      </div>
+    </div>
+
     <div class="hero">
       <div class="hero-label">net worth</div>
       <div style="display:flex;align-items:center;gap:12px;">
@@ -623,13 +661,17 @@
     <div id="insight-card" style="display:none;">
       <div class="insight-wrap">
         <div class="insight-header">
-          <div class="insight-label">💡 Your weekly insight</div>
-          <button class="insight-dismiss" onclick="dismissInsight()">✕</button>
+          <div class="insight-label" id="insight-label">💡 Your weekly insight</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button id="insight-refresh-btn" class="insight-dismiss" onclick="refreshInsight()" title="get a new insight" style="font-size:11px;color:var(--muted);display:none;">↺</button>
+            <button class="insight-dismiss" onclick="dismissInsight()">✕</button>
+          </div>
         </div>
         <div class="insight-text" id="insight-text"></div>
         <div class="insight-loading" id="insight-loading" style="display:none;">
           <div class="insight-dots"><span></span><span></span><span></span></div>
         </div>
+        <div id="insight-meta" style="font-size:11px;color:var(--muted);margin-top:8px;"></div>
       </div>
     </div>
 
@@ -681,15 +723,6 @@
       <div id="stacked-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;"></div>
     </div>
 
-    <div id="welcome-banner" style="display:none;">
-      <div class="welcome-banner">
-        <div class="welcome-text">
-          <div class="welcome-title">Start by adding your first account</div>
-          <div class="welcome-sub">Add your cash, investments, property, or debt below. Your net worth updates automatically as you go.</div>
-        </div>
-        <div class="welcome-icon">↓</div>
-      </div>
-    </div>
     <div class="cat-header">
       <div class="cat-header-left">
         <span class="cat-title">Assets</span>
@@ -815,10 +848,24 @@
 
     <div class="field" id="f-coin-picker" style="display:none;">
       <label>coin</label>
-      <div class="type-btn-row" id="coin-btn-row">
-        <button class="type-btn active" data-coin="btc" onclick="selectCoin('btc',this)">₿ Bitcoin</button>
-        <button class="type-btn" data-coin="eth" onclick="selectCoin('eth',this)">Ξ Ethereum</button>
-        <button class="type-btn" data-coin="ada" onclick="selectCoin('ada',this)">₳ Cardano</button>
+      <div class="coin-grid" id="coin-btn-row">
+        <button class="coin-btn active" data-coin="btc" onclick="selectCoin('btc',this)">BTC</button>
+        <button class="coin-btn" data-coin="eth" onclick="selectCoin('eth',this)">ETH</button>
+        <button class="coin-btn" data-coin="sol" onclick="selectCoin('sol',this)">SOL</button>
+        <button class="coin-btn" data-coin="xrp" onclick="selectCoin('xrp',this)">XRP</button>
+        <button class="coin-btn" data-coin="doge" onclick="selectCoin('doge',this)">DOGE</button>
+        <button class="coin-btn" data-coin="ada" onclick="selectCoin('ada',this)">ADA</button>
+        <button class="coin-btn" data-coin="avax" onclick="selectCoin('avax',this)">AVAX</button>
+        <button class="coin-btn" data-coin="link" onclick="selectCoin('link',this)">LINK</button>
+        <button class="coin-btn" data-coin="dot" onclick="selectCoin('dot',this)">DOT</button>
+        <button class="coin-btn" data-coin="matic" onclick="selectCoin('matic',this)">MATIC</button>
+        <button class="coin-btn" data-coin="other_crypto" onclick="selectCoin('other_crypto',this)">+ Other</button>
+      </div>
+      <div id="f-custom-ticker" style="display:none;margin-top:10px;">
+        <input type="text" id="f-ticker" placeholder="Ticker symbol e.g. SHIB" maxlength="12"
+          style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font-mono);font-size:14px;text-transform:uppercase;"
+          oninput="this.value=this.value.toUpperCase();onTickerInput(this.value)" />
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;">No live price — you'll update the balance manually.</div>
       </div>
     </div>
 
@@ -855,6 +902,7 @@ const GOOGLE_CLIENT_ID = '888736831379-tnffoch56c3shfcu6erl5hlc274hukml.apps.goo
 const SCOPES = 'openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
 const SHEET_TITLE = 'Stackd - Net Worth Tracker';
 const DEMO_MODE = false;
+let PREVIEW_MODE = false; // set to true in preview boot
 
 const TYPE_GROUP = {
   checking:'cash', savings:'cash', other_cash:'cash',
@@ -870,7 +918,7 @@ const TYPE_LABEL = {
   property:'Real Estate', vehicle:'Vehicle', other_property:'Other',
   creditcard:'Credit Card', loan:'Loan', mortgage:'Mortgage', other_debt:'Other'
 };
-const CRYPTO_COINS = ['btc','eth','ada'];
+const CRYPTO_COINS = ['btc','eth','ada','sol','xrp','doge','avax','link','dot','matic'];
 const DEBT_TYPES = ['creditcard','loan','mortgage','other_debt'];
 
 const GROUP_TYPES = {
@@ -883,9 +931,16 @@ const ASSET_GROUPS = ['cash','investments','property'];
 const ICON_CLASS = { cash:'icon-cash', investments:'icon-invest', property:'icon-property', debt:'icon-debt' };
 const BAR_COLOR = { cash:'#60b8f0', investments:'#c8f060', property:'#8ff0c0', debt:'#f06060' };
 const CRYPTO_ICONS = {
-  btc: `<img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
-  eth: `<img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
-  ada: `<img src="https://assets.coingecko.com/coins/images/975/small/cardano.png" width="36" height="36" style="border-radius:50%;display:block;" />`
+  btc:  `<img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  eth:  `<img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  ada:  `<img src="https://assets.coingecko.com/coins/images/975/small/cardano.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  sol:  `<img src="https://assets.coingecko.com/coins/images/4128/small/solana.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  xrp:  `<img src="https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  doge: `<img src="https://assets.coingecko.com/coins/images/5/small/dogecoin.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  avax: `<img src="https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  link: `<img src="https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  dot:  `<img src="https://assets.coingecko.com/coins/images/12171/small/polkadot.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
+  matic:`<img src="https://assets.coingecko.com/coins/images/4713/small/matic-token-icon.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
 };
 
 const REFRESH_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-bottom:1px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`;
@@ -909,7 +964,8 @@ let state = {
   sheetId: null,
   accounts: [],
   history: [],
-  prices: { btc:0, eth:0, ada:0 }
+  events: [], // { date, type:'milestone'|'account_added'|'account_removed', label }
+  prices: { btc:0, eth:0, ada:0, sol:0, xrp:0, doge:0, avax:0, link:0, dot:0, matic:0 }
 };
 let editingId = null;
 
@@ -1180,14 +1236,19 @@ async function saveHistoryToSheet() {
 // ---- PRICES ----
 async function fetchPrices() {
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano&vs_currencies=usd');
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana,ripple,dogecoin,avalanche-2,chainlink,polkadot,matic-network&vs_currencies=usd');
     const d = await r.json();
-    state.prices.btc = d.bitcoin?.usd || 0;
-    state.prices.eth = d.ethereum?.usd || 0;
-    state.prices.ada = d.cardano?.usd || 0;
-  } catch(e) {
-    ['p-btc','p-eth','p-ada'].forEach(id => document.getElementById(id).textContent = 'offline');
-  }
+    state.prices.btc   = d.bitcoin?.usd || 0;
+    state.prices.eth   = d.ethereum?.usd || 0;
+    state.prices.ada   = d.cardano?.usd || 0;
+    state.prices.sol   = d.solana?.usd || 0;
+    state.prices.xrp   = d.ripple?.usd || 0;
+    state.prices.doge  = d.dogecoin?.usd || 0;
+    state.prices.avax  = d['avalanche-2']?.usd || 0;
+    state.prices.link  = d.chainlink?.usd || 0;
+    state.prices.dot   = d.polkadot?.usd || 0;
+    state.prices.matic = d['matic-network']?.usd || 0;
+  } catch(e) { console.error('price fetch error', e); }
   render();
   autoSnapshot();
 }
@@ -1214,7 +1275,7 @@ function renderGroup(group) {
   const el = document.getElementById('g-' + group);
   if (!el) return;
 
-  // investments: split into traditional and crypto subcategories
+  // investments: all mixed together sorted by balance
   if (group === 'investments') {
     const allInvest = state.accounts
       .filter(a => TYPE_GROUP[a.type] === 'investments')
@@ -1227,10 +1288,7 @@ function renderGroup(group) {
       el.style.maxHeight = ''; el.style.overflow = ''; return;
     }
 
-    const traditional = allInvest.filter(a => !CRYPTO_COINS.includes(a.type));
-    const crypto = allInvest.filter(a => CRYPTO_COINS.includes(a.type));
-
-    const makeRow = (acc) => {
+    el.innerHTML = allInvest.map(acc => {
       const bal = getBal(acc);
       const isCrypto = CRYPTO_COINS.includes(acc.type);
       const iconContent = CRYPTO_ICONS[acc.type]
@@ -1257,31 +1315,8 @@ function renderGroup(group) {
           <div class="acct-bal">${fmt(bal)}</div>
         </div><button class="edit-ico" onclick="openEdit('${acc.id}')">✎</button></div>
       </div>`;
-    };
+    }).join('');
 
-    let html = '';
-
-    if (traditional.length) {
-      html += traditional.map(makeRow).join('');
-    }
-
-    if (crypto.length) {
-      const cryptoTotal = crypto.reduce((s,a)=>s+getBal(a),0);
-      const groupId = 'invest-crypto';
-      const isCollapsed = collapsedSections.has(groupId);
-      html += `<div class="section" id="section-${groupId}" style="margin-bottom:0;margin-top:${traditional.length?'8px':'0'};">
-        <div class="section-head collapsible" onclick="toggleSection('${groupId}')">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="section-caret ${isCollapsed?'collapsed':''}" id="caret-${groupId}">▾</span>
-            <span class="section-label">crypto</span>
-          </div>
-          <span class="section-total">${fmt(cryptoTotal)}</span>
-        </div>
-        <div id="g-${groupId}" ${isCollapsed?'style="max-height:0;overflow:hidden;"':''}>${crypto.map(makeRow).join('')}</div>
-      </div>`;
-    }
-
-    el.innerHTML = html || '<div class="empty-row">nothing here yet - tap + add above</div>';
     if (collapsedSections.has(group)) { el.style.maxHeight = '0'; el.style.overflow = 'hidden'; }
     else { el.style.maxHeight = ''; el.style.overflow = ''; }
     return;
@@ -1460,7 +1495,15 @@ function render() {
 
   // show welcome banner if no accounts
   const welcomeBanner = document.getElementById('welcome-banner');
-  if (welcomeBanner) welcomeBanner.style.display = state.accounts.length === 0 ? 'block' : 'none';
+  if (welcomeBanner) {
+    welcomeBanner.style.display = shouldShowWelcome() ? 'block' : 'none';
+    const greetingEl = document.getElementById('welcome-greeting');
+    if (greetingEl && state.user) {
+      const name = state.user.given_name || state.user.email.split('@')[0];
+      greetingEl.textContent = `Welcome, ${name}! 👋`;
+    }
+    renderWelcomeSteps();
+  }
 
   // show crypto refresh btn only if user has crypto
   const hasCrypto = state.accounts.some(a => CRYPTO_COINS.includes(a.type));
@@ -1472,29 +1515,52 @@ function render() {
   if (privacyOn) applyPrivacy();
 
   const histEl = document.getElementById('history');
-  if (!state.history.length) {
+
+  // merge history snapshots + events into one timeline
+  const snapshots = state.history.map(h => ({ date: h.date, type: 'snapshot', total: h.total }));
+  const allEvents = [...snapshots, ...state.events].sort((a,b) => b.date - a.date);
+
+  if (!allEvents.length) {
     histEl.innerHTML = '<div class="empty-row">your net worth history will appear here as you update your accounts over time</div>';
   } else {
-    const reversed = [...state.history].reverse();
     const showAll = histEl.dataset.expanded === 'true';
-    const visible = showAll ? reversed : reversed.slice(0, 3);
-    const moreCount = reversed.length - 3;
+    const visible = showAll ? allEvents : allEvents.slice(0, 5);
 
-    const rows = visible.map((h,i,arr) => {
-      const prev = arr[i+1];
-      let change = '';
-      if (prev) {
-        const d = h.total - prev.total;
-        change = `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</span>`;
+    const rows = visible.map((item, i, arr) => {
+      const dateStr = new Date(item.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+      if (item.type === 'snapshot') {
+        const prev = arr.slice(i+1).find(e => e.type === 'snapshot');
+        let change = '';
+        if (prev) {
+          const d = item.total - prev.total;
+          change = `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</span>`;
+        }
+        return `<div class="hist-row">
+          <span class="hist-date">${dateStr}</span>
+          <div class="hist-right">${change}<span class="hist-val">${fmt(item.total)}</span></div>
+        </div>`;
+      } else if (item.type === 'milestone') {
+        return `<div class="hist-row">
+          <span class="hist-date">${dateStr}</span>
+          <div class="hist-right"><span style="color:var(--accent);font-size:13px;">🎉 ${item.label}</span></div>
+        </div>`;
+      } else if (item.type === 'account_added') {
+        return `<div class="hist-row">
+          <span class="hist-date">${dateStr}</span>
+          <div class="hist-right"><span style="color:var(--muted);font-size:13px;">+ ${item.label}</span></div>
+        </div>`;
+      } else if (item.type === 'account_removed') {
+        return `<div class="hist-row">
+          <span class="hist-date">${dateStr}</span>
+          <div class="hist-right"><span style="color:var(--muted);font-size:13px;">− ${item.label}</span></div>
+        </div>`;
       }
-      return `<div class="hist-row">
-        <span class="hist-date">${new Date(h.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
-        <div class="hist-right">${change}<span class="hist-val">${fmt(h.total)}</span></div>
-      </div>`;
+      return '';
     }).join('');
 
-    const toggleBtn = reversed.length > 3
-      ? `<button class="hist-toggle" onclick="toggleHistory()">${showAll ? 'show less' : `see all ${reversed.length} snapshots`}</button>`
+    const moreCount = allEvents.length - 5;
+    const toggleBtn = allEvents.length > 5
+      ? `<button class="hist-toggle" onclick="toggleHistory()">${showAll ? 'show less' : `see all ${allEvents.length} entries`}</button>`
       : '';
 
     histEl.innerHTML = rows + toggleBtn;
@@ -1507,7 +1573,8 @@ let addingGroup = null;
 const TYPE_DEFAULT_NAME = {
   checking: 'Checking Account', savings: 'Savings Account', other_cash: 'Cash',
   '401k': '401k', roth: 'Roth IRA', brokerage: 'Brokerage', other_invest: 'Investment Account',
-  btc: 'Bitcoin', eth: 'Ethereum', ada: 'Cardano',
+  btc: 'Bitcoin', eth: 'Ethereum', ada: 'Cardano', sol: 'Solana', xrp: 'XRP',
+  doge: 'Dogecoin', avax: 'Avalanche', link: 'Chainlink', dot: 'Polkadot', matic: 'Polygon',
   property: 'Primary Home', vehicle: 'Vehicle', other_property: 'Property',
   creditcard: 'Credit Card', mortgage: 'Mortgage', loan: 'Loan', other_debt: 'Debt',
 };
@@ -1530,15 +1597,30 @@ function filterTypeOptions(group) {
 }
 
 function selectCoin(coin, btn) {
-  document.querySelectorAll('#coin-btn-row .type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#coin-btn-row .coin-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  // store selected coin in a data attr
   document.getElementById('f-coin-picker').dataset.selected = coin;
-  // auto-fill name
+  const customTicker = document.getElementById('f-custom-ticker');
+  customTicker.style.display = coin === 'other_crypto' ? 'block' : 'none';
+  if (coin !== 'other_crypto') {
+    const nameEl = document.getElementById('f-name');
+    nameEl.value = '';
+    const placeholders = { btc:'e.g. My Bitcoin', eth:'e.g. My Ethereum', ada:'e.g. My Cardano', sol:'e.g. My Solana', xrp:'e.g. My XRP', doge:'e.g. My Dogecoin', avax:'e.g. My Avalanche', link:'e.g. My Chainlink', dot:'e.g. My Polkadot', matic:'e.g. My Polygon' };
+    nameEl.placeholder = placeholders[coin] || 'e.g. My Crypto';
+    document.getElementById('f-val-label').textContent = 'amount of coins';
+    document.getElementById('f-val').placeholder = '0.00000000';
+    document.getElementById('f-hint').style.display = 'block';
+  } else {
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-val-label').textContent = 'balance ($)';
+    document.getElementById('f-val').placeholder = '0.00';
+    document.getElementById('f-hint').style.display = 'none';
+  }
+}
+
+function onTickerInput(val) {
   const nameEl = document.getElementById('f-name');
-  const current = nameEl.value.trim();
-  const isDefault = current === '' || Object.values(TYPE_DEFAULT_NAME).includes(current);
-  if (isDefault) nameEl.value = TYPE_DEFAULT_NAME[coin] || coin.toUpperCase();
+  if (val) nameEl.value = val;
 }
 
 function selectInvestSub(sub, btn) {
@@ -1612,7 +1694,8 @@ function onTypeChange() {
   // show coin picker only when crypto_group selected
   coinPicker.style.display = isCryptoGroup ? 'block' : 'none';
   if (isCryptoGroup) {
-    // default to btc
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-name').placeholder = 'Account name';
     const firstBtn = coinPicker.querySelector('[data-coin="btc"]');
     selectCoin('btc', firstBtn);
   }
@@ -1621,20 +1704,30 @@ function onTypeChange() {
   document.getElementById('f-val').placeholder = (isCryptoGroup || isCrypto) ? '0.00000000' : '0.00';
   document.getElementById('f-hint').style.display = (isCryptoGroup || isCrypto) ? 'block' : 'none';
 
-  // auto-fill name if adding new and not crypto (crypto handled by selectCoin)
-  if (!editingId && !isCryptoGroup) {
+  // set placeholder based on type instead of auto-filling
+  if (!editingId) {
     const nameEl = document.getElementById('f-name');
-    const current = nameEl.value.trim();
-    const isDefault = current === '' || Object.values(TYPE_DEFAULT_NAME).includes(current);
-    if (isDefault && TYPE_DEFAULT_NAME[t]) nameEl.value = TYPE_DEFAULT_NAME[t];
+    nameEl.value = '';
+    const placeholders = {
+      checking:'e.g. Chase Checking', savings:'e.g. Ally Savings', other_cash:'e.g. Cash on Hand',
+      '401k':'e.g. Fidelity 401k', roth:'e.g. Roth IRA', brokerage:'e.g. Robinhood', other_invest:'e.g. Investment Account',
+      property:'e.g. Primary Home', vehicle:'e.g. Tesla Model 3', other_property:'e.g. Rental Property',
+      creditcard:'e.g. Chase Visa', mortgage:'e.g. Home Mortgage', loan:'e.g. Car Loan', other_debt:'e.g. Personal Loan',
+    };
+    nameEl.placeholder = placeholders[t] || 'Account name';
   }
 }
 
 async function saveAccount() {
   let type = document.getElementById('f-type').value;
-  // resolve crypto_group to the selected coin
+  // resolve crypto_group to selected coin or custom ticker
   if (type === 'crypto_group') {
-    type = document.getElementById('f-coin-picker').dataset.selected || 'btc';
+    const selected = document.getElementById('f-coin-picker').dataset.selected || 'btc';
+    if (selected === 'other_crypto') {
+      type = document.getElementById('f-ticker').value.trim().toLowerCase() || 'crypto';
+    } else {
+      type = selected;
+    }
   }
   const name = document.getElementById('f-name').value.trim();
   const val = parseFloat(document.getElementById('f-val').value) || 0;
@@ -1651,6 +1744,7 @@ async function saveAccount() {
     if (isCrypto) { acc.amount = val; acc.balance = 0; }
     else { acc.balance = val; acc.amount = 0; acc.updatedAt = Date.now(); }
     state.accounts.push(acc);
+    state.events.push({ date: Date.now(), type: 'account_added', label: `${name} added` });
   }
   closeModal();
   render();
@@ -1659,6 +1753,8 @@ async function saveAccount() {
 }
 
 async function deleteAccount() {
+  const acc = state.accounts.find(a => a.id === editingId);
+  if (acc) state.events.push({ date: Date.now(), type: 'account_removed', label: `${acc.name} removed` });
   state.accounts = state.accounts.filter(a=>a.id!==editingId);
   closeModal();
   render();
@@ -1809,6 +1905,10 @@ function checkMilestone(prevTotal, newTotal) {
   const seenKey = 'stackd_milestone_' + crossed;
   if (localStorage.getItem(seenKey)) return;
   localStorage.setItem(seenKey, '1');
+  const label = crossed === 1 ? 'Positive net worth!' :
+    crossed >= 1000000 ? `Hit $${crossed/1000000}M` :
+    crossed >= 1000 ? `Hit $${crossed/1000}K` : `Hit $${crossed}`;
+  state.events.push({ date: Date.now(), type: 'milestone', label });
   showCelebration(crossed, newTotal);
 }
 
@@ -1932,13 +2032,49 @@ function saveProfile() {
   localStorage.removeItem('stackd_insight_dismissed');
   closeProfile();
   showToast('profile saved');
-  // refresh insight immediately with new age context
+  // clear dismiss so insight shows and stays visible
+  localStorage.removeItem(INSIGHT_DISMISS_KEY);
+  localStorage.removeItem(INSIGHT_CACHE_KEY);
+  localStorage.removeItem(INSIGHT_NW_KEY);
+  render();
+  // force a fresh insight with new age context
   document.getElementById('insight-card').style.display = 'none';
-  maybeShowInsight(getNetWorth());
+  forceShowInsight(getNetWorth());
 }
 
-function maybePromptProfile() {
-  // handled through insight card instead
+function getWelcomeProgress() {
+  const hasAssets = state.accounts.some(a => !DEBT_TYPES.includes(a.type));
+  const hasDebt = state.accounts.some(a => DEBT_TYPES.includes(a.type));
+  const hasAge = !!getProfile().age;
+  return { hasAssets, hasDebt, hasAge };
+}
+
+function renderWelcomeSteps() {
+  const stepsEl = document.getElementById('welcome-steps');
+  if (!stepsEl) return;
+  const { hasAssets, hasDebt, hasAge } = getWelcomeProgress();
+  const check = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const steps = [
+    { done: hasAssets, num: '1', label: `Add your <strong>assets</strong> — cash, investments, property, even crypto.`, action: `<span style="color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="openAddCategory('assets')">Add assets →</span>` },
+    { done: hasDebt,   num: '2', label: `Add any <strong>debt</strong> — credit cards, loans, mortgage.`,             action: `<span style="color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="openAddCategory('debt')">Add debt →</span>` },
+    { done: hasAge,    num: '3', label: `Set your <strong>age range</strong> to see how you compare to others.`,      action: `<span style="color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="openProfile()">Set it now →</span>` },
+  ];
+  stepsEl.innerHTML = steps.map(s => `
+    <div class="welcome-step ${s.done ? 'done' : ''}">
+      <div class="welcome-step-num">${s.done ? check : s.num}</div>
+      <div>${s.label}${!s.done ? ' ' + s.action : ''}</div>
+    </div>`).join('');
+}
+
+function dismissWelcome() {
+  sessionStorage.setItem('stackd_welcome_dismissed', '1');
+  document.getElementById('welcome-banner').style.display = 'none';
+}
+
+function shouldShowWelcome() {
+  if (sessionStorage.getItem('stackd_welcome_dismissed')) return false;
+  const { hasAssets, hasDebt, hasAge } = getWelcomeProgress();
+  return !(hasAssets && hasDebt && hasAge);
 }
 
 // ---- AI INSIGHT ----
@@ -1946,7 +2082,10 @@ const INSIGHT_DISMISS_KEY = 'stackd_insight_dismissed';
 const INSIGHT_CACHE_KEY = 'stackd_insight_cache';
 const INSIGHT_NW_KEY = 'stackd_insight_nw';
 
+let _forceInsight = false;
+
 function shouldShowInsight(netWorth) {
+  if (_forceInsight) return true;
   if (netWorth === 0) return false;
   if (state.history.length < 2) return false;
 
@@ -1954,7 +2093,6 @@ function shouldShowInsight(netWorth) {
   const cachedNW = parseFloat(localStorage.getItem(INSIGHT_NW_KEY) || '0');
   const pctChange = cachedNW > 0 ? Math.abs((netWorth - cachedNW) / cachedNW) : 1;
 
-  // show if: never dismissed, dismissed >7 days ago, or NW changed >5%
   if (dismissed) {
     const daysSince = (Date.now() - parseInt(dismissed)) / 86400000;
     if (daysSince < 7 && pctChange < 0.05) return false;
@@ -1973,6 +2111,8 @@ async function maybeShowInsight(netWorth) {
 
   // if no age set, show a gentle prompt instead
   if (!profile.age) {
+    // don't show age prompt if welcome card is already visible (it has the age step)
+    if (shouldShowWelcome()) return;
     const skipped = localStorage.getItem('stackd_age_skipped');
     if (skipped) {
       // permanently skipped - fall through to AI insight without age context
@@ -1989,6 +2129,8 @@ async function maybeShowInsight(netWorth) {
       textEl.style.display = 'block';
       loadingEl.style.display = 'none';
       card.style.display = 'block';
+      const labelEl = document.getElementById('insight-label');
+      if (labelEl) labelEl.textContent = '👋 Personalize your insights';
       return;
     }
   }
@@ -2005,6 +2147,12 @@ async function maybeShowInsight(netWorth) {
     textEl.style.display = 'block';
     loadingEl.style.display = 'none';
     card.style.display = 'block';
+    const dismissed = localStorage.getItem(INSIGHT_DISMISS_KEY);
+    const metaEl = document.getElementById('insight-meta');
+    if (metaEl && dismissed) {
+      const daysLeft = Math.max(0, 7 - Math.floor((Date.now() - parseInt(dismissed)) / 86400000));
+      metaEl.textContent = daysLeft > 0 ? `refreshes in ${daysLeft} day${daysLeft===1?'':'s'} · tap ↺ for a new one` : 'tap ↺ for a new insight';
+    }
     return;
   }
 
@@ -2084,25 +2232,51 @@ async function maybeShowInsight(netWorth) {
 
     const fullContext = [userMessage, ageContext, projectionContext].filter(Boolean).join(' ');
 
+    // rotate through angles, track last 2 used so Claude doesn't repeat
+    const ANGLES = ['PROJECTION', 'PEER_COMPARISON', 'TREND', 'COMPOSITION', 'CRYPTO_MARKET'];
+    const hasCryptoHoldings = state.accounts.some(a => CRYPTO_COINS.includes(a.type));
+    const eligibleAngles = hasCryptoHoldings ? ANGLES : ANGLES.filter(a => a !== 'CRYPTO_MARKET');
+    const angleIndex = parseInt(localStorage.getItem('stackd_insight_angle') || '0');
+    const angle = eligibleAngles[angleIndex % eligibleAngles.length];
+    localStorage.setItem('stackd_insight_angle', String(angleIndex + 1));
+
+    // track recently used angles to avoid nagging on same topic
+    const recentAngles = JSON.parse(localStorage.getItem('stackd_insight_recent') || '[]');
+    recentAngles.push(angle);
+    if (recentAngles.length > 2) recentAngles.shift();
+    localStorage.setItem('stackd_insight_recent', JSON.stringify(recentAngles));
+    const avoidTopics = recentAngles.slice(0, -1); // all except current
+
+    const angleInstructions = {
+      PROJECTION: `Focus on PROJECTION: mention when they might hit their next milestone at this pace. Frame it as an estimate. Be specific with the month/year. If there's no steady growth data, pick something encouraging instead.`,
+      PEER_COMPARISON: ageBracket ? `Focus on PEER COMPARISON: naturally mention how they compare to their age group median. Make it motivating not judgmental.` : `Focus on TREND: something encouraging in their recent history.`,
+      TREND: `Focus on TREND: something positive or notable in their recent history — consistent growth, a recovery, good momentum.`,
+      COMPOSITION: `Focus on COMPOSITION: something interesting about what's driving their net worth — which account is doing the heavy lifting, or what's working well.`,
+      CRYPTO_MARKET: `Focus on CRYPTO CONTEXT: crypto markets go through cycles — volatility is normal and long-term holders historically do well. Reference their specific crypto holdings. Keep it grounded and reassuring without giving financial advice. Use a relevant statistic if helpful (e.g. Bitcoin's historical recovery pattern). Stay positive and remind them that short-term swings are part of the ride.`,
+    };
+
+    const avoidNote = avoidTopics.length
+      ? `Do NOT mention or repeat topics from previous insights (already covered: ${avoidTopics.join(', ')}). Find a genuinely fresh angle.`
+      : '';
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
-        system: `You are a friendly financial coach inside a net worth tracker called Stackd. Pick ONE of the following angles — whichever feels most relevant and useful right now — and write 2-3 sentences max about it in warm, plain conversational language like a smart friend, not a financial advisor:
-
-1. PROJECTION: If there's steady growth data, mention when they might hit their next milestone at this pace. Always frame projections as estimates ("at this pace", "if things keep going"). Be specific with the month/year.
-2. PEER COMPARISON: If age data is provided, naturally mention how they compare to their age group median. Make it feel motivating not judgmental.
-3. TREND: Something notable in their recent history — a consistent climb, a dip and recovery, debt growing vs shrinking.
-4. COMPOSITION: Something interesting about what's driving their net worth — is one account doing the heavy lifting? Is debt eating into gains?
-
-Rules: Never use all angles at once. Never give generic advice. Never use bullet points. If history is short or there's a big jump from adding accounts, acknowledge they're just getting started. Keep it warm, specific, and human.`,
+        system: `You are a friendly financial coach inside a net worth tracker called Stackd. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} If their history is short or their balance recently jumped due to adding accounts, briefly acknowledge they're getting started and focus on something positive — do not dwell on or repeat concerns about data mismatches. Never use bullet points. Keep it warm, specific, and human.`,
         messages: [{ role: 'user', content: fullContext }]
       })
     });
 
     const data = await response.json();
+
+    if (data.type === 'error' || !data.content?.[0]?.text) {
+      showFallbackTip(textEl, loadingEl);
+      return;
+    }
+
     const insight = data.content?.[0]?.text || '';
 
     if (insight) {
@@ -2111,12 +2285,59 @@ Rules: Never use all angles at once. Never give generic advice. Never use bullet
       textEl.textContent = insight;
       textEl.style.display = 'block';
       loadingEl.style.display = 'none';
+      const labelEl = document.getElementById('insight-label');
+      if (labelEl) labelEl.textContent = '💡 Your weekly insight';
+      const metaEl = document.getElementById('insight-meta');
+      if (metaEl) metaEl.textContent = 'just updated · refreshes in 7 days or tap ↺ anytime';
     } else {
-      card.style.display = 'none';
+      showFallbackTip(textEl, loadingEl);
     }
   } catch(e) {
-    card.style.display = 'none';
+    showFallbackTip(textEl, loadingEl);
   }
+}
+
+const FALLBACK_TIPS = [
+  "Even small, consistent contributions to a retirement account can grow significantly over time thanks to compound interest.",
+  "Paying more than the minimum on credit cards each month can save you hundreds in interest over the year.",
+  "A good rule of thumb: try to keep your emergency fund at 3–6 months of expenses in an easily accessible account.",
+  "Automating your savings — even a small amount — means you pay yourself first before spending.",
+  "High-interest debt like credit cards typically costs more than most investments earn. Paying it down is often the best return you can get.",
+  "Diversifying across cash, investments, and property helps smooth out volatility in any one area.",
+  "Net worth is a long game. Consistent tracking keeps you honest and motivated — you're already ahead by doing this.",
+  "If your employer offers a 401k match, contributing at least enough to get the full match is essentially free money.",
+  "Crypto can be a small part of a diversified portfolio, but most advisors suggest keeping speculative assets to a manageable percentage.",
+  "Increasing income and reducing expenses both move net worth in the same direction — working both sides accelerates progress.",
+];
+
+function showFallbackTip(textEl, loadingEl) {
+  const tip = FALLBACK_TIPS[Math.floor(Math.random() * FALLBACK_TIPS.length)];
+  textEl.textContent = tip;
+  textEl.style.display = 'block';
+  loadingEl.style.display = 'none';
+  const labelEl = document.getElementById('insight-label');
+  if (labelEl) labelEl.textContent = '💡 Tip';
+  const metaEl = document.getElementById('insight-meta');
+  if (metaEl) metaEl.textContent = '';
+  // hide refresh button on fallback
+  const refreshBtn = document.getElementById('insight-refresh-btn');
+  if (refreshBtn) refreshBtn.style.display = 'none';
+}
+
+function refreshInsight() {
+  localStorage.removeItem(INSIGHT_CACHE_KEY);
+  localStorage.removeItem(INSIGHT_NW_KEY);
+  localStorage.removeItem(INSIGHT_DISMISS_KEY);
+  localStorage.removeItem('stackd_insight_recent');
+  document.getElementById('insight-card').style.display = 'none';
+  forceShowInsight(getNetWorth());
+}
+
+async function forceShowInsight(netWorth) {
+  _forceInsight = true;
+  await maybeShowInsight(netWorth);
+  // keep flag true so any re-renders don't hide the card
+  setTimeout(() => { _forceInsight = false; }, 100);
 }
 
 function dismissInsight() {
@@ -2154,7 +2375,7 @@ function renderChart() {
 
   if (data.length < 1) {
     canvas.style.display = 'none';
-    empty.style.display = 'block';
+    empty.style.display = 'flex';
     return;
   }
 
@@ -2291,57 +2512,10 @@ function renderChart() {
   };
 }
 
-// ---- BOOT (PREVIEW MODE) ----
+// ---- BOOT ----
 (async () => {
-  const now = Date.now();
-  const day = 86400000;
-
-  // clear cached state for preview
-  localStorage.removeItem('stackd_insight_dismissed');
-  localStorage.removeItem('stackd_insight_cache');
-  localStorage.removeItem('stackd_insight_nw');
-  localStorage.removeItem('stackd_age_skipped');
-  localStorage.removeItem('stackd_profile');
-
-  state.prices = { btc: 83000, eth: 1800, ada: 0.62 };
-
-  state.accounts = [
-    { id:'1', name:'Chase Checking', type:'checking', balance:4200, amount:0, updatedAt: now - day, note:'' },
-    { id:'2', name:'Ally Savings', type:'savings', balance:18500, amount:0, updatedAt: now - 3*day, note:'emergency fund' },
-    { id:'3', name:'Fidelity 401k', type:'401k', balance:94000, amount:0, updatedAt: now - 10*day, note:'' },
-    { id:'4', name:'Roth IRA', type:'roth', balance:31200, amount:0, updatedAt: now - 10*day, note:'' },
-    { id:'5', name:'Robinhood', type:'brokerage', balance:12800, amount:0, updatedAt: now - 20*day, note:'' },
-    { id:'6', name:'Bitcoin', type:'btc', balance:0, amount:0.45, note:'' },
-    { id:'7', name:'Ethereum', type:'eth', balance:0, amount:3.2, note:'' },
-    { id:'8', name:'Cardano', type:'ada', balance:0, amount:1800, note:'' },
-    { id:'9', name:'Primary Home', type:'property', balance:420000, amount:0, updatedAt: now - 30*day, note:'appraised 2024' },
-    { id:'10', name:'Tesla Model 3', type:'vehicle', balance:28000, amount:0, updatedAt: now - 60*day, note:'' },
-    { id:'11', name:'Chase Visa', type:'creditcard', balance:2400, amount:0, updatedAt: now - 2*day, note:'' },
-  ];
-
-  const base = 140000;
-  state.history = [
-    { date: now - 365*day, total: base * 0.72 },
-    { date: now - 300*day, total: base * 0.78 },
-    { date: now - 240*day, total: base * 0.81 },
-    { date: now - 180*day, total: base * 0.84 },
-    { date: now - 120*day, total: base * 0.91 },
-    { date: now - 90*day,  total: base * 0.89 },
-    { date: now - 60*day,  total: base * 0.94 },
-    { date: now - 30*day,  total: base * 0.97 },
-    { date: now - 7*day,   total: base * 0.99 },
-  ];
-
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-avatar').textContent = 'EJ';
-  document.getElementById('user-name').textContent = 'Edwin';
-  document.getElementById('dropdown-name').textContent = 'Edwin Rodriguez';
-  document.getElementById('dropdown-email').textContent = 'vandals856@gmail.com';
-
-  render();
-  autoSnapshot();
+  const handled = await handleAuthCallback();
+  if (!handled) showAuth();
 })();
 
 setInterval(fetchPrices, 60000);
