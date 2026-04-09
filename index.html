@@ -87,12 +87,12 @@
   }
   .auth-tagline {
     font-size: clamp(28px, 6vw, 48px); font-weight: 600;
-    color: var(--text); letter-spacing: -1.5px; line-height: 1.15;
+    color: #111827; letter-spacing: -1.5px; line-height: 1.15;
     margin-bottom: 12px; max-width: 560px;
   }
-  .auth-tagline span { color: var(--accent); }
+  .auth-tagline span { color: #22c47a; }
   .auth-sub-tagline {
-    font-size: clamp(15px, 2.5vw, 18px); color: var(--muted);
+    font-size: clamp(15px, 2.5vw, 18px); color: #8a94a6;
     font-weight: 400; margin-bottom: 36px; max-width: 400px;
   }
   .google-btn {
@@ -637,7 +637,8 @@
   .acct-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .acct-bal { font-size: 16px; font-weight: 500; font-family: var(--font-mono); text-align: right; }
   .acct-sub { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
-  .edit-ico { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 6px; border-radius: 8px; line-height: 1; }
+  .edit-ico { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 6px; border-radius: 8px; line-height: 1; opacity: 0; transition: opacity 0.15s; }
+  .acct-row:hover .edit-ico { opacity: 1; }
   .edit-ico:hover { background: var(--bg3); color: var(--text); }
   .empty-row { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; background: var(--bg2); border: 1px dashed var(--border); border-radius: 14px; }
   @media (max-width: 768px) {
@@ -1167,7 +1168,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.36
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.38
   </div>
 
 </div>
@@ -1940,7 +1941,7 @@ function renderGroup(group) {
             if (s.tappable) return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span> <span class="stale-tap" onclick="markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</span>`;
             return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
           })();
-      return `<div class="acct-row" onclick="openEdit('${acc.id}')">
+      return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
         <div class="acct-left">${iconContent}<div>
           <div class="acct-name">${acc.name}</div>
           <div class="acct-meta">${meta}</div>
@@ -1989,7 +1990,7 @@ function renderGroup(group) {
           return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
         })();
     const balColor = isDebt ? 'color:var(--danger)' : '';
-    return `<div class="acct-row" onclick="openEdit('${acc.id}')">
+    return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
       <div class="acct-left">
         ${iconContent}
         <div>
@@ -2060,7 +2061,7 @@ function render() {
     debtContainer.innerHTML = Object.entries(debtByType).map(([type, accs]) => {
       const sorted = [...accs].sort((a,b) => getBal(b)-getBal(a));
       const subtotal = sorted.reduce((s,a)=>s+getBal(a),0);
-      const rows = sorted.map(acc => `<div class="acct-row" onclick="openEdit('${acc.id}')">
+      const rows = sorted.map(acc => `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
         <div class="acct-left">
           <div class="acct-icon icon-debt">${TYPE_ICONS[acc.type] || acc.name.charAt(0).toUpperCase()}</div>
           <div>
