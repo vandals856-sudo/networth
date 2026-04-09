@@ -471,13 +471,6 @@
   .up { color: var(--accent); }
   .down { color: var(--danger); }
 
-  .price-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; font-family: var(--font-mono);
-    color: var(--muted);
-    margin-left: 4px;
-    vertical-align: middle;
-  }
   .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; display: inline-block; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
@@ -542,7 +535,7 @@
     margin-bottom: 8px; transition: border-color 0.15s;
   }
   .acct-row:hover { border-color: var(--border2); }
-  .acct-left { display: flex; align-items: center; gap: 12px; }
+  .acct-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
   .acct-icon {
     width: 38px; height: 38px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
@@ -554,16 +547,25 @@
   .icon-debt { background: rgba(217,96,96,0.12); color: var(--danger); }
   .acct-name { font-size: 15px; font-weight: 500; }
   .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .price-badge {
+    display: inline; font-size: 12px; font-family: var(--font-mono);
+    color: var(--muted); margin-left: 0;
+  }
   .stale-tap { cursor: pointer; color: var(--muted); opacity: 0.6; display: inline-flex; align-items: center; vertical-align: middle; }
   .stale-tap:hover { opacity: 1; color: var(--text); }
   .stale1 { color: var(--warn); }
   .stale2 { color: var(--danger); }
-  .acct-right { display: flex; align-items: center; gap: 12px; }
+  .acct-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .acct-bal { font-size: 16px; font-weight: 500; font-family: var(--font-mono); text-align: right; }
   .acct-sub { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
   .edit-ico { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 6px; border-radius: 8px; line-height: 1; }
   .edit-ico:hover { background: var(--bg3); color: var(--text); }
   .empty-row { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; background: var(--bg2); border: 1px dashed var(--border); border-radius: 14px; }
+  @media (hover: none) and (pointer: coarse) {
+    .edit-ico { display: none; }
+    .acct-row { cursor: pointer; }
+    .acct-row:active { background: var(--bg3); }
+  }
 
   /* Breakdown */
   .breakdown-item { margin-bottom: 14px; }
@@ -800,8 +802,8 @@
     <div class="auth-tagline">Your net worth. Your data.</div>
     <button class="google-btn" onclick="signIn()">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.97h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.94C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.107h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.104C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
       </svg>
@@ -953,7 +955,7 @@
     <button class="google-btn" onclick="signIn()" style="min-width:260px;">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.94C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.104C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
       </svg>
@@ -962,7 +964,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.9
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.10
   </div>
 
 </div>
@@ -1732,7 +1734,7 @@ function renderGroup(group) {
             if (s.tappable) return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span> <span class="stale-tap" onclick="markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</span>`;
             return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
           })();
-      return `<div class="acct-row">
+      return `<div class="acct-row" onclick="openEdit('${acc.id}')">
         <div class="acct-left">${iconContent}<div>
           <div class="acct-name">${acc.name}</div>
           <div class="acct-meta">${meta}</div>
@@ -1781,7 +1783,7 @@ function renderGroup(group) {
           return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
         })();
     const balColor = isDebt ? 'color:var(--danger)' : '';
-    return `<div class="acct-row">
+    return `<div class="acct-row" onclick="openEdit('${acc.id}')">
       <div class="acct-left">
         ${iconContent}
         <div>
@@ -1852,7 +1854,7 @@ function render() {
     debtContainer.innerHTML = Object.entries(debtByType).map(([type, accs]) => {
       const sorted = [...accs].sort((a,b) => getBal(b)-getBal(a));
       const subtotal = sorted.reduce((s,a)=>s+getBal(a),0);
-      const rows = sorted.map(acc => `<div class="acct-row">
+      const rows = sorted.map(acc => `<div class="acct-row" onclick="openEdit('${acc.id}')">
         <div class="acct-left">
           <div class="acct-icon icon-debt">${TYPE_ICONS[acc.type] || acc.name.charAt(0).toUpperCase()}</div>
           <div>
@@ -2664,10 +2666,14 @@ function startLongPress(idx, e, el) {
   _longPressTimer = setTimeout(() => {
     el.classList.remove('pressing');
     _ctxIdx = idx;
-    // show context menu near touch point
-    const touch = e.touches[0];
-    const fakeEvent = { preventDefault: ()=>{}, clientX: touch.clientX, clientY: touch.clientY };
-    showCtxMenu(fakeEvent, idx);
+    // on touch devices skip context menu and open modal directly
+    if (e.touches) {
+      openEditHistory(idx);
+    } else {
+      const touch = e.touches[0];
+      const fakeEvent = { preventDefault: ()=>{}, clientX: touch.clientX, clientY: touch.clientY };
+      showCtxMenu(fakeEvent, idx);
+    }
   }, 500);
 }
 
