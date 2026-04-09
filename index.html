@@ -1184,7 +1184,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.46
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.48
   </div>
 
 </div>
@@ -1193,8 +1193,8 @@
 <div id="setup-screen" style="display:none;">
   <div class="setup-card">
     <div class="setup-spinner"></div>
-    <h2 id="setup-msg">setting up your sheet...</h2>
-    <p id="setup-sub">creating your personal google sheet. this only happens once.</p>
+    <h2 id="setup-msg">Setting up your sheet...</h2>
+    <p id="setup-sub">Creating your personal Google Sheet. This only happens once.</p>
   </div>
 </div>
 
@@ -1234,7 +1234,7 @@
           <div class="dropdown-divider"></div>
           <div class="dropdown-item danger" onclick="signOut()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            sign out
+            Sign out
           </div>
         </div>
       </div>
@@ -1411,7 +1411,7 @@
 </div>
 
 <!-- MILESTONE HISTORY MODAL -->
-<div class="overlay" id="milestone-history-overlay" onclick="if(event.target===this)closeMilestoneHistory()" style="display:none;">
+<div class="overlay" id="milestone-history-overlay" onclick="overlayClickGeneric(event,closeMilestoneHistory)" style="display:none;">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>Milestones</h3>
@@ -1423,7 +1423,7 @@
 </div>
 
 <!-- EDIT HISTORY MODAL -->
-<div class="overlay" id="history-overlay" onclick="if(event.target===this)closeEditHistory()" style="display:none;">
+<div class="overlay" id="history-overlay" onclick="overlayClickGeneric(event,closeEditHistory)" style="display:none;">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>Edit snapshot</h3>
@@ -1444,7 +1444,7 @@
 </div>
 
 <!-- PROFILE MODAL -->
-<div class="overlay" id="profile-overlay" onclick="if(event.target===this)closeProfile()" style="display:none;">
+<div class="overlay" id="profile-overlay" onclick="overlayClickGeneric(event,closeProfile)" style="display:none;">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>Your profile</h3>
@@ -2481,7 +2481,20 @@ async function deleteAccount() {
 }
 
 function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; }
-function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+// ---- OVERLAY CLICK (prevents closing when selecting text) ----
+let _overlayMousedownTarget = null;
+document.addEventListener('mousedown', e => {
+  _overlayMousedownTarget = e.target;
+});
+
+function overlayClick(e) {
+  const overlay = document.getElementById('overlay');
+  if (e.target === overlay && _overlayMousedownTarget === overlay) closeModal();
+}
+
+function overlayClickGeneric(e, closeFn) {
+  if (e.target === e.currentTarget && _overlayMousedownTarget === e.currentTarget) closeFn();
+}
 
 function getNetWorth() {
   let assets = 0, debt = 0;
