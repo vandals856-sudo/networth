@@ -8,23 +8,51 @@
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0e0f11;
-    --bg2: #15171a;
-    --bg3: #1c1f23;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #f0f0ee;
-    --muted: #7a7d82;
-    --accent: #c8f060;
-    --accent2: #8ff0c0;
-    --warn: #f0c060;
-    --danger: #f06060;
-    --cash-color: #60b8f0;
-    --retire-color: #8ff0c0;
-    --broker-color: #c8f060;
-    --crypto-color: #f0a860;
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1e242d;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.11);
+    --text: #e8edf2;
+    --muted: #6e7a8a;
+    --accent: #3dd68c;
+    --accent2: #58c4dc;
+    --warn: #e8b84b;
+    --danger: #D96060;
+    --cash-color: #5BAF8E;
+    --retire-color: #5BAF8E;
+    --broker-color: #4A7FC1;
+    --crypto-color: #e8935a;
+    --property-color: #4AA8C0;
+    --overlay-bg: rgba(0,0,0,0.75);
+    --shadow: rgba(0,0,0,0.3);
+    --check-color: #0d1117;
+    --topbar-bg: rgba(13,17,23,0.88);
     --font-display: 'Plus Jakarta Sans', sans-serif;
     --font-mono: 'Fira Code', monospace;
+  }
+
+  [data-theme="light"] {
+    --bg: #f4f6f9;
+    --bg2: #ffffff;
+    --bg3: #eaecf2;
+    --border: rgba(0,0,0,0.06);
+    --border2: rgba(0,0,0,0.10);
+    --text: #111827;
+    --muted: #8a94a6;
+    --accent: #22c47a;
+    --accent2: #3ab5d4;
+    --warn: #e09a20;
+    --danger: #e05555;
+    --cash-color: #22b07d;
+    --retire-color: #22b07d;
+    --broker-color: #4a8fd4;
+    --crypto-color: #e07840;
+    --property-color: #3ab0c8;
+    --overlay-bg: rgba(0,0,0,0.4);
+    --shadow: rgba(0,0,0,0.10);
+    --check-color: #ffffff;
+    --topbar-bg: rgba(255,255,255,0.95);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-display); }
@@ -32,57 +60,189 @@
   /* ---- AUTH SCREEN ---- */
   #auth-screen {
     min-height: 100vh;
+    background: var(--bg2);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
   }
-  .auth-grid {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(200,240,96,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(200,240,96,0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
-    pointer-events: none;
+  .auth-topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .auth-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; color: var(--text); }
+  .auth-logo span { color: var(--accent); }
+
+  /* Hero */
+  .auth-hero {
+    flex: 0 0 auto;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 120px 2rem 80px;
+  }
+  .auth-eyebrow {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 24px;
   }
   .auth-wordmark {
-    font-size: 96px; font-weight: 600; letter-spacing: -6px;
-    line-height: 1; margin-bottom: 20px; position: relative;
+    font-size: clamp(64px, 14vw, 100px); font-weight: 600; letter-spacing: -5px;
+    line-height: 1; margin-bottom: 20px; color: var(--text);
   }
   .auth-wordmark span { color: var(--accent); }
-  .auth-headline {
-    font-size: clamp(16px, 4vw, 22px); color: var(--muted);
+  .auth-tagline {
+    font-size: clamp(18px, 3.5vw, 22px); color: var(--muted);
     font-weight: 400; margin-bottom: 48px;
-    letter-spacing: -0.3px; position: relative;
+    letter-spacing: -0.3px; max-width: 360px;
   }
-  .auth-headline em { color: var(--text); font-style: normal; }
   .google-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 28px;
-    background: var(--text);
-    color: #111;
-    border: none;
-    border-radius: 100px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 14px 32px;
+    background: var(--text); color: var(--check-color);
+    border: none; border-radius: 100px;
+    font-family: var(--font-display); font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
+    min-width: 260px;
   }
-  .google-btn:hover { opacity: 0.92; }
+  .google-btn:hover { opacity: 0.88; }
   .google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
   .auth-sub {
-    margin-top: 28px; font-size: 12px; color: var(--muted);
-    position: relative; letter-spacing: 0.02em;
+    margin-top: 16px; font-size: 12px; color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .auth-scroll-hint {
+    margin-top: 64px; display: flex; flex-direction: column;
+    align-items: center; gap: 6px; color: var(--muted); font-size: 12px;
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+
+  /* Value props */
+  .auth-props-section {
+    padding: 80px 2rem 100px;
+    max-width: 680px; margin: 0 auto;
+  }
+  .auth-props-eyebrow {
+    text-align: center; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 48px;
+  }
+  .auth-prop-row {
+    display: flex; flex-direction: column; gap: 40px;
+  }
+  .auth-prop {
+    display: flex; align-items: flex-start; gap: 20px;
+    text-align: left;
+  }
+  .auth-prop-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .auth-prop-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
+  .auth-prop-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  /* Divider */
+  .auth-divider {
+    width: 48px; height: 1px; background: var(--border2);
+    margin: 0 auto 80px;
+  }
+
+  /* Feature spotlight */
+  .auth-feature-section {
+    background: var(--bg3); padding: 80px 2rem;
+  }
+  .auth-feature-inner {
+    max-width: 680px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 48px;
+  }
+  @media(min-width: 600px) {
+    .auth-feature-inner { flex-direction: row; align-items: center; gap: 56px; }
+    .auth-feature-text { flex: 1; }
+    .auth-feature-mockup { flex: 1; }
+  }
+  .auth-feature-title {
+    font-size: clamp(22px, 4vw, 28px); font-weight: 600;
+    color: var(--text); letter-spacing: -0.5px; margin-bottom: 12px; line-height: 1.2;
+  }
+  .auth-feature-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .auth-feature-mockup {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .mock-milestone {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 8px; border-radius: 8px;
+  }
+  .mock-milestone.done { opacity: 1; }
+  .mock-milestone.next { opacity: 1; }
+  .mock-milestone.locked { opacity: 0.3; }
+  .mock-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .mock-check-empty {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px dashed var(--accent); flex-shrink: 0;
+  }
+  .mock-check-ring {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--border2); flex-shrink: 0;
+  }
+  .mock-milestone-text { flex: 1; min-width: 0; }
+  .mock-milestone-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .mock-milestone-label { font-size: 11px; color: var(--muted); }
+  .mock-milestone-date { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .mock-milestone-next-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .mock-progress-bar { width: 48px; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+  .mock-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+  .mock-milestone-pct { font-size: 11px; color: var(--accent); }
+
+  /* How it works */
+  .auth-steps-section {
+    padding: 80px 2rem; max-width: 680px; margin: 0 auto;
+    text-align: center;
+  }
+  .auth-steps {
+    display: flex; flex-direction: column; gap: 0;
+    align-items: center; margin-top: 48px;
+  }
+  @media(min-width: 600px) {
+    .auth-steps { flex-direction: row; align-items: flex-start; }
+  }
+  .auth-step { flex: 1; text-align: center; padding: 0 16px; }
+  .auth-step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: var(--text);
+    margin: 0 auto 14px;
+  }
+  .auth-step-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .auth-step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .auth-step-divider {
+    width: 1px; height: 32px; background: var(--border2);
+    margin: 16px auto;
+  }
+  @media(min-width: 600px) {
+    .auth-step-divider { width: 32px; height: 1px; margin: 18px 0; flex-shrink: 0; }
+  }
+
+  /* Bottom CTA */
+  .auth-bottom-cta {
+    background: var(--bg3); padding: 80px 2rem;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+
+  /* Footer */
+  .auth-footer {
+    padding: 24px 32px; text-align: center;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
   }
 
   /* ---- SETUP SCREEN ---- */
@@ -118,7 +278,7 @@
   #app-screen { display: none; min-height: 100vh; }
   .topbar {
     position: sticky; top: 0; z-index: 50;
-    background: rgba(14,15,17,0.85);
+    background: var(--topbar-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     padding: 14px 20px;
@@ -138,25 +298,21 @@
   .private-val { filter: blur(8px); user-select: none; transition: filter 0.2s; }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .user-pill {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 100px; padding: 6px 12px 6px 6px;
-    font-size: 13px; color: var(--muted);
-  }
   .user-menu { position: relative; cursor: pointer; }
   .user-pill {
     display: flex; align-items: center; gap: 8px;
     background: var(--bg3); border: 1px solid var(--border);
     border-radius: 100px; padding: 6px 12px 6px 6px;
     font-size: 13px; color: var(--muted);
-    user-select: none; transition: border-color 0.15s;
+    user-select: none; transition: background 0.15s, border-color 0.15s;
   }
-  .user-pill:hover { border-color: var(--border2); }
+  .user-pill:hover { border-color: var(--border2); background: var(--bg3); }
   .user-menu.open .user-pill { border-color: var(--border2); }
+  [data-theme="light"] .user-pill { background: #ffffff; }
+  [data-theme="light"] .user-pill:hover { background: var(--bg3); }
   .user-avatar {
     width: 24px; height: 24px; border-radius: 50%;
-    background: var(--accent); color: #111;
+    background: var(--accent); color: var(--check-color);
     font-size: 11px; font-weight: 600;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
@@ -190,7 +346,7 @@
   /* Celebration */
   #celebrate-overlay {
     position: fixed; inset: 0; z-index: 500;
-    background: rgba(0,0,0,0.85);
+    background: var(--overlay-bg);
     display: flex; align-items: center; justify-content: center;
     padding: 20px;
     pointer-events: all;
@@ -200,7 +356,7 @@
     pointer-events: none;
   }
   .celebrate-card {
-    background: var(--bg2); border: 1px solid rgba(200,240,96,0.3);
+    background: var(--bg2); border: 1px solid rgba(61,214,140,0.3);
     border-radius: 24px; padding: 2.5rem 2rem;
     width: 100%; max-width: 340px;
     text-align: center; position: relative; z-index: 1;
@@ -218,7 +374,7 @@
   .celebrate-amount { font-size: 15px; color: var(--text); font-family: var(--font-mono); font-weight: 500; margin-bottom: 1.5rem; }
   .celebrate-actions { display: flex; gap: 10px; }
   .celebrate-next {
-    width: 100%; background: var(--accent); color: #111;
+    width: 100%; background: var(--accent); color: var(--check-color);
     border: none; border-radius: 12px; padding: 14px;
     font-size: 15px; font-weight: 500; font-family: var(--font-display); cursor: pointer;
     transition: opacity 0.15s;
@@ -229,13 +385,12 @@
   .insight-wrap {
     background: var(--bg2); border: 1px solid var(--border2);
     border-radius: 14px; padding: 14px 16px; margin-bottom: 24px;
-    border-left: 3px solid var(--accent);
   }
   .insight-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .insight-label {
     display: flex; align-items: center; gap: 5px;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--accent); font-weight: 500;
+    font-size: 11px; letter-spacing: 0.03em;
+    color: var(--muted); font-weight: 500;
   }
   .insight-dismiss {
     background: none; border: none; color: var(--muted); cursor: pointer;
@@ -263,7 +418,7 @@
     cursor: pointer; transition: all 0.15s; text-align: center;
   }
   .coin-btn:hover { border-color: var(--border2); color: var(--text); }
-  .coin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,0.07); }
+  .coin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(61,214,140,0.07); }
 
   .coin-combo { position: relative; }
   .coin-combo input {
@@ -278,7 +433,7 @@
     position: absolute; top: calc(100% + 4px); left: 0; right: 0;
     background: var(--bg2); border: 1px solid var(--border2);
     border-radius: 10px; z-index: 100; max-height: 200px; overflow-y: auto;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 24px var(--shadow);
   }
   .coin-option {
     display: flex; align-items: center; justify-content: space-between;
@@ -290,7 +445,7 @@
   .coin-option:last-child { border-radius: 0 0 10px 10px; }
   .coin-option-ticker { font-family: var(--font-mono); font-weight: 500; color: var(--text); }
   .coin-option-name { color: var(--muted); font-size: 12px; }
-  .coin-option-badge { font-size: 10px; color: var(--accent); background: rgba(200,240,96,0.1); padding: 2px 6px; border-radius: 4px; }
+  .coin-option-badge { font-size: 10px; color: var(--accent); background: rgba(61,214,140,0.1); padding: 2px 6px; border-radius: 4px; }
 
   /* Milestones */
   .milestone-next { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
@@ -300,8 +455,8 @@
   .milestone-unlocked { display: flex; flex-wrap: wrap; gap: 6px; }
   .milestone-badge {
     font-size: 11px; font-family: var(--font-mono);
-    background: rgba(200,240,96,0.08); color: var(--accent);
-    border: 1px solid rgba(200,240,96,0.2);
+    background: var(--bg3); color: var(--muted);
+    border: 1px solid var(--border2);
     border-radius: 20px; padding: 2px 9px;
   }
 
@@ -333,7 +488,7 @@
     background: var(--bg2); border: 1px solid var(--border);
     border-radius: 14px; padding: 14px;
   }
-  .stat-tile-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .stat-tile-label { font-size: 11px; color: var(--muted); letter-spacing: 0.03em; margin-bottom: 6px; font-weight: 500; }
   .stat-tile-val { font-size: 20px; font-weight: 500; font-family: var(--font-mono); }
 
   .collapsible { cursor: pointer; user-select: none; }
@@ -345,7 +500,7 @@
   .section-body.collapsed { max-height: 0 !important; }
 
   .welcome-card {
-    background: var(--bg2); border: 1px solid rgba(200,240,96,0.2);
+    background: var(--bg2); border: 1px solid var(--border2);
     border-radius: 16px; padding: 20px; margin-bottom: 24px;
   }
   .welcome-greeting { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
@@ -355,12 +510,12 @@
   .welcome-step strong { color: var(--text); }
   .welcome-step-num {
     width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(200,240,96,0.15); color: var(--accent);
+    background: rgba(74,127,193,0.15); color: var(--broker-color);
     font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center;
     margin-top: 1px;
   }
   .welcome-step.done .welcome-step-num {
-    background: var(--accent); color: #111;
+    background: var(--accent); color: var(--check-color);
   }
   .welcome-step.done > div:last-child { color: var(--muted); text-decoration: none; }
   .welcome-step.done > div:last-child strong { color: var(--muted); }
@@ -375,9 +530,9 @@
   /* Section */
   .section { margin-bottom: 20px; }
   .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 6px 0; }
-  .section-label { font-size: 13px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+  .section-label { font-size: 13px; color: var(--muted); letter-spacing: 0.03em; font-weight: 500; }
   .add-link { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; font-family: var(--font-display); padding: 4px 10px; border-radius: 6px; }
-  .add-link:hover { background: rgba(200,240,96,0.08); }
+  .add-link:hover { background: rgba(61,214,140,0.08); }
 
   /* Account row */
   .acct-row {
@@ -393,10 +548,10 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 13px; font-weight: 600; flex-shrink: 0;
   }
-  .icon-cash { background: rgba(96,184,240,0.12); color: var(--cash-color); }
-  .icon-invest { background: rgba(200,240,96,0.12); color: var(--broker-color); }
-  .icon-property { background: rgba(143,240,192,0.12); color: var(--retire-color); }
-  .icon-debt { background: rgba(240,96,96,0.12); color: var(--danger); }
+  .icon-cash { background: rgba(91,175,142,0.12); color: var(--cash-color); }
+  .icon-invest { background: rgba(74,127,193,0.12); color: var(--broker-color); }
+  .icon-property { background: rgba(74,168,192,0.12); color: var(--property-color); }
+  .icon-debt { background: rgba(217,96,96,0.12); color: var(--danger); }
   .acct-name { font-size: 15px; font-weight: 500; }
   .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .stale-tap { cursor: pointer; color: var(--muted); opacity: 0.6; display: inline-flex; align-items: center; vertical-align: middle; }
@@ -429,7 +584,7 @@
   }
   .snapshot-row p { font-size: 13px; color: var(--muted); }
   .snap-btn {
-    background: var(--accent); color: #111;
+    background: var(--accent); color: var(--check-color);
     border: none; border-radius: 8px;
     padding: 8px 16px; font-size: 13px; font-weight: 500;
     font-family: var(--font-display); cursor: pointer;
@@ -440,18 +595,49 @@
   /* History */
   .hist-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 0; border-bottom: 1px solid var(--border);
-    font-size: 14px;
+    padding: 12px 8px; border-bottom: 1px solid var(--border);
+    font-size: 14px; border-radius: 8px; cursor: pointer;
+    transition: background 0.15s; position: relative; overflow: hidden;
+    margin: 0 -8px;
   }
   .hist-row:last-child { border-bottom: none; }
+  .hist-row:hover { background: var(--bg3); }
   .hist-date { color: var(--muted); }
   .hist-right { display: flex; gap: 14px; align-items: center; }
   .hist-val { font-family: var(--font-mono); font-weight: 500; }
 
+  /* long-press ripple */
+  .hist-row::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: 8px; border: 2px solid var(--accent);
+    opacity: 0; pointer-events: none;
+    transform: scale(0.95); transition: none;
+  }
+  .hist-row.pressing::after {
+    opacity: 0.5; transform: scale(1);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  /* context menu */
+  .ctx-menu {
+    position: fixed; z-index: 600;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 4px;
+    box-shadow: 0 8px 24px var(--shadow);
+    min-width: 160px;
+  }
+  .ctx-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; font-size: 13px; color: var(--text);
+    border-radius: 7px; cursor: pointer; transition: background 0.1s;
+  }
+  .ctx-item:hover { background: var(--bg3); }
+  .ctx-item.danger { color: var(--danger); }
+
   /* Modal */
   .overlay {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7); z-index: 200;
+    background: var(--overlay-bg); z-index: 200;
     align-items: flex-end; justify-content: center;
   }
   @media(min-width:500px){ .overlay { align-items: center; } }
@@ -468,23 +654,28 @@
   @media(min-width:500px){ .modal-handle { display: none; } }
   .modal h3 { font-size: 18px; font-weight: 500; margin-bottom: 1.25rem; }
   .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.03em; font-weight: 500; }
   .field input, .field select {
     width: 100%; background: var(--bg3); border: 1px solid var(--border2);
     color: var(--text); border-radius: 10px; padding: 11px 36px 11px 14px;
     font-size: 15px; font-family: var(--font-display); outline: none;
     appearance: none; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%237a7d82' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236e7a8a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
   }
   .field input { background-image: none; padding: 11px 14px; }
+  .field input::placeholder { color: var(--muted); opacity: 0.6; }
   .field input:focus, .field select:focus { border-color: var(--accent); }
   .field select option { background: var(--bg3); }
+  /* date input - invert calendar icon for dark theme */
+  .field input[type="date"] {
+    color-scheme: dark light;
+  }
   .crypto-hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
   .modal-actions { display: flex; gap: 10px; margin-top: 1.25rem; }
   .btn-save {
-    flex: 1; background: var(--accent); color: #111;
+    flex: 1; background: var(--accent); color: var(--check-color);
     border: none; border-radius: 10px; padding: 12px;
     font-size: 15px; font-weight: 500; font-family: var(--font-display); cursor: pointer;
   }
@@ -511,7 +702,7 @@
     color: var(--muted); transition: all 0.15s;
   }
   .type-btn:hover { color: var(--text); border-color: var(--border2); }
-  .type-btn.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 500; }
+  .type-btn.active { background: var(--accent); color: var(--check-color); border-color: var(--accent); font-weight: 500; }
 
   .hist-toggle {
     width: 100%; padding: 10px; margin-top: 4px;
@@ -549,7 +740,7 @@
     .chart-filters { gap: 10px; }
   }
   .cf:hover { border-color: var(--border2); color: var(--text); }
-  .cf.active { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 500; }
+  .cf.active { background: var(--accent); color: var(--check-color); border-color: var(--accent); font-weight: 500; }
   .chart-wrap {
     background: var(--bg2); border: 1px solid var(--border);
     border-radius: 14px; padding: 16px 16px 8px;
@@ -585,7 +776,7 @@
 
   /* Config banner */
   .config-banner {
-    background: rgba(200,240,96,0.06); border: 1px solid rgba(200,240,96,0.2);
+    background: rgba(61,214,140,0.06); border: 1px solid rgba(61,214,140,0.2);
     border-radius: 14px; padding: 16px; margin-bottom: 28px;
     font-size: 13px; line-height: 1.6; color: var(--muted);
   }
@@ -597,19 +788,183 @@
 
 <!-- AUTH -->
 <div id="auth-screen">
-  <div class="auth-grid"></div>
-  <div class="auth-wordmark">stack<span>d</span></div>
-  <div class="auth-headline">Your wealth. <em>Finally in one place.</em></div>
-  <button class="google-btn" onclick="signIn()">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-    </svg>
-    Continue with Google
-  </button>
-  <div class="auth-sub">Your data lives in your own Google Sheet. Private by default. &nbsp;·&nbsp; v1.74</div>
+
+  <div class="auth-topbar">
+    <div class="auth-logo">stack<span>d</span></div>
+  </div>
+
+  <!-- Hero -->
+  <div class="auth-hero">
+    <div class="auth-eyebrow">Personal finance, simplified</div>
+    <div class="auth-wordmark">stack<span>d</span></div>
+    <div class="auth-tagline">Your net worth. Your data.</div>
+    <button class="google-btn" onclick="signIn()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.97h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.94C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-sub">Free to use &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; Your data stays yours</div>
+    <div class="auth-scroll-hint">
+      <span>See how it works</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+
+  <div class="auth-divider"></div>
+
+  <!-- Value props -->
+  <div class="auth-props-section">
+    <div class="auth-props-eyebrow">Why Stackd</div>
+    <div class="auth-prop-row">
+
+      <div class="auth-prop">
+        <div class="auth-prop-icon" style="background:rgba(34,196,122,0.1);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c47a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="auth-prop-title">Your data, your Google Sheet</div>
+          <div class="auth-prop-desc">Everything is stored in a private Google Sheet that belongs to you — not us. No third-party servers, no data selling, no subscriptions. Just your numbers, in your hands.</div>
+        </div>
+      </div>
+
+      <div class="auth-prop">
+        <div class="auth-prop-icon" style="background:rgba(74,143,212,0.1);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a8fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div>
+          <div class="auth-prop-title">See your full picture</div>
+          <div class="auth-prop-desc">Cash, investments, property, crypto, and debt — all in one place. Live crypto prices update automatically so your net worth is always accurate.</div>
+        </div>
+      </div>
+
+      <div class="auth-prop">
+        <div class="auth-prop-icon" style="background:rgba(58,176,200,0.1);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3ab0c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div>
+          <div class="auth-prop-title">Watch your wealth grow</div>
+          <div class="auth-prop-desc">Track your net worth over time, celebrate milestones as you hit them, and get a weekly AI-powered insight tailored to where you are on your financial journey.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Milestone feature spotlight -->
+  <div class="auth-feature-section">
+    <div class="auth-feature-inner">
+      <div class="auth-feature-text">
+        <div class="auth-props-eyebrow" style="text-align:left;">Milestone tracker</div>
+        <div class="auth-feature-title">Every dollar gets you closer</div>
+        <div class="auth-feature-desc">Stackd tracks your progress toward ten financial milestones — from your first thousand to millionaire. Each one has a name, a meaning, and a moment worth celebrating.</div>
+      </div>
+      <div class="auth-feature-mockup">
+        <div class="mock-milestone done">
+          <div class="mock-check">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="mock-milestone-text">
+            <div class="mock-milestone-name">First Thousand</div>
+            <div class="mock-milestone-label">$1K</div>
+          </div>
+          <div class="mock-milestone-date">Jan 12, 2024</div>
+        </div>
+        <div class="mock-milestone done">
+          <div class="mock-check">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="mock-milestone-text">
+            <div class="mock-milestone-name">Solid Foundation</div>
+            <div class="mock-milestone-label">$5K</div>
+          </div>
+          <div class="mock-milestone-date">Mar 4, 2024</div>
+        </div>
+        <div class="mock-milestone done">
+          <div class="mock-check">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="mock-milestone-text">
+            <div class="mock-milestone-name">Double Digits</div>
+            <div class="mock-milestone-label">$10K</div>
+          </div>
+          <div class="mock-milestone-date">Aug 19, 2024</div>
+        </div>
+        <div class="mock-milestone next">
+          <div class="mock-check-empty"></div>
+          <div class="mock-milestone-text">
+            <div class="mock-milestone-name">On the Rise</div>
+            <div class="mock-milestone-label">$25K</div>
+          </div>
+          <div class="mock-milestone-next-wrap">
+            <div class="mock-progress-bar"><div class="mock-progress-fill" style="width:67%"></div></div>
+            <div class="mock-milestone-pct">67%</div>
+          </div>
+        </div>
+        <div class="mock-milestone locked">
+          <div class="mock-check-ring"></div>
+          <div class="mock-milestone-text">
+            <div class="mock-milestone-name">Halfway to $100K</div>
+            <div class="mock-milestone-label">$50K</div>
+          </div>
+        </div>
+        <div class="mock-milestone locked">
+          <div class="mock-check-ring"></div>
+          <div class="mock-milestone-text">
+            <div class="mock-milestone-name">Six Figures</div>
+            <div class="mock-milestone-label">$100K</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="auth-steps-section">
+    <div class="auth-props-eyebrow">How it works</div>
+    <div class="auth-steps">
+      <div class="auth-step">
+        <div class="auth-step-num">1</div>
+        <div class="auth-step-title">Sign in with Google</div>
+        <div class="auth-step-desc">One click. No passwords, no forms. A private Google Sheet is created in your Drive automatically.</div>
+      </div>
+      <div class="auth-step-divider"></div>
+      <div class="auth-step">
+        <div class="auth-step-num">2</div>
+        <div class="auth-step-title">Add your accounts</div>
+        <div class="auth-step-desc">Cash, investments, crypto, property, debt. Takes about two minutes. Live prices fill in automatically.</div>
+      </div>
+      <div class="auth-step-divider"></div>
+      <div class="auth-step">
+        <div class="auth-step-num">3</div>
+        <div class="auth-step-title">Watch it grow</div>
+        <div class="auth-step-desc">Your net worth chart builds over time. Hit milestones, get weekly insights, stay on track.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="auth-bottom-cta">
+    <div class="auth-wordmark" style="font-size:clamp(36px,8vw,56px);margin-bottom:12px;">stack<span>d</span></div>
+    <div style="font-size:16px;color:var(--muted);margin-bottom:32px;">Start tracking your net worth today. It's free.</div>
+    <button class="google-btn" onclick="signIn()" style="min-width:260px;">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.94C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+  </div>
+
+  <div class="auth-footer">
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.9
+  </div>
+
 </div>
 
 <!-- SETUP -->
@@ -640,6 +995,15 @@
           <div class="dropdown-item" onclick="openProfile()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Edit profile
+          </div>
+          <div class="dropdown-item" onclick="toggleTheme()" id="theme-toggle-item" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="theme-icon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <span id="theme-label">Dark mode</span>
+            </div>
+            <div id="theme-switch" style="width:32px;height:18px;border-radius:9px;background:var(--bg3);border:1px solid var(--border2);position:relative;transition:background 0.2s;flex-shrink:0;">
+              <div id="theme-knob" style="width:12px;height:12px;border-radius:50%;background:var(--muted);position:absolute;top:2px;left:2px;transition:transform 0.2s,background 0.2s;"></div>
+            </div>
           </div>
           <div class="dropdown-divider"></div>
           <div class="dropdown-item danger" onclick="signOut()">
@@ -680,7 +1044,10 @@
       <div class="hero-change" id="hero-change"></div>
       <div id="milestone-bar" style="display:none;margin-top:14px;">
         <div class="milestone-track"><div class="milestone-fill" id="milestone-fill"></div></div>
-        <div class="milestone-next" id="milestone-next" style="margin-top:6px;margin-bottom:0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+          <div class="milestone-next" id="milestone-next"></div>
+          <button onclick="openMilestoneHistory()" style="background:none;border:none;font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0;font-family:var(--font-display);transition:color 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">View all</button>
+        </div>
         <div class="milestone-unlocked" id="milestone-unlocked"></div>
       </div>
     </div>
@@ -718,12 +1085,12 @@
             <svg class="chart-placeholder" viewBox="0 0 600 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#c8f060" stop-opacity="0.12"/>
-                  <stop offset="100%" stop-color="#c8f060" stop-opacity="0"/>
+                  <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.12"/>
+                  <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
                 </linearGradient>
               </defs>
               <path d="M0 140 C60 130 80 120 120 105 C160 90 180 95 220 80 C260 65 280 70 320 55 C360 40 380 48 420 35 C460 22 500 28 540 18 L600 10 L600 160 L0 160 Z" fill="url(#pg)"/>
-              <path d="M0 140 C60 130 80 120 120 105 C160 90 180 95 220 80 C260 65 280 70 320 55 C360 40 380 48 420 35 C460 22 500 28 540 18 L600 10" fill="none" stroke="#c8f060" stroke-width="2" stroke-opacity="0.2"/>
+              <path d="M0 140 C60 130 80 120 120 105 C160 90 180 95 220 80 C260 65 280 70 320 55 C360 40 380 48 420 35 C460 22 500 28 540 18 L600 10" fill="none" stroke="var(--accent)" stroke-width="2" stroke-opacity="0.2"/>
             </svg>
             <div class="chart-empty-text">
               <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px;">Your growth chart will appear here</div>
@@ -739,14 +1106,14 @@
     </div>
 
     <div class="stats-grid">
-      <div class="stat-tile"><div class="stat-tile-label">cash</div><div class="stat-tile-val" id="s-cash" style="color:var(--cash-color)">$0</div></div>
-      <div class="stat-tile"><div class="stat-tile-label">investments</div><div class="stat-tile-val" id="s-investments" style="color:var(--broker-color)">$0</div></div>
-      <div class="stat-tile"><div class="stat-tile-label">property</div><div class="stat-tile-val" id="s-property" style="color:var(--retire-color)">$0</div></div>
-      <div class="stat-tile"><div class="stat-tile-label">debt</div><div class="stat-tile-val" id="s-debt" style="color:var(--danger)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">Cash</div><div class="stat-tile-val" id="s-cash" style="color:var(--cash-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">Investments</div><div class="stat-tile-val" id="s-investments" style="color:var(--broker-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">Property</div><div class="stat-tile-val" id="s-property" style="color:var(--property-color)">$0</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">Debt</div><div class="stat-tile-val" id="s-debt" style="color:var(--danger)">$0</div></div>
     </div>
 
     <div id="stacked-bar-wrap" style="margin-bottom:28px;">
-      <div id="stacked-bar" style="display:flex;height:8px;border-radius:6px;overflow:hidden;gap:2px;"></div>
+      <div id="stacked-bar" style="display:flex;height:8px;border-radius:6px;overflow:hidden;gap:4px;"></div>
       <div id="stacked-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;"></div>
     </div>
 
@@ -755,13 +1122,13 @@
         <span class="cat-title">Assets</span>
         <span class="cat-total" id="cat-total-assets"></span>
       </div>
-      <button class="add-link" onclick="openAddCategory('assets')">+ add</button>
+      <button class="add-link" onclick="openAddCategory('assets')">+ Add</button>
     </div>
     <div id="section-cash" class="section">
       <div class="section-head collapsible" onclick="toggleSection('cash')">
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="section-caret" id="caret-cash">▾</span>
-          <span class="section-label">cash</span>
+          <span class="section-label">Cash</span>
         </div>
         <span class="section-total" id="st-cash"></span>
       </div>
@@ -771,7 +1138,7 @@
       <div class="section-head collapsible" onclick="toggleSection('investments')">
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="section-caret" id="caret-investments">▾</span>
-          <span class="section-label">investments</span>
+          <span class="section-label">Investments</span>
         </div>
         <span class="section-total" id="st-investments"></span>
       </div>
@@ -781,7 +1148,7 @@
       <div class="section-head collapsible" onclick="toggleSection('property')">
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="section-caret" id="caret-property">▾</span>
-          <span class="section-label">property</span>
+          <span class="section-label">Property</span>
         </div>
         <span class="section-total" id="st-property"></span>
       </div>
@@ -793,14 +1160,61 @@
         <span class="cat-title">Debt</span>
         <span class="cat-total" id="cat-total-debt"></span>
       </div>
-      <button class="add-link" onclick="openAddCategory('debt')">+ add</button>
+      <button class="add-link" onclick="openAddCategory('debt')">+ Add</button>
     </div>
     <div id="debt-subcategories"></div>
 
     <div class="section" style="margin-top:40px;">
-      <div class="section-head"><span class="section-label">history</span></div>
+      <div class="section-head">
+        <span style="font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--text);">History</span>
+      </div>
       <div id="history"></div>
     </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctx-menu" style="display:none;">
+  <div class="ctx-item" onclick="ctxEdit()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit snapshot
+  </div>
+  <div class="ctx-item danger" onclick="ctxDelete()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    Delete snapshot
+  </div>
+</div>
+
+<!-- MILESTONE HISTORY MODAL -->
+<div class="overlay" id="milestone-history-overlay" onclick="if(event.target===this)closeMilestoneHistory()" style="display:none;">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Milestones</h3>
+    <div id="milestone-history-list" style="margin-top:4px;"></div>
+    <div class="modal-actions" style="margin-top:1.5rem;">
+      <button class="btn-save" onclick="closeMilestoneHistory()" style="width:100%;">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT HISTORY MODAL -->
+<div class="overlay" id="history-overlay" onclick="if(event.target===this)closeEditHistory()" style="display:none;">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Edit snapshot</h3>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="h-date" />
+    </div>
+    <div class="field">
+      <label>Net worth</label>
+      <input type="number" id="h-total" step="any" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel2" onclick="closeEditHistory()">Cancel</button>
+      <button class="btn-save" onclick="saveEditHistory()">Save</button>
+    </div>
+    <button class="btn-delete" onclick="deleteHistoryEntry()">Delete snapshot</button>
   </div>
 </div>
 
@@ -810,7 +1224,7 @@
     <div class="modal-handle"></div>
     <h3>Your profile</h3>
     <div class="field">
-      <label>age range</label>
+      <label>Age range</label>
       <select id="p-age">
         <option value="">Prefer not to say</option>
         <option value="18-24">18–24</option>
@@ -823,8 +1237,8 @@
     </div>
     <div style="font-size:12px;color:var(--muted);margin-top:-6px;margin-bottom:14px;line-height:1.5;">Used to compare your net worth to others in your age group. Stored locally, never shared.</div>
     <div class="modal-actions">
-      <button class="btn-cancel2" onclick="closeProfile()">cancel</button>
-      <button class="btn-save" onclick="saveProfile()">save</button>
+      <button class="btn-cancel2" onclick="closeProfile()">Cancel</button>
+      <button class="btn-save" onclick="saveProfile()">Save</button>
     </div>
   </div>
 </div>
@@ -845,15 +1259,15 @@
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3 id="modal-title">add account</h3>
+    <h3 id="modal-title">Add account</h3>
 
     <div class="field" id="f-category-picker" style="display:none;">
-      <label>category</label>
+      <label>Category</label>
       <div class="type-btn-row" id="category-btn-row"></div>
     </div>
 
     <div class="field" id="f-type-picker">
-      <label>type</label>
+      <label>Type</label>
       <select id="f-type" onchange="onTypeChange()">
         <option value="checking">Checking</option>
         <option value="savings">Savings</option>
@@ -874,7 +1288,7 @@
     </div>
 
     <div class="field" id="f-coin-picker" style="display:none;">
-      <label>coin</label>
+      <label>Coin</label>
       <div class="coin-combo" id="coin-combo">
         <input type="text" id="coin-search" placeholder="Search or type ticker (e.g. BTC, SHIB...)"
           autocomplete="off" oninput="filterCoins(this.value)" onfocus="openCoinDropdown()" />
@@ -884,23 +1298,23 @@
     </div>
 
     <div class="field">
-      <label>account name</label>
+      <label>Account name</label>
       <input type="text" id="f-name" placeholder="Account name" />
     </div>
     <div class="field">
-      <label id="f-val-label">balance ($)</label>
+      <label id="f-val-label">Balance ($)</label>
       <input type="number" id="f-val" placeholder="0.00" step="any" />
-      <div class="crypto-hint" id="f-hint" style="display:none;">enter your coin amount - dollar value updates automatically from live price</div>
+      <div class="crypto-hint" id="f-hint" style="display:none;">Enter your coin amount — dollar value updates automatically from live price</div>
     </div>
     <div class="field">
-      <label>note <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></label>
+      <label>Note <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></label>
       <input type="text" id="f-note" placeholder="e.g. got bonus, opened new account..." maxlength="120" />
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel2" onclick="closeModal()">cancel</button>
-      <button class="btn-save" onclick="saveAccount()">save</button>
+      <button class="btn-cancel2" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveAccount()">Save</button>
     </div>
-    <button class="btn-delete" id="btn-delete" style="display:none;" onclick="deleteAccount()">remove account</button>
+    <button class="btn-delete" id="btn-delete" style="display:none;" onclick="deleteAccount()">Remove account</button>
   </div>
 </div>
 
@@ -943,7 +1357,7 @@ const GROUP_TYPES = {
 };
 const ASSET_GROUPS = ['cash','investments','property'];
 const ICON_CLASS = { cash:'icon-cash', investments:'icon-invest', property:'icon-property', debt:'icon-debt' };
-const BAR_COLOR = { cash:'#60b8f0', investments:'#c8f060', property:'#8ff0c0', debt:'#f06060' };
+const BAR_COLOR = { cash:'#5BAF8E', investments:'#4A7FC1', property:'#4AA8C0', debt:'#D96060' };
 const CRYPTO_ICONS = {
   btc:  `<img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
   eth:  `<img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
@@ -1229,7 +1643,7 @@ async function saveAccountsToSheet() {
       `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A${clearStart}:F1000:clear`, {}
     ).catch(()=>{});
   }
-  showToast('saved to google sheet');
+  showToast('Saved to Google Sheet');
 }
 
 async function saveHistoryToSheet() {
@@ -1297,7 +1711,7 @@ function renderGroup(group) {
     if (stEl) stEl.textContent = allInvest.length ? fmt(allInvest.reduce((s,a)=>s+getBal(a),0)) : '';
 
     if (!allInvest.length) {
-      el.innerHTML = '<div class="empty-row">nothing here yet - tap + add above</div>';
+      el.innerHTML = '<div class="empty-row">Nothing here yet — tap + Add above</div>';
       el.style.maxHeight = ''; el.style.overflow = ''; return;
     }
 
@@ -1343,7 +1757,7 @@ function renderGroup(group) {
   if (stEl) stEl.textContent = accs.length ? fmt(accs.reduce((s,a)=>s+getBal(a),0)) : '';
 
   if (!accs.length) {
-    el.innerHTML = '<div class="empty-row">nothing here yet - tap + add above</div>';
+    el.innerHTML = '<div class="empty-row">Nothing here yet — tap + Add above</div>';
     el.style.maxHeight = '';
     el.style.overflow = '';
     return;
@@ -1422,8 +1836,8 @@ function render() {
 
   // render debt subcategories dynamically
   const debtTypeLabels = {
-    creditcard:'Credit Cards', mortgage:'Mortgages',
-    loan:'Loans', other_debt:'Other Debt'
+    creditcard:'Credit cards', mortgage:'Mortgages',
+    loan:'Loans', other_debt:'Other debt'
   };
   const debtAccounts = state.accounts.filter(a => DEBT_TYPES.includes(a.type));
   const debtByType = {};
@@ -1534,7 +1948,7 @@ function render() {
   const allEvents = [...snapshots, ...state.events].sort((a,b) => b.date - a.date);
 
   if (!allEvents.length) {
-    histEl.innerHTML = '<div class="empty-row">your net worth history will appear here as you update your accounts over time</div>';
+    histEl.innerHTML = '<div class="empty-row">Your net worth history will appear here as you update your accounts over time</div>';
   } else {
     const showAll = histEl.dataset.expanded === 'true';
     const visible = showAll ? allEvents : allEvents.slice(0, 5);
@@ -1548,12 +1962,15 @@ function render() {
           const d = item.total - prev.total;
           change = `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</span>`;
         }
-        return `<div class="hist-row">
+        const idx = state.history.findIndex(h => h.date === item.date);
+        return `<div class="hist-row"
+          oncontextmenu="showCtxMenu(event,${idx})"
+          ontouchstart="startLongPress(${idx},event,this)" ontouchend="cancelLongPress(this)" ontouchmove="cancelLongPress(this)">
           <span class="hist-date">${dateStr}</span>
           <div class="hist-right">${change}<span class="hist-val">${fmt(item.total)}</span></div>
         </div>`;
       } else if (item.type === 'milestone') {
-        return `<div class="hist-row">
+        return `<div class="hist-row" style="cursor:pointer;" onclick="openMilestoneHistory()">
           <span class="hist-date">${dateStr}</span>
           <div class="hist-right"><span style="color:var(--accent);font-size:13px;">🎉 ${item.label}</span></div>
         </div>`;
@@ -1573,7 +1990,7 @@ function render() {
 
     const moreCount = allEvents.length - 5;
     const toggleBtn = allEvents.length > 5
-      ? `<button class="hist-toggle" onclick="toggleHistory()">${showAll ? 'show less' : `see all ${allEvents.length} entries`}</button>`
+      ? `<button class="hist-toggle" onclick="toggleHistory()">${showAll ? 'Show less' : `See all ${allEvents.length} entries`}</button>`
       : '';
 
     histEl.innerHTML = rows + toggleBtn;
@@ -1664,12 +2081,12 @@ function pickCoin(ticker, name, hasLivePrice) {
   if (!hasLivePrice) {
     infoEl.textContent = 'No live price — balance will be updated manually.';
     infoEl.style.display = 'block';
-    document.getElementById('f-val-label').textContent = 'balance ($)';
+    document.getElementById('f-val-label').textContent = 'Balance ($)';
     document.getElementById('f-val').placeholder = '0.00';
     document.getElementById('f-hint').style.display = 'none';
   } else {
     infoEl.style.display = 'none';
-    document.getElementById('f-val-label').textContent = 'amount of coins';
+    document.getElementById('f-val-label').textContent = 'Amount of coins';
     document.getElementById('f-val').placeholder = '0.00000000';
     document.getElementById('f-hint').style.display = 'block';
   }
@@ -1704,7 +2121,7 @@ function selectCategory(group, btn) {
 
 function openAddCategory(category) {
   addingGroup = null; editingId = null;
-  document.getElementById('modal-title').textContent = 'add account';
+  document.getElementById('modal-title').textContent = 'Add account';
   document.getElementById('f-name').value = '';
   document.getElementById('f-val').value = '';
   document.getElementById('f-note').value = '';
@@ -1745,7 +2162,7 @@ function openEdit(id) {
   if (!acc) return;
   editingId = id;
   addingGroup = TYPE_GROUP[acc.type];
-  document.getElementById('modal-title').textContent = 'edit account';
+  document.getElementById('modal-title').textContent = 'Edit account';
   document.getElementById('f-category-picker').style.display = 'none';
   filterTypeOptions(addingGroup);
   document.getElementById('f-type').value = acc.type;
@@ -1776,12 +2193,12 @@ function onTypeChange() {
     if (infoEl) infoEl.style.display = 'none';
     document.getElementById('f-coin-picker').dataset.selected = '';
     // default val label
-    document.getElementById('f-val-label').textContent = 'amount of coins';
+    document.getElementById('f-val-label').textContent = 'Amount of coins';
     document.getElementById('f-val').placeholder = '0.00000000';
     document.getElementById('f-hint').style.display = 'block';
   }
 
-  document.getElementById('f-val-label').textContent = (isCryptoGroup || isCrypto) ? 'amount of coins' : 'balance ($)';
+  document.getElementById('f-val-label').textContent = (isCryptoGroup || isCrypto) ? 'Amount of coins' : 'Balance ($)';
   document.getElementById('f-val').placeholder = (isCryptoGroup || isCrypto) ? '0.00000000' : '0.00';
   document.getElementById('f-hint').style.display = (isCryptoGroup || isCrypto) ? 'block' : 'none';
 
@@ -1898,7 +2315,7 @@ async function markUpdated(id) {
   acc.updatedAt = Date.now();
   render();
   await saveAccountsToSheet();
-  showToast('marked as updated');
+  showToast('Marked as updated');
 }
 
 function toggleHistory() {
@@ -1969,7 +2386,92 @@ function renderMilestones(netWorth) {
   unlockedEl.innerHTML = '';
 }
 
-// ---- CELEBRATION ----
+function openMilestoneHistory() {
+  const ALL_MILESTONES = [
+    { val: 1,       label: 'Positive net worth', name: 'In the Green' },
+    { val: 1000,    label: '$1K',    name: 'First Thousand' },
+    { val: 5000,    label: '$5K',    name: 'Solid Foundation' },
+    { val: 10000,   label: '$10K',   name: 'Double Digits' },
+    { val: 25000,   label: '$25K',   name: 'On the Rise' },
+    { val: 50000,   label: '$50K',   name: 'Halfway to $100K' },
+    { val: 100000,  label: '$100K',  name: 'Six Figures' },
+    { val: 250000,  label: '$250K',  name: 'Building Real Wealth' },
+    { val: 500000,  label: '$500K',  name: 'High Net Worth' },
+    { val: 1000000, label: '$1M',    name: 'Millionaire' },
+  ];
+
+  const netWorth = getNetWorth();
+  const everHadDebt = state.accounts.some(a => DEBT_TYPES.includes(a.type)) ||
+    !!localStorage.getItem('stackd_milestone_1');
+
+  // filter out positive NW milestone if never in debt
+  const milestones = ALL_MILESTONES.filter(m => m.val !== 1 || everHadDebt);
+
+  const listEl = document.getElementById('milestone-history-list');
+
+  const rows = milestones.map((m, i, arr) => {
+    const stored = localStorage.getItem('stackd_milestone_' + m.val);
+    // auto-fulfill if current net worth exceeds this milestone
+    const hit = !!stored || netWorth >= m.val;
+    const ts = stored && stored !== '1' ? parseInt(stored) : null;
+    const dateStr = ts
+      ? new Date(ts).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+      : hit ? new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : null;
+
+    const remaining = milestones.filter(x => !localStorage.getItem('stackd_milestone_' + x.val) && netWorth < x.val);
+    const isNext = !hit && remaining.length > 0 && remaining[0].val === m.val;
+
+    if (hit) {
+      return `<div class="hist-row" style="cursor:default;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="var(--check-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:500;color:var(--text);font-size:14px;">${m.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${m.label}</div>
+          </div>
+        </div>
+        <span style="font-size:11px;color:var(--muted);">${dateStr}</span>
+      </div>`;
+    } else if (isNext) {
+      const prev = i > 0 ? arr[i-1].val : 0;
+      const pct = Math.max(0, Math.min(100, ((netWorth - prev) / (m.val - prev)) * 100)).toFixed(1);
+      return `<div class="hist-row" style="cursor:default;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+          <span style="font-size:15px;">🎯</span>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="color:var(--text);font-size:14px;">${m.name}</div>
+              <span style="font-size:11px;color:var(--accent);margin-left:8px;flex-shrink:0;">${pct}%</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${m.label}</div>
+            <div style="background:var(--bg3);border-radius:3px;height:3px;overflow:hidden;">
+              <div style="width:${pct}%;height:100%;background:var(--accent);border-radius:3px;transition:width 0.4s;"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      return `<div class="hist-row" style="cursor:default;opacity:0.35;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted);flex-shrink:0;"></div>
+          <div>
+            <div style="color:var(--muted);font-size:14px;">${m.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${m.label}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  listEl.innerHTML = rows;
+  document.getElementById('milestone-history-overlay').style.display = 'flex';
+}
+
+function closeMilestoneHistory() {
+  document.getElementById('milestone-history-overlay').style.display = 'none';
+}
 const MILESTONE_VALUES = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
 let confettiAnim = null;
 
@@ -1980,7 +2482,7 @@ function checkMilestone(prevTotal, newTotal) {
   if (!crossed) return;
   const seenKey = 'stackd_milestone_' + crossed;
   if (localStorage.getItem(seenKey)) return;
-  localStorage.setItem(seenKey, '1');
+  localStorage.setItem(seenKey, Date.now().toString()); // store timestamp
   const label = crossed === 1 ? 'Positive net worth!' :
     crossed >= 1000000 ? `Hit $${crossed/1000000}M` :
     crossed >= 1000 ? `Hit $${crossed/1000}K` : `Hit $${crossed}`;
@@ -2019,7 +2521,7 @@ function startConfetti() {
     y: Math.random() * canvas.height - canvas.height,
     r: Math.random() * 6 + 3,
     d: Math.random() * 3 + 1,
-    color: ['#c8f060','#8ff0c0','#60b8f0','#f0a860','#f06090','#fff'][Math.floor(Math.random()*6)],
+    color: ['#3dd68c','#58c4dc','#7c9ef5','#e8935a','#f07090','#fff'][Math.floor(Math.random()*6)],
     tilt: Math.random() * 10 - 5,
     tiltSpeed: Math.random() * 0.1 + 0.05,
     angle: Math.random() * Math.PI * 2,
@@ -2048,6 +2550,51 @@ function stopConfetti() {
   if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
   const ctx = document.getElementById('confetti-canvas').getContext('2d');
   ctx.clearRect(0, 0, 9999, 9999);
+}
+
+// ---- THEME ----
+function initTheme() {
+  const saved = localStorage.getItem('stackd_theme') || 'light';
+  applyTheme(saved, false);
+}
+
+function applyTheme(theme, save = true) {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  const isDark = theme === 'dark';
+  const label = document.getElementById('theme-label');
+  const icon = document.getElementById('theme-icon');
+  const knob = document.getElementById('theme-knob');
+  const sw = document.getElementById('theme-switch');
+
+  if (label) label.textContent = isDark ? 'Dark mode' : 'Dark mode';
+  if (icon) {
+    icon.innerHTML = isDark
+      ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+      : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+  if (knob && sw) {
+    if (isDark) {
+      sw.style.background = 'var(--accent)';
+      knob.style.transform = 'translateX(14px)';
+      knob.style.background = 'white';
+    } else {
+      sw.style.background = 'var(--bg3)';
+      knob.style.transform = 'translateX(0)';
+      knob.style.background = 'var(--muted)';
+    }
+  }
+  if (save) localStorage.setItem('stackd_theme', theme);
+  render();
+}
+
+function toggleTheme() {
+  const current = localStorage.getItem('stackd_theme') || 'dark';
+  applyTheme(current === 'light' ? 'dark' : 'light');
+  document.getElementById('user-menu').classList.remove('open');
 }
 
 // ---- PRIVACY ----
@@ -2081,6 +2628,94 @@ function applyPrivacy() {
   if (canvas) canvas.style.filter = privacyOn ? 'blur(8px)' : '';
 }
 
+// ---- EDIT HISTORY ----
+let editingHistoryIdx = null;
+let _longPressTimer = null;
+let _ctxIdx = null;
+
+function showCtxMenu(e, idx) {
+  e.preventDefault();
+  _ctxIdx = idx;
+  const menu = document.getElementById('ctx-menu');
+  menu.style.display = 'block';
+  const x = Math.min(e.clientX, window.innerWidth - 180);
+  const y = Math.min(e.clientY, window.innerHeight - 90);
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+}
+
+function ctxEdit() {
+  document.getElementById('ctx-menu').style.display = 'none';
+  openEditHistory(_ctxIdx);
+}
+
+function ctxDelete() {
+  document.getElementById('ctx-menu').style.display = 'none';
+  editingHistoryIdx = _ctxIdx;
+  deleteHistoryEntry();
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('ctx-menu').style.display = 'none';
+});
+
+function startLongPress(idx, e, el) {
+  el.classList.add('pressing');
+  _longPressTimer = setTimeout(() => {
+    el.classList.remove('pressing');
+    _ctxIdx = idx;
+    // show context menu near touch point
+    const touch = e.touches[0];
+    const fakeEvent = { preventDefault: ()=>{}, clientX: touch.clientX, clientY: touch.clientY };
+    showCtxMenu(fakeEvent, idx);
+  }, 500);
+}
+
+function cancelLongPress(el) {
+  if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; }
+  if (el) el.classList.remove('pressing');
+}
+
+function openEditHistory(idx) {
+  const entry = state.history[idx];
+  if (!entry) return;
+  editingHistoryIdx = idx;
+  // format date as YYYY-MM-DD for input
+  const d = new Date(entry.date);
+  const dateStr = d.toISOString().slice(0, 10);
+  document.getElementById('h-date').value = dateStr;
+  document.getElementById('h-total').value = Math.round(entry.total);
+  document.getElementById('history-overlay').style.display = 'flex';
+}
+
+function closeEditHistory() {
+  document.getElementById('history-overlay').style.display = 'none';
+  editingHistoryIdx = null;
+}
+
+async function saveEditHistory() {
+  if (editingHistoryIdx === null) return;
+  const dateVal = document.getElementById('h-date').value;
+  const totalVal = parseFloat(document.getElementById('h-total').value);
+  if (!dateVal || isNaN(totalVal)) return;
+  state.history[editingHistoryIdx] = {
+    date: new Date(dateVal).getTime(),
+    total: totalVal
+  };
+  state.history.sort((a, b) => a.date - b.date);
+  closeEditHistory();
+  await saveHistoryToSheet();
+  render();
+}
+
+async function deleteHistoryEntry() {
+  if (editingHistoryIdx === null) return;
+  state.history.splice(editingHistoryIdx, 1);
+  closeEditHistory();
+  await saveHistoryToSheet();
+  render();
+}
+
 // ---- PROFILE ----
 const PROFILE_KEY = 'stackd_profile';
 
@@ -2107,7 +2742,7 @@ function saveProfile() {
   localStorage.removeItem('stackd_insight_nw');
   localStorage.removeItem('stackd_insight_dismissed');
   closeProfile();
-  showToast('profile saved');
+  showToast('Profile saved');
   // clear dismiss so insight shows and stays visible
   localStorage.removeItem(INSIGHT_DISMISS_KEY);
   localStorage.removeItem(INSIGHT_CACHE_KEY);
@@ -2129,7 +2764,7 @@ function renderWelcomeSteps() {
   const stepsEl = document.getElementById('welcome-steps');
   if (!stepsEl) return;
   const { hasAssets, hasDebt, hasAge } = getWelcomeProgress();
-  const check = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const check = `<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="var(--check-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const steps = [
     { done: hasAssets, num: '1', label: `Add your <strong>assets</strong> — cash, investments, property, even crypto.`, action: `<span style="color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="openAddCategory('assets')">Add assets →</span>` },
     { done: hasDebt,   num: '2', label: `Add any <strong>debt</strong> — credit cards, loans, mortgage.`,             action: `<span style="color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="openAddCategory('debt')">Add debt →</span>` },
@@ -2523,8 +3158,8 @@ function renderChart() {
 
   // gradient fill
   const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
-  grad.addColorStop(0, 'rgba(200,240,96,0.18)');
-  grad.addColorStop(1, 'rgba(200,240,96,0)');
+  grad.addColorStop(0, document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(42,184,114,0.15)' : 'rgba(61,214,140,0.20)');
+  grad.addColorStop(1, 'rgba(61,214,140,0)');
   ctx.beginPath();
   ctx.moveTo(px(0), py(chartData[0].total));
   for (let i = 1; i < chartData.length; i++) {
@@ -2548,7 +3183,8 @@ function renderChart() {
     const cpx = (x0 + x1) / 2;
     ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
   }
-  ctx.strokeStyle = '#c8f060';
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  ctx.strokeStyle = accentColor;
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -2556,7 +3192,7 @@ function renderChart() {
   const lastX = px(chartData.length-1), lastY = py(chartData[chartData.length-1].total);
   ctx.beginPath();
   ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
-  ctx.fillStyle = '#c8f060';
+  ctx.fillStyle = accentColor;
   ctx.fill();
 
   // x-axis labels
@@ -2598,6 +3234,7 @@ function renderChart() {
 
 // ---- BOOT ----
 (async () => {
+  initTheme();
   const handled = await handleAuthCallback();
   if (!handled) showAuth();
 })();
