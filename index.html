@@ -73,8 +73,8 @@
     background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0,0,0,0.06);
   }
-  .auth-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; color: var(--text); }
-  .auth-logo span { color: var(--accent); }
+  .auth-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; color: #111827; }
+  .auth-logo span { color: #22c47a; }
 
   /* Hero */
   .auth-hero {
@@ -696,12 +696,13 @@
   .hist-row:last-child { border-bottom: none; }
   .hist-row:hover { background: var(--bg3); }
   .hist-date { color: var(--muted); }
-  .hist-right { display: flex; gap: 10px; align-items: center; }
-  .hist-val {
-    font-family: var(--font-mono); font-weight: 500; white-space: nowrap;
+  .hist-right { display: flex; align-items: center; }
+  .hist-vals {
+    display: flex; gap: 10px; align-items: center; white-space: nowrap;
     transition: transform 0.2s ease;
   }
-  .hist-row:hover .hist-val { transform: translateX(-8px); }
+  .hist-row:hover .hist-vals { transform: translateX(-8px); }
+  .hist-val { font-family: var(--font-mono); font-weight: 500; }
   .hist-edit-ico {
     background: none; border: none; color: var(--muted); cursor: pointer;
     font-size: 15px; padding: 6px; border-radius: 8px; line-height: 1;
@@ -713,7 +714,7 @@
   .hist-edit-ico:hover { background: var(--bg2); color: var(--text); }
   @media (max-width: 768px) {
     .hist-edit-ico { display: none !important; }
-    .hist-row:hover .hist-val { transform: none; }
+    .hist-row:hover .hist-vals { transform: none; }
   }
 
   /* context menu */
@@ -1184,7 +1185,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.41
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.42
   </div>
 
 </div>
@@ -2192,7 +2193,7 @@ function render() {
           onclick="if(window.innerWidth<=768)openEditHistory(${idx})"
           ontouchstart="startLongPress(${idx},event,this)" ontouchend="cancelLongPress(this)" ontouchmove="cancelLongPress(this)">
           <span class="hist-date">${dateStr}</span>
-          <div class="hist-right">${change}<span class="hist-val">${fmt(item.total)}</span><button class="hist-edit-ico" onclick="event.stopPropagation();openEditHistory(${idx})">✎</button></div>
+          <div class="hist-right"><div class="hist-vals">${change}<span class="hist-val">${fmt(item.total)}</span></div><button class="hist-edit-ico" onclick="event.stopPropagation();openEditHistory(${idx})">✎</button></div>
         </div>`;
       } else if (item.type === 'milestone') {
         return `<div class="hist-row" style="cursor:pointer;" onclick="openMilestoneHistory()">
