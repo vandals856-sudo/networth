@@ -687,10 +687,9 @@
   /* History */
   .hist-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 8px; border-bottom: 1px solid var(--border);
-    font-size: 14px; border-radius: 8px;
-    transition: background 0.15s; position: relative; overflow: hidden;
-    margin: 0 -8px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px; border-radius: 0;
+    transition: background 0.15s; position: relative;
   }
   .hist-row:last-child { border-bottom: none; }
   .hist-row:hover { background: var(--bg3); }
@@ -803,13 +802,13 @@
   .type-btn.active { background: var(--accent); color: var(--check-color); border-color: var(--accent); font-weight: 500; }
 
   .hist-toggle {
-    width: 100%; padding: 10px; margin-top: 4px;
-    background: none; border: 1px dashed var(--border);
-    border-radius: 10px; color: var(--muted); font-size: 13px;
+    width: 100%; padding: 10px; margin-top: 0;
+    background: none; border: none; border-top: 1px dashed var(--border);
+    border-radius: 0; color: var(--muted); font-size: 13px;
     font-family: var(--font-display); cursor: pointer;
     transition: all 0.15s;
   }
-  .hist-toggle:hover { border-color: var(--border2); color: var(--text); }
+  .hist-toggle:hover { color: var(--text); background: var(--bg3); }
 
   /* Saving indicator */
   .save-toast {
@@ -893,7 +892,7 @@
 
   <!-- Hero -->
   <div class="auth-hero">
-    <div class="auth-tagline">Track every dollar.<br>Build the life <span>you want.</span></div>
+    <div class="auth-tagline">Know your net worth.<br>Watch it <span>grow.</span></div>
     <div class="auth-sub-tagline" style="white-space:nowrap;">All your accounts. One number. Always yours.</div>
     <button class="google-btn" onclick="signIn()">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1184,7 +1183,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.48
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.50
   </div>
 
 </div>
@@ -1393,7 +1392,9 @@
       <div class="section-head">
         <span style="font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--text);">History</span>
       </div>
-      <div id="history"></div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:4px 16px;">
+        <div id="history"></div>
+      </div>
     </div>
   </div>
 </div>
