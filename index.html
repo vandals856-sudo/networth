@@ -3259,21 +3259,101 @@ async function maybeShowInsight(netWorth) {
   }
 }
 
-const FALLBACK_TIPS = [
-  "Even small, consistent contributions to a retirement account can grow significantly over time thanks to compound interest.",
-  "Paying more than the minimum on credit cards each month can save you hundreds in interest over the year.",
-  "A good rule of thumb: try to keep your emergency fund at 3–6 months of expenses in an easily accessible account.",
-  "Automating your savings — even a small amount — means you pay yourself first before spending.",
-  "High-interest debt like credit cards typically costs more than most investments earn. Paying it down is often the best return you can get.",
-  "Diversifying across cash, investments, and property helps smooth out volatility in any one area.",
-  "Net worth is a long game. Consistent tracking keeps you honest and motivated — you're already ahead by doing this.",
-  "If your employer offers a 401k match, contributing at least enough to get the full match is essentially free money.",
-  "Crypto can be a small part of a diversified portfolio, but most advisors suggest keeping speculative assets to a manageable percentage.",
-  "Increasing income and reducing expenses both move net worth in the same direction — working both sides accelerates progress.",
-];
+function getSmartFallbackTip() {
+  const accounts = state.accounts || [];
+  const hasCrypto = accounts.some(a => CRYPTO_COINS.includes(a.type));
+  const hasDebt = accounts.some(a => DEBT_TYPES.includes(a.type));
+  const hasCreditCard = accounts.some(a => a.type === 'creditcard');
+  const hasMortgage = accounts.some(a => a.type === 'mortgage');
+  const has401k = accounts.some(a => a.type === '401k' || a.type === 'roth');
+  const hasBrokerage = accounts.some(a => a.type === 'brokerage');
+  const hasProperty = accounts.some(a => a.type === 'property' || a.type === 'vehicle' || a.type === 'other_property');
+  const nw = getNetWorth();
+
+  const totalCash = accounts.filter(a => ['checking','savings','other_cash'].includes(a.type)).reduce((s,a) => s + getBal(a), 0);
+  const totalDebt = accounts.filter(a => DEBT_TYPES.includes(a.type)).reduce((s,a) => s + getBal(a), 0);
+  const totalInvest = accounts.filter(a => ['401k','roth','brokerage','other_invest',...CRYPTO_COINS].includes(a.type)).reduce((s,a) => s + getBal(a), 0);
+  const cashHeavy = totalCash > 0 && totalInvest > 0 && totalCash > totalInvest * 0.5;
+  const debtFree = hasDebt === false || totalDebt === 0;
+  const highDebt = totalDebt > nw * 0.4;
+
+  // Build a pool relevant to this user's situation
+  const tips = [];
+
+  // Always relevant
+  tips.push("Net worth is a long game. Consistent tracking keeps you honest and motivated — you're already ahead by doing this.");
+  tips.push("Increasing income and reducing expenses both move net worth in the same direction — working both sides accelerates progress.");
+
+  // Cash-heavy
+  if (cashHeavy) {
+    tips.push("You have a healthy cash position. Excess cash beyond your emergency fund may work harder in a high-yield savings account or invested.");
+    tips.push("Cash loses value to inflation over time. If you have more than 6 months of expenses saved, consider putting the rest to work.");
+  }
+
+  // Low or no cash
+  if (totalCash < 5000 && totalInvest > 0) {
+    tips.push("A solid emergency fund — 3 to 6 months of expenses — acts as a buffer so you don't need to touch investments in a pinch.");
+  }
+
+  // Has credit card debt
+  if (hasCreditCard) {
+    tips.push("Credit card interest rates are often 20%+. Paying more than the minimum each month saves significantly over time.");
+    tips.push("High-interest debt like credit cards typically costs more than most investments earn. Paying it down is often the best return you can get.");
+  }
+
+  // Has mortgage
+  if (hasMortgage) {
+    tips.push("Your mortgage is likely your largest liability — but also builds equity over time. Extra principal payments reduce total interest paid.");
+    tips.push("As your home equity grows, it becomes a meaningful part of your net worth even while the debt shrinks.");
+  }
+
+  // Debt-free
+  if (debtFree && nw > 0) {
+    tips.push("Being debt-free is a significant financial milestone. With no interest working against you, every dollar saved compounds in your favor.");
+    tips.push("Without debt payments, you have more cash flow to direct toward building wealth — consider maxing out retirement accounts.");
+  }
+
+  // High debt relative to net worth
+  if (highDebt) {
+    tips.push("With significant debt relative to your net worth, focusing on reducing high-interest balances can accelerate your net worth growth.");
+  }
+
+  // Has 401k / retirement
+  if (has401k) {
+    tips.push("Even small, consistent contributions to a retirement account can grow significantly over time thanks to compound interest.");
+    tips.push("If your employer offers a 401k match, contributing at least enough to get the full match is essentially free money.");
+  } else {
+    tips.push("A retirement account like a 401k or Roth IRA is one of the most tax-efficient ways to build long-term wealth.");
+  }
+
+  // Has brokerage
+  if (hasBrokerage) {
+    tips.push("A taxable brokerage account complements retirement accounts — no contribution limits and accessible anytime.");
+    tips.push("Diversifying across cash, investments, and property helps smooth out volatility in any one area.");
+  }
+
+  // Has crypto
+  if (hasCrypto) {
+    tips.push("Crypto markets go through cycles — volatility is normal. Long-term holders have historically benefited from patience over reaction.");
+    tips.push("Most advisors suggest keeping speculative assets like crypto to a manageable percentage of your overall portfolio.");
+  }
+
+  // Has property
+  if (hasProperty) {
+    tips.push("Real estate is a long-term asset. Keeping your estimated values current in Stackd gives you a truer picture of your net worth.");
+  }
+
+  // General investing if no investments at all
+  if (!has401k && !hasBrokerage && !hasCrypto) {
+    tips.push("Automating savings — even a small amount — means you pay yourself first before spending. It's the foundation of building wealth.");
+    tips.push("Starting to invest, even in small amounts, lets compound growth work in your favor over time.");
+  }
+
+  return tips[Math.floor(Math.random() * tips.length)];
+}
 
 function showFallbackTip(textEl, loadingEl) {
-  const tip = FALLBACK_TIPS[Math.floor(Math.random() * FALLBACK_TIPS.length)];
+  const tip = getSmartFallbackTip();
   textEl.textContent = tip;
   textEl.style.display = 'block';
   loadingEl.style.display = 'none';
@@ -3281,7 +3361,6 @@ function showFallbackTip(textEl, loadingEl) {
   if (labelEl) labelEl.textContent = '💡 Tip';
   const metaEl = document.getElementById('insight-meta');
   if (metaEl) metaEl.textContent = '';
-  // hide refresh button on fallback
   const refreshBtn = document.getElementById('insight-refresh-btn');
   if (refreshBtn) refreshBtn.style.display = 'none';
 }
