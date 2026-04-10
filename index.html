@@ -33,7 +33,7 @@
   }
 
   [data-theme="light"] {
-    --bg: #f4f6f9;
+    --bg: #f6f8fb;
     --bg2: #ffffff;
     --bg3: #eaecf2;
     --border: rgba(0,0,0,0.06);
@@ -597,13 +597,13 @@
   .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 6px 0; }
   .section-label { font-size: 13px; color: var(--muted); letter-spacing: 0.03em; font-weight: 500; }
   .add-link {
-    font-size: 12px; color: var(--accent); background: none;
-    border: 1.5px solid var(--accent); cursor: pointer;
-    font-family: var(--font-display); padding: 4px 10px;
-    border-radius: 6px; transition: background 0.15s;
-    font-weight: 500;
+    font-size: 13px; color: var(--accent); background: none;
+    border: none; cursor: pointer;
+    font-family: var(--font-display); padding: 4px 0;
+    font-weight: 500; text-decoration: underline;
+    text-underline-offset: 3px; transition: opacity 0.15s;
   }
-  .add-link:hover { background: rgba(61,214,140,0.1); }
+  .add-link:hover { opacity: 0.75; }
 
   /* Account row */
   .acct-row {
@@ -629,16 +629,24 @@
     display: inline; font-size: 12px; font-family: var(--font-mono);
     color: var(--muted); margin-left: 0;
   }
-  .stale-tap { cursor: pointer; color: var(--muted); opacity: 0.6; display: inline-flex; align-items: center; vertical-align: middle; }
-  .stale-tap:hover { opacity: 1; color: var(--text); }
+  .stale-tap {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 15px; padding: 0; border-radius: 8px; line-height: 1;
+    opacity: 0; width: 0; overflow: hidden;
+    transition: opacity 0.2s ease, width 0.2s ease, padding 0.2s ease;
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .acct-row:hover .stale-tap { opacity: 1; width: 28px; padding: 6px; }
+  .stale-tap.always-show { opacity: 1; width: 28px; padding: 6px; margin-left: 8px; }
+  .stale-tap:hover { background: var(--bg2); color: var(--text); }
   .stale1 { color: var(--warn); }
   .stale2 { color: var(--danger); }
-  .acct-right { display: flex; align-items: center; flex-shrink: 0; }
+  .acct-right { display: flex; align-items: center; flex-shrink: 0; min-width: 80px; justify-content: flex-end; }
   .acct-bal {
     font-size: 16px; font-weight: 500; font-family: var(--font-mono);
     text-align: right; transition: transform 0.2s ease; white-space: nowrap;
   }
-  .acct-row:hover .acct-bal { transform: translateX(-8px); }
+  .acct-row:hover .acct-bal { transform: translateX(-4px); }
   .acct-sub { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
   .edit-ico {
     background: none; border: none; color: var(--muted); cursor: pointer;
@@ -687,9 +695,10 @@
   /* History */
   .hist-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 0; border-bottom: 1px solid var(--border);
-    font-size: 14px; border-radius: 0;
+    padding: 12px 10px; border-bottom: 1px solid var(--border);
+    font-size: 14px; border-radius: 8px;
     transition: background 0.15s; position: relative;
+    margin: 0 -10px;
   }
   .hist-row:last-child { border-bottom: none; }
   .hist-row:hover { background: var(--bg3); }
@@ -699,7 +708,7 @@
     display: flex; gap: 10px; align-items: center; white-space: nowrap;
     transition: transform 0.2s ease;
   }
-  .hist-row:hover .hist-vals { transform: translateX(-8px); }
+  .hist-row:hover .hist-vals { transform: translateX(-4px); }
   .hist-val { font-family: var(--font-mono); font-weight: 500; }
   .hist-edit-ico {
     background: none; border: none; color: var(--muted); cursor: pointer;
@@ -1183,7 +1192,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.53
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.58
   </div>
 
 </div>
@@ -1597,7 +1606,7 @@ const CRYPTO_ICONS = {
   matic:`<img src="https://assets.coingecko.com/coins/images/4713/small/matic-token-icon.png" width="36" height="36" style="border-radius:50%;display:block;" />`,
 };
 
-const REFRESH_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-bottom:1px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`;
+const REFRESH_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`;
 
 const TYPE_ICONS = {
   checking:    `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
@@ -1618,8 +1627,9 @@ let state = {
   sheetId: null,
   accounts: [],
   history: [],
-  events: [], // { date, type:'milestone'|'account_added'|'account_removed', label }
-  prices: { btc:0, eth:0, ada:0, sol:0, xrp:0, doge:0, avax:0, link:0, dot:0, matic:0 }
+  events: [],
+  prices: { btc:0, eth:0, ada:0, sol:0, xrp:0, doge:0, avax:0, link:0, dot:0, matic:0 },
+  changes: {}
 };
 let editingId = null;
 
@@ -1830,7 +1840,7 @@ async function loadFromSheet() {
   try {
     const id = state.sheetId;
     const [ar, hr] = await Promise.all([
-      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A2:F1000`),
+      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A2:G1000`),
       gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A2:B1000`)
     ]);
     const ad = await ar.json();
@@ -1840,8 +1850,17 @@ async function loadFromSheet() {
       balance: parseFloat(r[3]) || 0,
       amount: parseFloat(r[3]) || 0,
       updatedAt: parseInt(r[4]) || null,
-      note: r[5] || ''
+      note: r[5] || '',
+      lastPrice: parseFloat(r[6]) || 0
     }));
+    // seed prices from last known prices stored in sheet
+    state.accounts.forEach(a => {
+      if (CRYPTO_COINS.includes(a.type) && a.lastPrice > 0) {
+        if (!state.prices[a.type] || state.prices[a.type] === 0) {
+          state.prices[a.type] = a.lastPrice;
+        }
+      }
+    });
     state.history = (hd.values || []).map(r => ({
       date: parseInt(r[0]), total: parseFloat(r[1]) || 0
     }));
@@ -1856,17 +1875,18 @@ async function saveAccountsToSheet() {
   const rows = state.accounts.map(a => [
     a.id, a.name, a.type,
     CRYPTO_COINS.includes(a.type) ? a.amount : a.balance,
-    a.updatedAt || '', a.note || ''
+    a.updatedAt || '', a.note || '',
+    CRYPTO_COINS.includes(a.type) ? (state.prices[a.type] || a.lastPrice || '') : ''
   ]);
-  const values = [['id','name','type','balance_or_amount','updated_at','notes'], ...rows];
+  const values = [['id','name','type','balance_or_amount','updated_at','notes','last_price'], ...rows];
   await gapi('PUT',
-    `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A1:F${values.length}?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A1:G${values.length}?valueInputOption=RAW`,
     { values }
   );
   if (rows.length < 999) {
     const clearStart = rows.length + 2;
     await gapi('POST',
-      `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A${clearStart}:F1000:clear`, {}
+      `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Accounts!A${clearStart}:G1000:clear`, {}
     ).catch(()=>{});
   }
   showToast('Saved to Google Sheet');
@@ -1889,9 +1909,8 @@ async function saveHistoryToSheet() {
 // ---- PRICES ----
 async function fetchPrices() {
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana,ripple,dogecoin,avalanche-2,chainlink,polkadot,matic-network&vs_currencies=usd');
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana,ripple,dogecoin,avalanche-2,chainlink,polkadot,matic-network&vs_currencies=usd&include_24hr_change=true');
     const d = await r.json();
-    // only update price if we got a valid non-zero value — keep last known otherwise
     const update = (key, val) => { if (val && val > 0) state.prices[key] = val; };
     update('btc',   d.bitcoin?.usd);
     update('eth',   d.ethereum?.usd);
@@ -1903,30 +1922,44 @@ async function fetchPrices() {
     update('link',  d.chainlink?.usd);
     update('dot',   d.polkadot?.usd);
     update('matic', d['matic-network']?.usd);
-    // persist last known prices to localStorage
-    localStorage.setItem('stackd_prices', JSON.stringify(state.prices));
+    // store 24h changes
+    const setChange = (key, val) => { if (val !== undefined && val !== null) state.changes[key] = val; };
+    setChange('btc',   d.bitcoin?.usd_24h_change);
+    setChange('eth',   d.ethereum?.usd_24h_change);
+    setChange('ada',   d.cardano?.usd_24h_change);
+    setChange('sol',   d.solana?.usd_24h_change);
+    setChange('xrp',   d.ripple?.usd_24h_change);
+    setChange('doge',  d.dogecoin?.usd_24h_change);
+    setChange('avax',  d['avalanche-2']?.usd_24h_change);
+    setChange('link',  d.chainlink?.usd_24h_change);
+    setChange('dot',   d.polkadot?.usd_24h_change);
+    setChange('matic', d['matic-network']?.usd_24h_change);
   } catch(e) {
     console.error('price fetch error', e);
-    // on error, keep whatever is already in state (already loaded from cache below)
+    // if we have any cached prices treat as loaded, else keep waiting
   }
   render();
   autoSnapshot();
 }
 
-function loadCachedPrices() {
-  try {
-    const cached = localStorage.getItem('stackd_prices');
-    if (cached) {
-      const p = JSON.parse(cached);
-      // only apply cached values that are valid non-zero
-      Object.keys(p).forEach(k => { if (p[k] > 0) state.prices[k] = p[k]; });
-    }
-  } catch(e) {}
-}
+
 
 function getBal(acc) {
-  if (CRYPTO_COINS.includes(acc.type)) return (acc.amount || 0) * (state.prices[acc.type] || 0);
+  if (CRYPTO_COINS.includes(acc.type)) {
+    const price = state.prices[acc.type];
+    if (!price || price === 0) return 0;
+    return (acc.amount || 0) * price;
+  }
   return acc.balance || 0;
+}
+
+function getBalDisplay(acc) {
+  if (CRYPTO_COINS.includes(acc.type)) {
+    const price = state.prices[acc.type];
+    if (!price || price === 0) return '$0';
+    return fmt((acc.amount || 0) * price);
+  }
+  return fmt(acc.balance || 0);
 }
 
 // ---- RENDER ----
@@ -1961,6 +1994,7 @@ function renderGroup(group) {
 
     el.innerHTML = allInvest.map(acc => {
       const bal = getBal(acc);
+      const balDisp = getBalDisplay(acc);
       const isCrypto = CRYPTO_COINS.includes(acc.type);
       const iconContent = CRYPTO_ICONS[acc.type]
         ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
@@ -1968,23 +2002,30 @@ function renderGroup(group) {
           ? `<div class="acct-icon icon-invest">${TYPE_ICONS[acc.type]}</div>`
           : `<div class="acct-icon icon-invest">${acc.name.charAt(0).toUpperCase()}</div>`;
       const price = state.prices[acc.type];
+      const s = isCrypto ? null : staleness(acc.updatedAt);
+      const change24h = state.changes[acc.type];
+      const changeStr = change24h !== undefined
+        ? ` <span style="color:${change24h >= 0 ? 'var(--accent)' : 'var(--danger)'};font-size:11px;">${change24h >= 0 ? '+' : ''}${change24h.toFixed(1)}%</span> <span style="color:var(--muted);font-size:11px;">last 24h</span>`
+        : '';
       const meta = isCrypto
-        ? `<span style="white-space:nowrap;">${acc.amount} ${acc.type.toUpperCase()}${price ? ' &nbsp;·&nbsp; <span style="white-space:nowrap;">Price: $' + price.toLocaleString() + '</span>' : ''}</span>`
-        : (() => {
-            const s = staleness(acc.updatedAt);
-            if (!s) return TYPE_LABEL[acc.type];
-            if (s.tappable) return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span> <span class="stale-tap" onclick="markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</span>`;
-            return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
-          })();
+        ? `<span style="white-space:nowrap;">${acc.amount} ${acc.type.toUpperCase()}${price ? ' &nbsp;·&nbsp; $' + price.toLocaleString() + changeStr : ''}</span>`
+        : s ? `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>` : TYPE_LABEL[acc.type];
+      const staleBtn = (s && s.tappable)
+        ? `<button class="stale-tap" onclick="event.stopPropagation();markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</button>`
+        : (isCrypto && (!price || price === 0))
+          ? `<button class="stale-tap always-show" onclick="event.stopPropagation();fetchPrices()" title="Retry price">${REFRESH_ICON}</button>`
+          : '';
       return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
         <div class="acct-left">${iconContent}<div>
           <div class="acct-name">${acc.name}</div>
           <div class="acct-meta">${meta}</div>
           ${acc.note ? `<div class="acct-note">${acc.note}</div>` : ''}
         </div></div>
-        <div class="acct-right"><div>
-          <div class="acct-bal">${fmt(bal)}</div>
-        </div><button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')">✎</button></div>
+        <div class="acct-right">
+          <div class="acct-bal">${balDisp}</div>
+          ${staleBtn}
+          <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')" title="Edit">✎</button>
+        </div>
       </div>`;
     }).join('');
 
@@ -2016,15 +2057,25 @@ function renderGroup(group) {
         ? `<div class="acct-icon ${ICON_CLASS[group]}">${TYPE_ICONS[acc.type]}</div>`
         : `<div class="acct-icon ${ICON_CLASS[group]}">${acc.name.charAt(0).toUpperCase()}</div>`;
     const price = state.prices[acc.type];
+    const change24h2 = state.changes[acc.type];
+    const changeStr2 = change24h2 !== undefined
+      ? ` <span style="color:${change24h2 >= 0 ? 'var(--accent)' : 'var(--danger)'};font-size:11px;">${change24h2 >= 0 ? '+' : ''}${change24h2.toFixed(1)}%</span> <span style="color:var(--muted);font-size:11px;">last 24h</span>`
+      : '';
     const meta = isCrypto
-      ? `<span style="white-space:nowrap;">${acc.amount} ${acc.type.toUpperCase()}${price ? ' &nbsp;·&nbsp; <span style="white-space:nowrap;">Price: $' + price.toLocaleString() + '</span>' : ''}</span>`
+      ? `<span style="white-space:nowrap;">${acc.amount} ${acc.type.toUpperCase()}${price ? ' &nbsp;·&nbsp; $' + price.toLocaleString() + changeStr2 : ''}</span>`
       : (() => {
           const s = staleness(acc.updatedAt);
           if (!s) return TYPE_LABEL[acc.type];
-          if (s.tappable) return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span> <span class="stale-tap" onclick="markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</span>`;
           return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
         })();
+    const staleInfo = isCrypto ? null : staleness(acc.updatedAt);
+    const staleBtn2 = (staleInfo && staleInfo.tappable)
+      ? `<button class="stale-tap" onclick="event.stopPropagation();markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</button>`
+      : (isCrypto && (!price || price === 0))
+        ? `<button class="stale-tap always-show" onclick="event.stopPropagation();fetchPrices()" title="Retry price">${REFRESH_ICON}</button>`
+        : '';
     const balColor = isDebt ? 'color:var(--danger)' : '';
+    const balDisp2 = getBalDisplay(acc);
     return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
       <div class="acct-left">
         ${iconContent}
@@ -2035,10 +2086,9 @@ function renderGroup(group) {
         </div>
       </div>
       <div class="acct-right">
-        <div>
-          <div class="acct-bal" style="${balColor}">${isDebt ? '-' : ''}${fmt(bal)}</div>
-        </div>
-        <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')">✎</button>
+        <div class="acct-bal" style="${balColor}">${isDebt ? '-' : ''}${balDisp2 || fmt(bal)}</div>
+        ${staleBtn2}
+        <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')" title="Edit">✎</button>
       </div>
     </div>`;
   }).join('');
@@ -2105,7 +2155,7 @@ function render() {
         </div>
         <div class="acct-right">
           <div class="acct-bal" style="color:var(--danger)">-${fmt(getBal(acc))}</div>
-          <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')">✎</button>
+          <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')" title="Edit">✎</button>
         </div>
       </div>`).join('');
       const groupId = 'debt-' + type;
@@ -3588,12 +3638,44 @@ function renderChart() {
   };
 }
 
-// ---- BOOT ----
+// ---- BOOT (PREVIEW MODE — price failure simulation) ----
 (async () => {
-  loadCachedPrices();
+  const now = Date.now();
+  const day = 86400000;
+
+  PREVIEW_MODE = true;
   initTheme();
-  const handled = await handleAuthCallback();
-  if (!handled) showAuth();
+
+  state.accounts = [
+    { id:'1', name:'Chase Checking', type:'checking', balance:4200, amount:0, updatedAt: now - day, note:'' },
+    { id:'2', name:'Ally Savings', type:'savings', balance:18500, amount:0, updatedAt: now - 3*day, note:'emergency fund' },
+    { id:'3', name:'Fidelity 401k', type:'401k', balance:94000, amount:0, updatedAt: now - 10*day, note:'' },
+    { id:'4', name:'Bitcoin', type:'btc', balance:0, amount:0.45, note:'' },
+    { id:'5', name:'Ethereum', type:'eth', balance:0, amount:3.2, note:'' },
+    { id:'6', name:'Chase Visa', type:'creditcard', balance:2400, amount:0, updatedAt: now - 2*day, note:'' },
+  ];
+
+  // Simulate no prices loaded (new device, fetch failed)
+  state.prices = { btc:83000, eth:1800, ada:0.62, sol:140, xrp:0.52, doge:0.16, avax:25, link:14, dot:6, matic:0.55 };
+  state.changes = { btc: 3.2, eth: -1.8, ada: 0.5, sol: 5.1, xrp: -0.3, doge: 2.4, avax: -3.1, link: 1.7, dot: -0.8, matic: 0.9 };
+
+  const base = 140000;
+  state.history = [
+    { date: now - 180*day, total: base * 0.84 },
+    { date: now - 90*day,  total: base * 0.91 },
+    { date: now - 30*day,  total: base * 0.97 },
+  ];
+  state.events = [];
+
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-avatar').textContent = 'EJ';
+  document.getElementById('user-name').textContent = 'Edwin';
+  document.getElementById('dropdown-name').textContent = 'Edwin Rodriguez';
+  document.getElementById('dropdown-email').textContent = 'vandals856@gmail.com';
+
+  render();
 })();
 
 // ---- MOCKUP ANIMATIONS ----
