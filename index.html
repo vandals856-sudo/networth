@@ -86,9 +86,9 @@
     gap: 0;
   }
   .auth-tagline {
-    font-size: clamp(28px, 6vw, 48px); font-weight: 600;
-    color: #111827; letter-spacing: -1.5px; line-height: 1.15;
-    margin-bottom: 12px; max-width: 560px;
+    font-size: clamp(30px, 6vw, 56px); font-weight: 600;
+    color: #111827; letter-spacing: -1.5px; line-height: 1.1;
+    margin-bottom: 12px; max-width: 720px; width: 100%;
   }
   .auth-tagline span { color: #22c47a; }
   .auth-sub-tagline {
@@ -192,8 +192,8 @@
     max-width: 680px; margin: 0 auto;
   }
   .auth-props-eyebrow {
-    text-align: center; font-size: 15px; font-weight: 600;
-    letter-spacing: 0.04em;
+    text-align: center; font-size: 22px; font-weight: 600;
+    letter-spacing: -0.3px;
     color: #22c47a; margin-bottom: 48px;
   }
   .auth-prop-row {
@@ -1183,7 +1183,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.50
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.52
   </div>
 
 </div>
@@ -2678,7 +2678,7 @@ function openMilestoneHistory() {
       const pct = Math.max(0, Math.min(100, ((netWorth - prev) / (m.val - prev)) * 100)).toFixed(1);
       return `<div class="hist-row" style="cursor:default;">
         <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-          <span style="font-size:15px;">🎯</span>
+          <div style="width:20px;height:20px;border-radius:50%;border:1.5px dashed var(--accent);flex-shrink:0;"></div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <div style="color:var(--text);font-size:14px;">${m.name}</div>
