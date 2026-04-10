@@ -88,12 +88,16 @@
   .auth-tagline {
     font-size: clamp(30px, 6vw, 56px); font-weight: 600;
     color: #111827; letter-spacing: -1.5px; line-height: 1.1;
-    margin-bottom: 12px; max-width: 720px; width: 100%;
+    margin-bottom: 20px; max-width: 720px; width: 100%;
   }
   .auth-tagline span { color: #22c47a; }
   .auth-sub-tagline {
-    font-size: clamp(15px, 2.5vw, 18px); color: #8a94a6;
-    font-weight: 400; margin-bottom: 36px; max-width: 400px;
+    font-size: clamp(14px, 2vw, 16px); color: #8a94a6;
+    font-weight: 400; margin-bottom: 32px; max-width: 600px;
+    white-space: nowrap;
+  }
+  @media (max-width: 600px) {
+    .auth-sub-tagline { white-space: normal; font-size: 14px; }
   }
   .google-btn {
     display: inline-flex; align-items: center; justify-content: center;
@@ -107,7 +111,7 @@
   .google-btn:hover { opacity: 0.88; }
   .google-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
   .auth-sub {
-    margin-top: 14px; font-size: 12px; color: var(--muted);
+    margin-top: 18px; font-size: 12px; color: var(--muted);
     letter-spacing: 0.02em;
   }
 
@@ -208,7 +212,7 @@
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .auth-prop-title { font-size: 17px; font-weight: 600; color: #111827; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .auth-prop-title { font-size: 17px; font-weight: 600; color: #111827; margin-bottom: 8px; letter-spacing: -0.3px; }
   .auth-prop-desc { font-size: 14px; color: #8a94a6; line-height: 1.65; }
 
   /* Divider */
@@ -232,7 +236,7 @@
   }
   .auth-feature-title {
     font-size: clamp(22px, 4vw, 28px); font-weight: 600;
-    color: #e8edf2; letter-spacing: -0.5px; margin-bottom: 12px; line-height: 1.2;
+    color: #e8edf2; letter-spacing: -0.5px; margin-bottom: 16px; margin-top: 8px; line-height: 1.2;
   }
   .auth-feature-desc { font-size: 14px; color: #6e7a8a; line-height: 1.7; }
   .auth-feature-mockup {
@@ -270,7 +274,7 @@
 
   /* How it works */
   .auth-steps-section {
-    padding: 80px 2rem; max-width: 680px; margin: 0 auto;
+    padding: 80px 2rem; max-width: 860px; margin: 0 auto;
     text-align: center;
   }
   .auth-steps-wrap {
@@ -916,15 +920,6 @@
 
     <!-- Product mockup -->
     <div class="hero-mockup">
-
-      <!-- Topbar -->
-      <div class="hero-mockup-topbar" style="background:#ffffff;border-bottom:1px solid rgba(0,0,0,0.06);">
-        <div class="hero-mockup-logo" style="color:#111827;">stack<span style="color:#22c47a;">d</span></div>
-        <div style="width:26px;height:26px;border-radius:100px;background:#f4f6f9;border:1px solid rgba(0,0,0,0.10);display:flex;align-items:center;justify-content:center;">
-          <div style="width:20px;height:20px;border-radius:50%;background:#22c47a;font-size:9px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;">EJ</div>
-        </div>
-      </div>
-
       <!-- Body -->
       <div class="hero-mockup-body">
 
@@ -945,22 +940,33 @@
 
         <!-- Chart — wrapped in card like real app -->
         <div style="background:#f4f6f9;border-radius:12px;padding:12px 12px 8px;margin-bottom:14px;">
-          <div style="width:100%;height:90px;">
-            <svg viewBox="0 0 520 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;">
-              <defs>
-                <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#22c47a" stop-opacity="0.20"/>
-                  <stop offset="100%" stop-color="#22c47a" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <text x="0" y="87" font-size="7" fill="#b0b8c8" font-family="Fira Code,monospace" text-anchor="start">$100K</text>
-              <text x="0" y="50" font-size="7" fill="#b0b8c8" font-family="Fira Code,monospace" text-anchor="start">$300K</text>
-              <text x="0" y="16" font-size="7" fill="#b0b8c8" font-family="Fira Code,monospace" text-anchor="start">$550K</text>
-              <path class="mock-chart-fill" d="M40 82 C90 76 130 70 185 62 C230 55 255 58 300 48 C345 38 375 42 415 28 C448 18 476 20 506 13 L506 90 L40 90 Z" fill="url(#mg)"/>
-              <path class="mock-chart-path" d="M40 82 C90 76 130 70 185 62 C230 55 255 58 300 48 C345 38 375 42 415 28 C448 18 476 20 506 13" fill="none" stroke="#22c47a" stroke-width="2"/>
-              <circle cx="506" cy="13" r="10" fill="#22c47a" opacity="0" style="animation: mockPulse 2s ease-out 1.9s infinite;"/>
-              <circle cx="506" cy="13" r="4" fill="#22c47a" style="opacity:0;animation:fadeIn 0.3s ease 1.8s forwards;"/>
-            </svg>
+          <!-- Y-axis labels on left -->
+          <div style="display:flex;gap:8px;">
+            <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:36px;">
+              <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$550K</div>
+              <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$300K</div>
+              <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$100K</div>
+            </div>
+            <div style="flex:1;height:clamp(75px,18vw,95px);">
+              <svg viewBox="0 0 480 95" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;">
+                <defs>
+                  <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#22c47a" stop-opacity="0.20"/>
+                    <stop offset="100%" stop-color="#22c47a" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path class="mock-chart-fill" d="M0 88 C60 82 100 76 160 66 C210 58 240 60 285 48 C330 36 360 40 400 24 C430 12 460 14 480 6 L480 95 L0 95 Z" fill="url(#mg)"/>
+                <path class="mock-chart-path" d="M0 88 C60 82 100 76 160 66 C210 58 240 60 285 48 C330 36 360 40 400 24 C430 12 460 14 480 6" fill="none" stroke="#22c47a" stroke-width="2"/>
+                <circle cx="480" cy="6" r="10" fill="#22c47a" opacity="0" style="animation: mockPulse 2s ease-out 1.9s infinite;"/>
+                <circle cx="480" cy="6" r="4" fill="#22c47a" style="opacity:0;animation:fadeIn 0.3s ease 1.8s forwards;"/>
+              </svg>
+            </div>
+          </div>
+          <!-- X-axis dates -->
+          <div style="display:flex;justify-content:space-between;margin-top:4px;padding-left:44px;">
+            <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jan '24</div>
+            <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jun '24</div>
+            <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jan '25</div>
           </div>
         </div>
 
@@ -995,7 +1001,7 @@
         <!-- Assets section header -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <span style="font-size:18px;font-weight:600;letter-spacing:-0.5px;color:#111827;">Assets</span>
-          <div style="font-size:11px;color:#22c47a;border:1.5px solid #22c47a;border-radius:6px;padding:3px 8px;font-weight:500;">+ Add</div>
+          <div style="font-size:13px;color:#22c47a;font-weight:500;text-decoration:underline;text-underline-offset:3px;cursor:pointer;">+ Add</div>
         </div>
 
         <!-- Account rows - stagger in -->
@@ -1086,7 +1092,7 @@
   <div class="auth-feature-section">
     <div class="auth-feature-inner">
       <div class="auth-feature-text">
-        <div class="auth-props-eyebrow" style="text-align:left;color:#3dd68c;">Milestone tracker</div>
+        <div class="auth-props-eyebrow" style="text-align:left;color:#3dd68c;margin-bottom:8px;">Milestone tracker</div>
         <div class="auth-feature-title">Every dollar gets you closer</div>
         <div class="auth-feature-desc">Stackd tracks your progress toward ten financial milestones — from your first thousand to millionaire. Each one has a name, a meaning, and a moment worth celebrating.</div>
       </div>
@@ -1153,7 +1159,7 @@
   <!-- How it works -->
   <div class="auth-steps-wrap">
     <div class="auth-steps-section">
-      <div class="auth-props-eyebrow">How it works</div>
+      <div class="auth-props-eyebrow" style="margin-bottom:16px;">How it works</div>
       <div class="auth-steps">
         <div class="auth-step">
           <div class="auth-step-num">1</div>
