@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Stackd - Net Worth Tracker</title>
+<title>Wealthsnap - Net Worth Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0d1117;
@@ -73,8 +73,8 @@
     background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0,0,0,0.06);
   }
-  .auth-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; color: #111827; }
-  .auth-logo span { color: #22c47a; }
+  .auth-logo { font-size: 20px; font-weight: 300; letter-spacing: -1px; color: #111827; }
+  .auth-logo span { color: #22c47a; font-weight: 600; }
 
   /* Hero */
   .auth-hero {
@@ -159,8 +159,8 @@
     background: #ffffff; border-bottom: 1px solid rgba(0,0,0,0.06);
     padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
   }
-  .hero-mockup-logo { font-size: 14px; font-weight: 600; letter-spacing: -0.5px; color: #111827; }
-  .hero-mockup-logo span { color: #22c47a; }
+  .hero-mockup-logo { font-size: 14px; font-weight: 300; letter-spacing: -0.5px; color: #111827; }
+  .hero-mockup-logo span { color: #22c47a; font-weight: 600; }
   .hero-mockup-body { padding: 20px 20px 20px; background: #ffffff; }
   .hero-mockup-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
   .hero-mockup-nw { font-size: 36px; font-weight: 600; letter-spacing: -2px; color: var(--text); font-family: var(--font-mono); line-height: 1; }
@@ -362,8 +362,8 @@
     align-items: center;
     justify-content: space-between;
   }
-  .topbar-logo { font-size: 20px; font-weight: 600; letter-spacing: -1px; }
-  .topbar-logo span { color: var(--accent); }
+  .topbar-logo { font-size: 20px; font-weight: 300; letter-spacing: -1px; }
+  .topbar-logo span { color: var(--accent); font-weight: 600; }
   .privacy-btn {
     background: none; border: none; cursor: pointer;
     color: var(--muted); padding: 6px; border-radius: 8px;
@@ -900,7 +900,7 @@
 <div id="auth-screen">
 
   <div class="auth-topbar">
-    <div class="auth-logo">stack<span>d</span></div>
+    <div class="auth-logo">wealth<span>snap</span></div>
   </div>
 
   <!-- Hero -->
@@ -1052,7 +1052,7 @@
 
   <!-- Value props -->
   <div class="auth-props-section">
-    <div class="auth-props-eyebrow">Why Stackd</div>
+    <div class="auth-props-eyebrow">Why Wealthsnap</div>
     <div class="auth-prop-row">
 
       <div class="auth-prop">
@@ -1094,7 +1094,7 @@
       <div class="auth-feature-text">
         <div class="auth-props-eyebrow" style="text-align:left;color:#3dd68c;margin-bottom:8px;">Milestone tracker</div>
         <div class="auth-feature-title">Every dollar gets you closer</div>
-        <div class="auth-feature-desc">Stackd tracks your progress toward ten financial milestones — from your first thousand to millionaire. Each one has a name, a meaning, and a moment worth celebrating.</div>
+        <div class="auth-feature-desc">Wealthsnap tracks your progress toward ten financial milestones — from your first thousand to millionaire. Each one has a name, a meaning, and a moment worth celebrating.</div>
       </div>
       <div class="auth-feature-mockup">
         <div class="mock-milestone done">
@@ -1198,7 +1198,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v3.0
+    wealth<span style="color:var(--accent);">snap</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; <a href="privacy.html" style="color:var(--muted);text-decoration:none;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Privacy</a> &nbsp;·&nbsp; v3.0
   </div>
 
 </div>
@@ -1215,7 +1215,7 @@
 <!-- APP -->
 <div id="app-screen">
   <div class="topbar">
-    <div class="topbar-logo">stack<span>d</span></div>
+    <div class="topbar-logo">wealth<span>snap</span></div>
     <div class="topbar-right">
       <div class="user-menu" id="user-menu" onclick="toggleUserMenu()">
         <div class="user-pill">
@@ -1268,7 +1268,7 @@
           <div class="welcome-greeting" id="welcome-greeting">Welcome! 👋</div>
           <button class="insight-dismiss" onclick="dismissWelcome()" style="margin-top:2px;">✕</button>
         </div>
-        <div class="welcome-sub">Complete these steps to get the most out of Stackd.</div>
+        <div class="welcome-sub">Complete these steps to get the most out of Wealthsnap.</div>
         <div class="welcome-steps" id="welcome-steps"></div>
       </div>
     </div>
@@ -1569,7 +1569,7 @@ const GOOGLE_CLIENT_ID = '888736831379-tnffoch56c3shfcu6erl5hlc274hukml.apps.goo
 // ============================================================
 
 const SCOPES = 'openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
-const SHEET_TITLE = 'Stackd - Net Worth Tracker';
+const SHEET_TITLE = 'Wealthsnap - Net Worth Tracker';
 const DEMO_MODE = false;
 let PREVIEW_MODE = false; // set to true in preview boot
 
@@ -1646,8 +1646,8 @@ function initDemo() {
   document.getElementById('app-screen').style.display = 'block';
   document.getElementById('user-avatar').textContent = 'D';
   document.getElementById('user-name').textContent = 'demo';
-  state.accounts = JSON.parse(localStorage.getItem('stackd_demo_accts') || '[]');
-  state.history = JSON.parse(localStorage.getItem('stackd_demo_hist') || '[]');
+  state.accounts = JSON.parse(localStorage.getItem('wealthsnap_demo_accts') || '[]');
+  state.history = JSON.parse(localStorage.getItem('wealthsnap_demo_hist') || '[]');
   fetchPrices();
 }
 
@@ -1665,9 +1665,9 @@ function signIn() {
 }
 
 function signOut() {
-  localStorage.removeItem('stackd_token');
-  localStorage.removeItem('stackd_token_expiry');
-  localStorage.removeItem('stackd_sheet');
+  localStorage.removeItem('wealthsnap_token');
+  localStorage.removeItem('wealthsnap_token_expiry');
+  localStorage.removeItem('wealthsnap_sheet');
   window.location.reload();
 }
 
@@ -1678,33 +1678,33 @@ async function handleAuthCallback() {
 
   if (token) {
     const expiry = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
-    localStorage.setItem('stackd_token', token);
-    localStorage.setItem('stackd_token_expiry', expiry);
+    localStorage.setItem('wealthsnap_token', token);
+    localStorage.setItem('wealthsnap_token_expiry', expiry);
     window.history.replaceState({}, '', window.location.pathname);
     state.accessToken = token;
     const ok = await initApp();
-    if (!ok) { localStorage.removeItem('stackd_token'); showAuth(); }
+    if (!ok) { localStorage.removeItem('wealthsnap_token'); showAuth(); }
     return true;
   }
 
-  const saved = localStorage.getItem('stackd_token');
-  const expiry = parseInt(localStorage.getItem('stackd_token_expiry') || '0');
+  const saved = localStorage.getItem('wealthsnap_token');
+  const expiry = parseInt(localStorage.getItem('wealthsnap_token_expiry') || '0');
   const isExpired = expiry && Date.now() > expiry - 60000;
 
   if (saved && !isExpired) {
     state.accessToken = saved;
     const ok = await initApp();
     if (!ok) {
-      localStorage.removeItem('stackd_token');
-      localStorage.removeItem('stackd_token_expiry');
+      localStorage.removeItem('wealthsnap_token');
+      localStorage.removeItem('wealthsnap_token_expiry');
       showAuth();
     }
     return true;
   }
 
   if (saved) {
-    localStorage.removeItem('stackd_token');
-    localStorage.removeItem('stackd_token_expiry');
+    localStorage.removeItem('wealthsnap_token');
+    localStorage.removeItem('wealthsnap_token_expiry');
   }
 
   return false;
@@ -1744,14 +1744,14 @@ async function initApp() {
   document.getElementById('dropdown-email').textContent = user.email;
 
   showSetup('finding your sheet...');
-  const cachedId = localStorage.getItem('stackd_sheet_' + user.sub);
+  const cachedId = localStorage.getItem('wealthsnap_sheet_' + user.sub);
 
   if (cachedId) {
     const exists = await verifySheet(cachedId);
     if (exists) {
       state.sheetId = cachedId;
     } else {
-      localStorage.removeItem('stackd_sheet_' + user.sub);
+      localStorage.removeItem('wealthsnap_sheet_' + user.sub);
       state.sheetId = await findOrCreateSheet();
     }
   } else {
@@ -1759,7 +1759,7 @@ async function initApp() {
   }
 
   if (!state.sheetId) return false;
-  localStorage.setItem('stackd_sheet_' + user.sub, state.sheetId);
+  localStorage.setItem('wealthsnap_sheet_' + user.sub, state.sheetId);
 
   showSetup('loading your data...');
   await loadFromSheet();
@@ -1793,7 +1793,7 @@ async function verifySheet(id) {
 
 async function findOrCreateSheet() {
   try {
-    // search Drive for existing Stackd sheet
+    // search Drive for existing Wealthsnap sheet
     const q = encodeURIComponent(`name='${SHEET_TITLE}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`);
     const r = await gapi('GET', `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=1`);
     if (r.ok) {
@@ -1875,7 +1875,7 @@ async function loadFromSheet() {
 
 async function saveAccountsToSheet() {
   if (DEMO_MODE) {
-    localStorage.setItem('stackd_demo_accts', JSON.stringify(state.accounts));
+    localStorage.setItem('wealthsnap_demo_accts', JSON.stringify(state.accounts));
     return;
   }
   const rows = state.accounts.map(a => [
@@ -1900,7 +1900,7 @@ async function saveAccountsToSheet() {
 
 async function saveHistoryToSheet() {
   if (DEMO_MODE) {
-    localStorage.setItem('stackd_demo_hist', JSON.stringify(state.history));
+    localStorage.setItem('wealthsnap_demo_hist', JSON.stringify(state.history));
     return;
   }
   const rows = state.history.map(h => [h.date, h.total]);
@@ -2715,7 +2715,7 @@ function openMilestoneHistory() {
 
   const netWorth = getNetWorth();
   const everHadDebt = state.accounts.some(a => DEBT_TYPES.includes(a.type)) ||
-    !!localStorage.getItem('stackd_milestone_1');
+    !!localStorage.getItem('wealthsnap_milestone_1');
 
   // filter out positive NW milestone if never in debt
   const milestones = ALL_MILESTONES.filter(m => m.val !== 1 || everHadDebt);
@@ -2723,7 +2723,7 @@ function openMilestoneHistory() {
   const listEl = document.getElementById('milestone-history-list');
 
   const rows = milestones.map((m, i, arr) => {
-    const stored = localStorage.getItem('stackd_milestone_' + m.val);
+    const stored = localStorage.getItem('wealthsnap_milestone_' + m.val);
     // auto-fulfill if current net worth exceeds this milestone
     const hit = !!stored || netWorth >= m.val;
     const ts = stored && stored !== '1' ? parseInt(stored) : null;
@@ -2731,7 +2731,7 @@ function openMilestoneHistory() {
       ? new Date(ts).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
       : hit ? new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : null;
 
-    const remaining = milestones.filter(x => !localStorage.getItem('stackd_milestone_' + x.val) && netWorth < x.val);
+    const remaining = milestones.filter(x => !localStorage.getItem('wealthsnap_milestone_' + x.val) && netWorth < x.val);
     const isNext = !hit && remaining.length > 0 && remaining[0].val === m.val;
 
     if (hit) {
@@ -2793,7 +2793,7 @@ function checkMilestone(prevTotal, newTotal) {
   const values = hasDebt ? [1, ...MILESTONE_VALUES] : MILESTONE_VALUES;
   const crossed = values.find(m => prevTotal < m && newTotal >= m);
   if (!crossed) return;
-  const seenKey = 'stackd_milestone_' + crossed;
+  const seenKey = 'wealthsnap_milestone_' + crossed;
   if (localStorage.getItem(seenKey)) return;
   localStorage.setItem(seenKey, Date.now().toString()); // store timestamp
   const label = crossed === 1 ? 'Positive net worth!' :
@@ -2867,7 +2867,7 @@ function stopConfetti() {
 
 // ---- THEME ----
 function initTheme() {
-  const saved = localStorage.getItem('stackd_theme') || 'light';
+  const saved = localStorage.getItem('wealthsnap_theme') || 'light';
   applyTheme(saved, false);
 }
 
@@ -2900,12 +2900,12 @@ function applyTheme(theme, save = true) {
       knob.style.background = 'var(--muted)';
     }
   }
-  if (save) localStorage.setItem('stackd_theme', theme);
+  if (save) localStorage.setItem('wealthsnap_theme', theme);
   render();
 }
 
 function toggleTheme() {
-  const current = localStorage.getItem('stackd_theme') || 'dark';
+  const current = localStorage.getItem('wealthsnap_theme') || 'dark';
   applyTheme(current === 'light' ? 'dark' : 'light');
   document.getElementById('user-menu').classList.remove('open');
 }
@@ -3034,7 +3034,7 @@ async function deleteHistoryEntry() {
 }
 
 // ---- PROFILE ----
-const PROFILE_KEY = 'stackd_profile';
+const PROFILE_KEY = 'wealthsnap_profile';
 
 function getProfile() {
   try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'); } catch { return {}; }
@@ -3055,9 +3055,9 @@ function saveProfile() {
   const age = document.getElementById('p-age').value;
   localStorage.setItem(PROFILE_KEY, JSON.stringify({ age }));
   // clear insight cache so it regenerates with new context
-  localStorage.removeItem('stackd_insight_cache');
-  localStorage.removeItem('stackd_insight_nw');
-  localStorage.removeItem('stackd_insight_dismissed');
+  localStorage.removeItem('wealthsnap_insight_cache');
+  localStorage.removeItem('wealthsnap_insight_nw');
+  localStorage.removeItem('wealthsnap_insight_dismissed');
   closeProfile();
   showToast('Profile saved');
   // clear dismiss so insight shows and stays visible
@@ -3095,12 +3095,12 @@ function renderWelcomeSteps() {
 }
 
 function dismissWelcome() {
-  localStorage.setItem('stackd_welcome_dismissed', '1');
+  localStorage.setItem('wealthsnap_welcome_dismissed', '1');
   document.getElementById('welcome-banner').style.display = 'none';
 }
 
 function shouldShowWelcome() {
-  if (localStorage.getItem('stackd_welcome_dismissed')) return false;
+  if (localStorage.getItem('wealthsnap_welcome_dismissed')) return false;
   const { hasAssets, hasDebt, hasAge } = getWelcomeProgress();
   if (hasAssets && hasDebt && hasAge) return false;
   // hide if they have history older than 2 days — they know what they're doing
@@ -3110,9 +3110,9 @@ function shouldShowWelcome() {
 }
 
 // ---- AI INSIGHT ----
-const INSIGHT_DISMISS_KEY = 'stackd_insight_dismissed';
-const INSIGHT_CACHE_KEY = 'stackd_insight_cache';
-const INSIGHT_NW_KEY = 'stackd_insight_nw';
+const INSIGHT_DISMISS_KEY = 'wealthsnap_insight_dismissed';
+const INSIGHT_CACHE_KEY = 'wealthsnap_insight_cache';
+const INSIGHT_NW_KEY = 'wealthsnap_insight_nw';
 
 let _forceInsight = false;
 
@@ -3148,7 +3148,7 @@ async function maybeShowInsight(netWorth) {
   if (!profile.age) {
     // don't show age prompt if welcome card is already visible (it has the age step)
     if (shouldShowWelcome()) return;
-    const skipped = localStorage.getItem('stackd_age_skipped');
+    const skipped = localStorage.getItem('wealthsnap_age_skipped');
     if (skipped) {
       // permanently skipped - fall through to AI insight without age context
     } else {
@@ -3157,7 +3157,7 @@ async function maybeShowInsight(netWorth) {
         const daysSince = (Date.now() - parseInt(dismissed)) / 86400000;
         if (daysSince < 14) return;
         // shown twice now - permanently stop asking
-        localStorage.setItem('stackd_age_skipped', '1');
+        localStorage.setItem('wealthsnap_age_skipped', '1');
         return;
       }
       textEl.innerHTML = `Add your age range to see how your net worth compares to others your age. <span style="color:var(--accent);cursor:pointer;text-decoration:underline;" onclick="openProfile()">Set age range →</span>`;
@@ -3271,15 +3271,15 @@ async function maybeShowInsight(netWorth) {
     const ANGLES = ['PROJECTION', 'PEER_COMPARISON', 'TREND', 'COMPOSITION', 'CRYPTO_MARKET'];
     const hasCryptoHoldings = state.accounts.some(a => CRYPTO_COINS.includes(a.type));
     const eligibleAngles = hasCryptoHoldings ? ANGLES : ANGLES.filter(a => a !== 'CRYPTO_MARKET');
-    const angleIndex = parseInt(localStorage.getItem('stackd_insight_angle') || '0');
+    const angleIndex = parseInt(localStorage.getItem('wealthsnap_insight_angle') || '0');
     const angle = eligibleAngles[angleIndex % eligibleAngles.length];
-    localStorage.setItem('stackd_insight_angle', String(angleIndex + 1));
+    localStorage.setItem('wealthsnap_insight_angle', String(angleIndex + 1));
 
     // track recently used angles to avoid nagging on same topic
-    const recentAngles = JSON.parse(localStorage.getItem('stackd_insight_recent') || '[]');
+    const recentAngles = JSON.parse(localStorage.getItem('wealthsnap_insight_recent') || '[]');
     recentAngles.push(angle);
     if (recentAngles.length > 2) recentAngles.shift();
-    localStorage.setItem('stackd_insight_recent', JSON.stringify(recentAngles));
+    localStorage.setItem('wealthsnap_insight_recent', JSON.stringify(recentAngles));
     const avoidTopics = recentAngles.slice(0, -1); // all except current
 
     const angleInstructions = {
@@ -3300,7 +3300,7 @@ async function maybeShowInsight(netWorth) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 1000,
-        system: `You are a friendly financial coach inside a net worth tracker called Stackd. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} If their history is short or their balance recently jumped due to adding accounts, briefly acknowledge they're getting started and focus on something positive — do not dwell on or repeat concerns about data mismatches. Never use bullet points. Keep it warm, specific, and human.`,
+        system: `You are a friendly financial coach inside a net worth tracker called Wealthsnap. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} If their history is short or their balance recently jumped due to adding accounts, briefly acknowledge they're getting started and focus on something positive — do not dwell on or repeat concerns about data mismatches. Never use bullet points. Keep it warm, specific, and human.`,
         messages: [{ role: 'user', content: fullContext }]
       })
     });
@@ -3414,7 +3414,7 @@ function getSmartFallbackTip() {
 
   // Has property
   if (hasProperty) {
-    tips.push("Real estate is a long-term asset. Keeping your estimated values current in Stackd gives you a truer picture of your net worth.");
+    tips.push("Real estate is a long-term asset. Keeping your estimated values current in Wealthsnap gives you a truer picture of your net worth.");
   }
 
   // General investing if no investments at all
@@ -3443,7 +3443,7 @@ function refreshInsight() {
   localStorage.removeItem(INSIGHT_CACHE_KEY);
   localStorage.removeItem(INSIGHT_NW_KEY);
   localStorage.removeItem(INSIGHT_DISMISS_KEY);
-  localStorage.removeItem('stackd_insight_recent');
+  localStorage.removeItem('wealthsnap_insight_recent');
   document.getElementById('insight-card').style.display = 'none';
   forceShowInsight(getNetWorth());
 }
