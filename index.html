@@ -1192,7 +1192,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.58
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v3.0
   </div>
 
 </div>
@@ -3638,45 +3638,14 @@ function renderChart() {
   };
 }
 
-// ---- BOOT (PREVIEW MODE — price failure simulation) ----
+// ---- BOOT ----
 (async () => {
-  const now = Date.now();
-  const day = 86400000;
-
-  PREVIEW_MODE = true;
   initTheme();
-
-  state.accounts = [
-    { id:'1', name:'Chase Checking', type:'checking', balance:4200, amount:0, updatedAt: now - day, note:'' },
-    { id:'2', name:'Ally Savings', type:'savings', balance:18500, amount:0, updatedAt: now - 3*day, note:'emergency fund' },
-    { id:'3', name:'Fidelity 401k', type:'401k', balance:94000, amount:0, updatedAt: now - 10*day, note:'' },
-    { id:'4', name:'Bitcoin', type:'btc', balance:0, amount:0.45, note:'' },
-    { id:'5', name:'Ethereum', type:'eth', balance:0, amount:3.2, note:'' },
-    { id:'6', name:'Chase Visa', type:'creditcard', balance:2400, amount:0, updatedAt: now - 2*day, note:'' },
-  ];
-
-  // Simulate no prices loaded (new device, fetch failed)
-  state.prices = { btc:83000, eth:1800, ada:0.62, sol:140, xrp:0.52, doge:0.16, avax:25, link:14, dot:6, matic:0.55 };
-  state.changes = { btc: 3.2, eth: -1.8, ada: 0.5, sol: 5.1, xrp: -0.3, doge: 2.4, avax: -3.1, link: 1.7, dot: -0.8, matic: 0.9 };
-
-  const base = 140000;
-  state.history = [
-    { date: now - 180*day, total: base * 0.84 },
-    { date: now - 90*day,  total: base * 0.91 },
-    { date: now - 30*day,  total: base * 0.97 },
-  ];
-  state.events = [];
-
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-avatar').textContent = 'EJ';
-  document.getElementById('user-name').textContent = 'Edwin';
-  document.getElementById('dropdown-name').textContent = 'Edwin Rodriguez';
-  document.getElementById('dropdown-email').textContent = 'vandals856@gmail.com';
-
-  render();
+  const handled = await handleAuthCallback();
+  if (!handled) showAuth();
 })();
+
+setInterval(fetchPrices, 60000);
 
 // ---- MOCKUP ANIMATIONS ----
 function animateMockNW(from, to, duration, onDone) {
@@ -3721,8 +3690,6 @@ function runMockupAnimations() {
 if (document.getElementById('auth-screen')) {
   window.addEventListener('load', () => setTimeout(runMockupAnimations, 400));
 }
-
-setInterval(fetchPrices, 60000);
 </script>
 </body>
 </html>
