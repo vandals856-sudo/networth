@@ -1183,7 +1183,7 @@
   </div>
 
   <div class="auth-footer">
-    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.52
+    stack<span style="color:var(--accent);">d</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; v2.53
   </div>
 
 </div>
@@ -1891,19 +1891,37 @@ async function fetchPrices() {
   try {
     const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana,ripple,dogecoin,avalanche-2,chainlink,polkadot,matic-network&vs_currencies=usd');
     const d = await r.json();
-    state.prices.btc   = d.bitcoin?.usd || 0;
-    state.prices.eth   = d.ethereum?.usd || 0;
-    state.prices.ada   = d.cardano?.usd || 0;
-    state.prices.sol   = d.solana?.usd || 0;
-    state.prices.xrp   = d.ripple?.usd || 0;
-    state.prices.doge  = d.dogecoin?.usd || 0;
-    state.prices.avax  = d['avalanche-2']?.usd || 0;
-    state.prices.link  = d.chainlink?.usd || 0;
-    state.prices.dot   = d.polkadot?.usd || 0;
-    state.prices.matic = d['matic-network']?.usd || 0;
-  } catch(e) { console.error('price fetch error', e); }
+    // only update price if we got a valid non-zero value — keep last known otherwise
+    const update = (key, val) => { if (val && val > 0) state.prices[key] = val; };
+    update('btc',   d.bitcoin?.usd);
+    update('eth',   d.ethereum?.usd);
+    update('ada',   d.cardano?.usd);
+    update('sol',   d.solana?.usd);
+    update('xrp',   d.ripple?.usd);
+    update('doge',  d.dogecoin?.usd);
+    update('avax',  d['avalanche-2']?.usd);
+    update('link',  d.chainlink?.usd);
+    update('dot',   d.polkadot?.usd);
+    update('matic', d['matic-network']?.usd);
+    // persist last known prices to localStorage
+    localStorage.setItem('stackd_prices', JSON.stringify(state.prices));
+  } catch(e) {
+    console.error('price fetch error', e);
+    // on error, keep whatever is already in state (already loaded from cache below)
+  }
   render();
   autoSnapshot();
+}
+
+function loadCachedPrices() {
+  try {
+    const cached = localStorage.getItem('stackd_prices');
+    if (cached) {
+      const p = JSON.parse(cached);
+      // only apply cached values that are valid non-zero
+      Object.keys(p).forEach(k => { if (p[k] > 0) state.prices[k] = p[k]; });
+    }
+  } catch(e) {}
 }
 
 function getBal(acc) {
@@ -3572,6 +3590,7 @@ function renderChart() {
 
 // ---- BOOT ----
 (async () => {
+  loadCachedPrices();
   initTheme();
   const handled = await handleAuthCallback();
   if (!handled) showAuth();
