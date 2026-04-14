@@ -757,10 +757,15 @@
     border-radius: 20px 20px 0 0; padding: 1.5rem;
     width: 100%; max-width: 420px;
     animation: slideup 0.2s ease;
+    max-height: 85vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 60px;
+    position: relative;
   }
-  @media(min-width:500px){ .modal { border-radius: 20px; } }
+  @media(min-width:500px){ .modal { border-radius: 20px; margin-top: 0; max-height: 90vh; } }
   @keyframes slideup { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 1.25rem; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 1.25rem; cursor: grab; }
   @media(min-width:500px){ .modal-handle { display: none; } }
   .modal h3 { font-size: 18px; font-weight: 500; margin-bottom: 1.25rem; }
   .field { margin-bottom: 14px; }
@@ -2454,6 +2459,8 @@ function openAddCategory(category) {
   }
 
   document.getElementById('overlay').classList.add('open');
+  lockScroll();
+  initBottomSheet(document.getElementById('overlay'), closeModal);
   setTimeout(() => document.getElementById('f-name').focus(), 100);
 }
 
@@ -2472,6 +2479,8 @@ function openEdit(id) {
   onTypeChange();
   document.getElementById('btn-delete').style.display = 'block';
   document.getElementById('overlay').classList.add('open');
+  lockScroll();
+  initBottomSheet(document.getElementById('overlay'), closeModal);
 }
 
 function onTypeChange() {
@@ -2555,8 +2564,52 @@ async function deleteAccount() {
   autoSnapshot();
 }
 
-function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; }
-// ---- OVERLAY CLICK (prevents closing when selecting text) ----
+function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; unlockScroll(); }
+// ---- BOTTOM SHEET DRAG TO CLOSE ----
+function initBottomSheet(overlayEl, closeFn) {
+  const modal = overlayEl.querySelector('.modal');
+  if (!modal) return;
+  let startY = 0, currentY = 0, dragging = false;
+
+  const handle = modal.querySelector('.modal-handle');
+  const dragTarget = handle || modal;
+
+  dragTarget.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    currentY = 0;
+    dragging = true;
+    modal.style.transition = 'none';
+  }, { passive: true });
+
+  dragTarget.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    currentY = e.touches[0].clientY - startY;
+    if (currentY < 0) currentY = 0;
+    modal.style.transform = `translateY(${currentY}px)`;
+  }, { passive: true });
+
+  dragTarget.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    modal.style.transition = 'transform 0.2s ease';
+    if (currentY > 100) {
+      modal.style.transform = `translateY(100%)`;
+      setTimeout(() => { modal.style.transform = ''; modal.style.transition = ''; closeFn(); }, 200);
+    } else {
+      modal.style.transform = '';
+    }
+  });
+
+  // tap on overlay backdrop (not the modal) to close
+  overlayEl.addEventListener('mousedown', e => { _overlayMousedownTarget = e.target; });
+  overlayEl.addEventListener('click', e => {
+    if (e.target === overlayEl && _overlayMousedownTarget === overlayEl) closeFn();
+  });
+}
+
+// ---- SCROLL LOCK ----
+function lockScroll() { document.body.style.overflow = 'hidden'; }
+function unlockScroll() { document.body.style.overflow = ''; }
 let _overlayMousedownTarget = null;
 document.addEventListener('mousedown', e => {
   _overlayMousedownTarget = e.target;
@@ -2780,10 +2833,13 @@ function openMilestoneHistory() {
 
   listEl.innerHTML = rows;
   document.getElementById('milestone-history-overlay').style.display = 'flex';
+  lockScroll();
+  initBottomSheet(document.getElementById('milestone-history-overlay'), closeMilestoneHistory);
 }
 
 function closeMilestoneHistory() {
   document.getElementById('milestone-history-overlay').style.display = 'none';
+  unlockScroll();
 }
 const MILESTONE_VALUES = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
 let confettiAnim = null;
@@ -3003,11 +3059,14 @@ function openEditHistory(idx) {
   document.getElementById('h-date').value = dateStr;
   document.getElementById('h-total').value = Math.round(entry.total);
   document.getElementById('history-overlay').style.display = 'flex';
+  lockScroll();
+  initBottomSheet(document.getElementById('history-overlay'), closeEditHistory);
 }
 
 function closeEditHistory() {
   document.getElementById('history-overlay').style.display = 'none';
   editingHistoryIdx = null;
+  unlockScroll();
 }
 
 async function saveEditHistory() {
@@ -3045,10 +3104,13 @@ function openProfile() {
   document.getElementById('p-age').value = profile.age || '';
   document.getElementById('profile-overlay').style.display = 'flex';
   document.getElementById('user-menu').classList.remove('open');
+  lockScroll();
+  initBottomSheet(document.getElementById('profile-overlay'), closeProfile);
 }
 
 function closeProfile() {
   document.getElementById('profile-overlay').style.display = 'none';
+  unlockScroll();
 }
 
 function saveProfile() {
