@@ -3009,12 +3009,13 @@ function toggleTheme() {
 
 // ---- PRIVACY ----
 let privacyOn = false;
-const PRIVACY_SELECTORS = [
-  '#hero-total', '#hero-change', '#s-cash', '#s-investments',
-  '#s-property', '#s-debt', '#cat-total-assets', '#cat-total-debt',
-  '.acct-bal', '.acct-sub', '.hist-val', '.hist-change', '.stat-tile-val',
-  '.section-total', '.breakdown-amt', '.milestone-next strong',
-  '.milestone-next', '#milestone-next'
+const PRIVACY_SELECTORS_DOTS = [
+  '#hero-total', '#hero-change', '.acct-bal', '.hist-val', '.hist-change',
+  '.stat-tile-val', '.breakdown-amt', '.milestone-next strong', '#milestone-next'
+];
+const PRIVACY_SELECTORS_HIDE = [
+  '.acct-sub', '.section-total', '#cat-total-assets', '#cat-total-debt',
+  '#s-cash', '#s-investments', '#s-property', '#s-debt', '.milestone-next'
 ];
 
 function togglePrivacy() {
@@ -3028,12 +3029,16 @@ function togglePrivacy() {
 }
 
 function applyPrivacy() {
-  PRIVACY_SELECTORS.forEach(sel => {
+  PRIVACY_SELECTORS_DOTS.forEach(sel => {
     document.querySelectorAll(sel).forEach(el => {
       el.classList.toggle('private-val', privacyOn);
     });
   });
-  // also hide chart canvas
+  PRIVACY_SELECTORS_HIDE.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.style.visibility = privacyOn ? 'hidden' : '';
+    });
+  });
   const canvas = document.getElementById('nw-chart');
   if (canvas) canvas.style.filter = privacyOn ? 'blur(8px)' : '';
 }
@@ -3572,6 +3577,7 @@ function setRange(r) {
     b.classList.toggle('active', b.textContent.trim() === (map[r] || r.toUpperCase()));
   });
   render();
+  if (privacyOn) applyPrivacy();
 }
 
 function getFilteredHistory() {
