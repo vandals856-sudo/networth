@@ -364,7 +364,7 @@
   }
   .privacy-btn:hover { color: var(--text); background: var(--bg3); }
   .privacy-btn.active { color: var(--accent); }
-  .private-val { filter: blur(8px); user-select: none; transition: filter 0.2s; }
+  .private-val { color: transparent !important; background: var(--border2); border-radius: 4px; user-select: none; transition: all 0.2s; }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-menu { position: relative; cursor: pointer; }
@@ -2050,8 +2050,9 @@ function renderGroup(group) {
         ? ` <span style="color:${change24h >= 0 ? 'var(--accent)' : 'var(--danger)'};font-size:11px;">${change24h >= 0 ? '+' : ''}${change24h.toFixed(1)}%</span> <span style="color:var(--muted);font-size:11px;">last 24h</span>`
         : '';
       const meta = isCrypto
-        ? `<span style="white-space:nowrap;">${acc.amount} ${acc.type.toUpperCase()}${price ? ' &nbsp;·&nbsp; $' + price.toLocaleString() + changeStr : ''}</span>`
+        ? `<span style="white-space:nowrap;">${price ? '$' + price.toLocaleString() + changeStr : ''}</span>`
         : s ? `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>` : TYPE_LABEL[acc.type];
+      const cryptoSub = isCrypto ? `<div class="acct-sub">${acc.amount} ${acc.type.toUpperCase()}</div>` : '';
       const staleBtn = (s && s.tappable)
         ? `<button class="stale-tap" onclick="event.stopPropagation();markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</button>`
         : (isCrypto && (!price || price === 0))
@@ -2064,7 +2065,10 @@ function renderGroup(group) {
           ${acc.note ? `<div class="acct-note">${acc.note}</div>` : ''}
         </div></div>
         <div class="acct-right">
-          <div class="acct-bal">${balDisp}</div>
+          <div>
+            <div class="acct-bal">${balDisp}</div>
+            ${cryptoSub}
+          </div>
           ${staleBtn}
           <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')" title="Edit">✎</button>
         </div>
@@ -2104,12 +2108,13 @@ function renderGroup(group) {
       ? ` <span style="color:${change24h2 >= 0 ? 'var(--accent)' : 'var(--danger)'};font-size:11px;">${change24h2 >= 0 ? '+' : ''}${change24h2.toFixed(1)}%</span> <span style="color:var(--muted);font-size:11px;">last 24h</span>`
       : '';
     const meta = isCrypto
-      ? `<span style="white-space:nowrap;">${acc.amount} ${acc.type.toUpperCase()}${price ? ' &nbsp;·&nbsp; $' + price.toLocaleString() + changeStr2 : ''}</span>`
+      ? `<span style="white-space:nowrap;">${price ? '$' + price.toLocaleString() + changeStr2 : ''}</span>`
       : (() => {
           const s = staleness(acc.updatedAt);
           if (!s) return TYPE_LABEL[acc.type];
           return `${TYPE_LABEL[acc.type]} · <span class="${s.cls}">${s.text}</span>`;
         })();
+    const cryptoSub2 = isCrypto ? `<div class="acct-sub">${acc.amount} ${acc.type.toUpperCase()}</div>` : '';
     const staleInfo = isCrypto ? null : staleness(acc.updatedAt);
     const staleBtn2 = (staleInfo && staleInfo.tappable)
       ? `<button class="stale-tap" onclick="event.stopPropagation();markUpdated('${acc.id}')" title="no changes">${REFRESH_ICON}</button>`
@@ -2128,7 +2133,10 @@ function renderGroup(group) {
         </div>
       </div>
       <div class="acct-right">
-        <div class="acct-bal" style="${balColor}">${isDebt ? '-' : ''}${balDisp2 || fmt(bal)}</div>
+        <div>
+          <div class="acct-bal" style="${balColor}">${isDebt ? '-' : ''}${balDisp2 || fmt(bal)}</div>
+          ${cryptoSub2}
+        </div>
         ${staleBtn2}
         <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')" title="Edit">✎</button>
       </div>
@@ -2719,6 +2727,7 @@ function toggleHistory() {
   const histEl = document.getElementById('history');
   histEl.dataset.expanded = histEl.dataset.expanded === 'true' ? 'false' : 'true';
   render();
+  if (privacyOn) applyPrivacy();
 }
 
 function toggleUserMenu() {
@@ -3002,7 +3011,7 @@ let privacyOn = false;
 const PRIVACY_SELECTORS = [
   '#hero-total', '#hero-change', '#s-cash', '#s-investments',
   '#s-property', '#s-debt', '#cat-total-assets', '#cat-total-debt',
-  '.acct-bal', '.acct-sub', '.hist-val', '.stat-tile-val',
+  '.acct-bal', '.acct-sub', '.hist-val', '.hist-vals', '.hist-date', '.stat-tile-val',
   '.section-total', '.breakdown-amt', '.milestone-next strong',
   '.milestone-next', '#milestone-next'
 ];
@@ -3023,7 +3032,7 @@ function applyPrivacy() {
       el.classList.toggle('private-val', privacyOn);
     });
   });
-  // also blur chart canvas
+  // also hide chart canvas
   const canvas = document.getElementById('nw-chart');
   if (canvas) canvas.style.filter = privacyOn ? 'blur(8px)' : '';
 }
