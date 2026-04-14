@@ -137,17 +137,10 @@
   }
   .mock-new-row.visible { opacity: 1; transform: translateY(0); border-color: transparent; background: #f4f6f9; }
   .mock-chart-path {
-    stroke-dasharray: 700;
-    stroke-dashoffset: 700;
-    animation: drawChart 1.8s ease forwards;
+    stroke-dasharray: 496;
+    stroke-dashoffset: 496;
   }
-  @keyframes drawChart {
-    to { stroke-dashoffset: 0; }
-  }
-  .mock-chart-fill {
-    opacity: 0;
-    animation: fadeIn 0.6s ease 1.6s forwards;
-  }
+  .mock-chart-fill { opacity: 0; transition: opacity 0.6s ease; }
   @keyframes fadeIn { to { opacity: 1; } }
   @keyframes mockPulse {
     0% { r: 3.5; opacity: 0.4; }
@@ -960,8 +953,8 @@
                     <stop offset="100%" stop-color="#22c47a" stop-opacity="0"/>
                   </linearGradient>
                 </defs>
-                <path class="mock-chart-fill" d="M0 88 C60 82 100 76 160 66 C210 58 240 60 285 48 C330 36 360 40 400 24 C430 12 460 14 480 6 L480 95 L0 95 Z" fill="url(#mg)"/>
-                <path class="mock-chart-path" d="M0 88 C60 82 100 76 160 66 C210 58 240 60 285 48 C330 36 360 40 400 24 C430 12 460 14 480 6" fill="none" stroke="#22c47a" stroke-width="2"/>
+                <path class="mock-chart-fill" d="M0 88 C40 82 70 70 120 58 C155 50 175 52 210 42 C240 34 260 36 290 50 C315 62 335 48 370 32 C400 18 440 14 480 8 L480 95 L0 95 Z" fill="url(#mg)"/>
+                <path class="mock-chart-path" d="M0 88 C40 82 70 70 120 58 C155 50 175 52 210 42 C240 34 260 36 290 50 C315 62 335 48 370 32 C400 18 440 14 480 8" fill="none" stroke="#22c47a" stroke-width="2"/>
                 <circle cx="480" cy="6" r="10" fill="#22c47a" opacity="0" style="animation: mockPulse 2s ease-out 1.9s infinite;"/>
                 <circle cx="480" cy="6" r="4" fill="#22c47a" style="opacity:0;animation:fadeIn 0.3s ease 1.8s forwards;"/>
               </svg>
@@ -1003,49 +996,87 @@
           <div style="flex:1;background:#e05555;border-radius:0 3px 3px 0;"></div>
         </div>
 
-        <!-- Assets section header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:18px;font-weight:600;letter-spacing:-0.5px;color:#111827;">Assets</span>
-          <div style="font-size:13px;color:#22c47a;font-weight:500;text-decoration:underline;text-underline-offset:3px;cursor:pointer;">+ Add</div>
-        </div>
-
-        <!-- Account rows - stagger in -->
-        <div style="display:flex;flex-direction:column;gap:6px;" id="mock-rows">
-          <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <!-- Account rows - stagger in with scroll-up effect, only 3 visible at a time -->
+        <div style="height:144px;overflow:hidden;position:relative;" id="mock-rows-wrap">
+          <div style="display:flex;flex-direction:column;gap:6px;position:absolute;width:100%;transition:transform 0.5s ease;" id="mock-rows">
+            <!-- Row 1 -->
+            <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Ally Savings</div>
+                  <div style="font-size:10px;color:#8a94a6;text-align:left;">Savings</div>
+                </div>
               </div>
-              <div>
-                <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Ally Savings</div>
-                <div style="font-size:10px;color:#8a94a6;text-align:left;">Savings</div>
-              </div>
+              <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$18,500</div>
             </div>
-            <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$18,500</div>
-          </div>
-          <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,127,193,0.12);display:flex;align-items:center;justify-content:center;color:#4A7FC1;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <!-- Row 2 -->
+            <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,127,193,0.12);display:flex;align-items:center;justify-content:center;color:#4A7FC1;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Fidelity 401k</div>
+                  <div style="font-size:10px;color:#8a94a6;text-align:left;">401k</div>
+                </div>
               </div>
-              <div>
-                <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Fidelity 401k</div>
-                <div style="font-size:10px;color:#8a94a6;text-align:left;">401k</div>
-              </div>
+              <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$94,000</div>
             </div>
-            <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$94,000</div>
-          </div>
-          <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,168,192,0.12);display:flex;align-items:center;justify-content:center;color:#4AA8C0;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+            <!-- Row 3 -->
+            <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,168,192,0.12);display:flex;align-items:center;justify-content:center;color:#4AA8C0;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Primary Home</div>
+                  <div style="font-size:10px;color:#8a94a6;text-align:left;">Real estate</div>
+                </div>
               </div>
-              <div>
-                <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Primary Home</div>
-                <div style="font-size:10px;color:#8a94a6;text-align:left;">Real estate</div>
-              </div>
+              <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$420,000</div>
             </div>
-            <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$420,000</div>
+            <!-- Row 4 — debt (causes dip) -->
+            <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(217,96,96,0.12);display:flex;align-items:center;justify-content:center;color:#D96060;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Chase Visa</div>
+                  <div style="font-size:10px;color:#8a94a6;text-align:left;">Credit card</div>
+                </div>
+              </div>
+              <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#D96060;">-$8,400</div>
+            </div>
+            <!-- Row 5 -->
+            <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,127,193,0.12);display:flex;align-items:center;justify-content:center;color:#4A7FC1;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Robinhood</div>
+                  <div style="font-size:10px;color:#8a94a6;text-align:left;">Brokerage</div>
+                </div>
+              </div>
+              <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$34,000</div>
+            </div>
+            <!-- Row 6 -->
+            <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Chase Checking</div>
+                  <div style="font-size:10px;color:#8a94a6;text-align:left;">Checking</div>
+                </div>
+              </div>
+              <div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$4,200</div>
+            </div>
           </div>
         </div>
 
@@ -3723,34 +3754,96 @@ function animateMockNW(from, to, duration, onDone) {
   function step(now) {
     const progress = Math.min((now - startTime) / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
-    nwEl.textContent = '$' + Math.round(from + (to - from) * eased).toLocaleString();
+    const current = Math.round(from + (to - from) * eased);
+    nwEl.textContent = '$' + current.toLocaleString();
     if (progress < 1) requestAnimationFrame(step);
     else if (onDone) onDone();
   }
   requestAnimationFrame(step);
 }
 
+function animateMockChartSegment(fromOffset, toOffset, duration, delay) {
+  setTimeout(() => {
+    const path = document.querySelector('.mock-chart-path');
+    if (!path) return;
+    const startTime = performance.now();
+    function step(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      // very gentle ease — slow start, slow end
+      const eased = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      path.style.strokeDashoffset = fromOffset + (toOffset - fromOffset) * eased;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }, delay);
+}
+
 function runMockupAnimations() {
   const nwEl = document.getElementById('mock-nw');
   if (!nwEl) return;
 
-  // accounts and their running totals
+  const TOTAL_DASH = 496;
+  const FINAL_NW = 562300;
+
   const steps = [
-    { total: 18500,  delay: 400 },
-    { total: 112500, delay: 1100 },
-    { total: 532500, delay: 1800 },
+    { total: 18500,  delay: 400  },
+    { total: 112500, delay: 900  },
+    { total: 532500, delay: 1400 },
+    { total: 524100, delay: 1900 },
+    { total: 558100, delay: 2400 },
+    { total: 562300, delay: 2900 },
   ];
 
   nwEl.textContent = '$0';
+  const path = document.querySelector('.mock-chart-path');
+  if (path) path.style.strokeDashoffset = TOTAL_DASH;
   const rows = document.querySelectorAll('.mock-row-anim');
+  const rowsContainer = document.getElementById('mock-rows');
+  const rowsWrap = document.getElementById('mock-rows-wrap');
+
+  requestAnimationFrame(() => {
+    if (rows[0] && rows[2] && rowsWrap) {
+      const r0 = rows[0].getBoundingClientRect();
+      const r2 = rows[2].getBoundingClientRect();
+      rowsWrap.style.height = (r2.bottom - r0.top) + 'px';
+    }
+  });
+
+  const CHART_DURATION = 3100;
+  setTimeout(() => {
+    const path = document.querySelector('.mock-chart-path');
+    if (!path) return;
+    const startTime = performance.now();
+    function drawChart(now) {
+      const progress = Math.min((now - startTime) / CHART_DURATION, 1);
+      path.style.strokeDashoffset = TOTAL_DASH * (1 - progress);
+      if (progress < 1) requestAnimationFrame(drawChart);
+      else {
+        const fill = document.querySelector('.mock-chart-fill');
+        if (fill) fill.style.opacity = '1';
+      }
+    }
+    requestAnimationFrame(drawChart);
+  }, 400);
 
   steps.forEach((step, i) => {
     setTimeout(() => {
-      // fade in row
       if (rows[i]) rows[i].classList.add('visible');
-      // count up from previous total
-      const from = i === 0 ? 0 : steps[i-1].total;
-      animateMockNW(from, step.total, 600);
+
+      if (i >= 2 && rowsContainer) {
+        const firstRow = rows[0];
+        const secondRow = rows[1];
+        const actualRowHeight = firstRow && secondRow
+          ? secondRow.getBoundingClientRect().top - firstRow.getBoundingClientRect().top
+          : 50;
+        rowsContainer.style.transform = `translateY(-${(i - 2) * actualRowHeight}px)`;
+      }
+
+      const from = i === 0 ? 0 : steps[i - 1].total;
+      const isLast = i === steps.length - 1;
+      animateMockNW(from, step.total, 400, null);
     }, step.delay);
   });
 }
