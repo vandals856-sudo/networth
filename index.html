@@ -364,8 +364,22 @@
   }
   .privacy-btn:hover { color: var(--text); background: var(--bg3); }
   .privacy-btn.active { color: var(--accent); }
-  .private-val { visibility: hidden; user-select: none; position: relative; }
-  .private-val::after { content: "••••••"; visibility: visible; position: absolute; left: 0; top: 0; color: var(--muted); letter-spacing: 2px; font-size: 0.85em; }
+  .private-val { user-select: none; }
+  .private-val > * { visibility: hidden; }
+  .private-val { color: transparent !important; }
+  .acct-bal.private-val::after,
+  .hist-val.private-val::after,
+  #hero-total.private-val::after,
+  #hero-change.private-val::after,
+  .stat-tile-val.private-val::after,
+  .breakdown-amt.private-val::after {
+    content: "••••••";
+    color: var(--muted);
+    letter-spacing: 1px;
+    font-size: 0.8em;
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-menu { position: relative; cursor: pointer; }
@@ -3010,12 +3024,13 @@ function toggleTheme() {
 // ---- PRIVACY ----
 let privacyOn = false;
 const PRIVACY_SELECTORS_DOTS = [
-  '#hero-total', '#hero-change', '.acct-bal', '.hist-val', '.hist-change',
+  '#hero-total', '#hero-change', '.acct-bal', '.hist-val',
   '.stat-tile-val', '.breakdown-amt', '.milestone-next strong', '#milestone-next'
 ];
 const PRIVACY_SELECTORS_HIDE = [
   '.acct-sub', '.section-total', '#cat-total-assets', '#cat-total-debt',
-  '#s-cash', '#s-investments', '#s-property', '#s-debt', '.milestone-next'
+  '#s-cash', '#s-investments', '#s-property', '#s-debt', '.milestone-next',
+  '.hist-change'
 ];
 
 function togglePrivacy() {
