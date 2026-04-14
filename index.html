@@ -373,9 +373,16 @@
     font-family: var(--font-display);
     font-weight: 400;
     position: absolute;
-    left: 0; top: 50%;
+    right: 0; top: 50%;
     transform: translateY(-50%);
   }
+  #s-cash.private-val::before,
+  #s-investments.private-val::before,
+  #s-property.private-val::before,
+  #s-debt.private-val::before,
+  .stat-tile-val.private-val::before { right: auto; left: 0; }
+  #hero-total.private-val { width: auto; display: inline-block; }
+  #hero-total.private-val::before { left: 0; right: auto; }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-menu { position: relative; cursor: pointer; }
@@ -649,7 +656,7 @@
   .stale-tap:hover { background: var(--bg2); color: var(--text); }
   .stale1 { color: var(--warn); }
   .stale2 { color: var(--danger); }
-  .acct-right { display: flex; align-items: center; flex-shrink: 0; min-width: 80px; justify-content: flex-end; }
+  .acct-right { display: flex; align-items: center; flex-shrink: 0; justify-content: flex-end; }
   .acct-bal {
     font-size: 16px; font-weight: 500; font-family: var(--font-mono);
     text-align: right; transition: transform 0.2s ease; white-space: nowrap;
@@ -1245,7 +1252,7 @@
   </div>
 
   <div class="auth-footer">
-    wealth<span style="color:var(--accent);">snap</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; <a href="privacy.html" style="color:var(--muted);text-decoration:none;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Privacy</a> &nbsp;·&nbsp; v3.0
+    wealth<span style="color:var(--accent);">snap</span> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; <a href="privacy.html" style="color:var(--muted);text-decoration:none;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Privacy</a> &nbsp;·&nbsp; v3.1
   </div>
 
 </div>
@@ -2171,7 +2178,12 @@ function render() {
   const totalDebt = totals.debt;
   const netWorth = totalAssets - totalDebt;
 
-  document.getElementById('hero-total').textContent = fmt(netWorth);
+  const heroTotalEl = document.getElementById('hero-total');
+  if (!privacyOn) {
+    heroTotalEl.textContent = fmt(netWorth);
+  } else {
+    heroTotalEl.dataset.realVal = fmt(netWorth);
+  }
   renderMilestones(netWorth);
   document.getElementById('s-cash').textContent = fmt(totals.cash);
   document.getElementById('s-investments').textContent = fmt(totals.investments);
@@ -2734,11 +2746,18 @@ async function markUpdated(id) {
   showToast('Marked as updated');
 }
 
+function reapplyPrivacyAfterRender() {
+  if (!privacyOn) return;
+  applyPrivacy();
+  const ht = document.getElementById('hero-total');
+  if (ht) { ht.textContent = '••••••'; ht.style.letterSpacing = '4px'; ht.style.color = 'var(--text)'; }
+}
+
 function toggleHistory() {
   const histEl = document.getElementById('history');
   histEl.dataset.expanded = histEl.dataset.expanded === 'true' ? 'false' : 'true';
   render();
-  if (privacyOn) applyPrivacy();
+  reapplyPrivacyAfterRender();
 }
 
 function toggleUserMenu() {
@@ -3009,6 +3028,7 @@ function applyTheme(theme, save = true) {
   }
   if (save) localStorage.setItem('wealthsnap_theme', theme);
   render();
+  reapplyPrivacyAfterRender();
 }
 
 function toggleTheme() {
@@ -3020,13 +3040,13 @@ function toggleTheme() {
 // ---- PRIVACY ----
 let privacyOn = false;
 const PRIVACY_SELECTORS_DOTS = [
-  '#hero-total', '#hero-change', '.acct-bal', '.hist-val',
+  '#hero-total', '.acct-bal', '.hist-val',
+  '#s-cash', '#s-investments', '#s-property', '#s-debt',
   '.stat-tile-val', '.breakdown-amt', '.milestone-next strong', '#milestone-next'
 ];
 const PRIVACY_SELECTORS_HIDE = [
-  '.acct-sub', '.section-total', '#cat-total-assets', '#cat-total-debt',
-  '#s-cash', '#s-investments', '#s-property', '#s-debt', '.milestone-next',
-  '.hist-change'
+  '#hero-change', '.acct-sub', '.section-total', '#cat-total-assets', '#cat-total-debt',
+  '.milestone-next', '.hist-change'
 ];
 
 function togglePrivacy() {
@@ -3040,11 +3060,30 @@ function togglePrivacy() {
 }
 
 function applyPrivacy() {
+  const heroTotal = document.getElementById('hero-total');
+
   PRIVACY_SELECTORS_DOTS.forEach(sel => {
     document.querySelectorAll(sel).forEach(el => {
+      if (el === heroTotal) return; // handle separately
       el.classList.toggle('private-val', privacyOn);
     });
   });
+
+  // hero total — swap text so no gap
+  if (heroTotal) {
+    if (privacyOn) {
+      heroTotal.dataset.realVal = heroTotal.textContent;
+      heroTotal.textContent = '••••••';
+      heroTotal.style.letterSpacing = '4px';
+      heroTotal.style.color = 'var(--text)';
+    } else {
+      // always restore from live net worth so theme switches don't break it
+      heroTotal.textContent = fmt(getNetWorth());
+      heroTotal.style.letterSpacing = '';
+      heroTotal.style.color = '';
+    }
+  }
+
   PRIVACY_SELECTORS_HIDE.forEach(sel => {
     document.querySelectorAll(sel).forEach(el => {
       el.style.visibility = privacyOn ? 'hidden' : '';
@@ -3588,7 +3627,7 @@ function setRange(r) {
     b.classList.toggle('active', b.textContent.trim() === (map[r] || r.toUpperCase()));
   });
   render();
-  if (privacyOn) applyPrivacy();
+  reapplyPrivacyAfterRender();
 }
 
 function getFilteredHistory() {
