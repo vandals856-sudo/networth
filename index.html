@@ -364,7 +364,8 @@
   }
   .privacy-btn:hover { color: var(--text); background: var(--bg3); }
   .privacy-btn.active { color: var(--accent); }
-  .private-val { color: transparent !important; background: var(--border2); border-radius: 4px; user-select: none; transition: all 0.2s; }
+  .private-val { visibility: hidden; user-select: none; position: relative; }
+  .private-val::after { content: "••••••"; visibility: visible; position: absolute; left: 0; top: 0; color: var(--muted); letter-spacing: 2px; font-size: 0.85em; }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .user-menu { position: relative; cursor: pointer; }
@@ -2304,7 +2305,7 @@ function render() {
         let change = '';
         if (prev) {
           const d = item.total - prev.total;
-          change = `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</span>`;
+          change = `<span class="hist-change ${d>=0?'up':'down'}">${d>=0?'+':''}${fmt(d)}</span>`;
         }
         const idx = state.history.findIndex(h => h.date === item.date);
         return `<div class="hist-row"
@@ -3011,7 +3012,7 @@ let privacyOn = false;
 const PRIVACY_SELECTORS = [
   '#hero-total', '#hero-change', '#s-cash', '#s-investments',
   '#s-property', '#s-debt', '#cat-total-assets', '#cat-total-debt',
-  '.acct-bal', '.acct-sub', '.hist-val', '.hist-vals', '.hist-date', '.stat-tile-val',
+  '.acct-bal', '.acct-sub', '.hist-val', '.hist-change', '.stat-tile-val',
   '.section-total', '.breakdown-amt', '.milestone-next strong',
   '.milestone-next', '#milestone-next'
 ];
