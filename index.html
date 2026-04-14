@@ -364,21 +364,17 @@
   }
   .privacy-btn:hover { color: var(--text); background: var(--bg3); }
   .privacy-btn.active { color: var(--accent); }
-  .private-val { user-select: none; }
-  .private-val > * { visibility: hidden; }
-  .private-val { color: transparent !important; }
-  .acct-bal.private-val::after,
-  .hist-val.private-val::after,
-  #hero-total.private-val::after,
-  #hero-change.private-val::after,
-  .stat-tile-val.private-val::after,
-  .breakdown-amt.private-val::after {
+  .private-val { color: transparent !important; user-select: none; position: relative; white-space: nowrap; }
+  .private-val::before {
     content: "••••••";
     color: var(--muted);
     letter-spacing: 1px;
-    font-size: 0.8em;
+    font-size: 0.75em;
     font-family: var(--font-display);
     font-weight: 400;
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
   }
 
   .topbar-right { display: flex; align-items: center; gap: 12px; }
