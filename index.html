@@ -1950,12 +1950,14 @@ async function loadFromSheet() {
   if (DEMO_MODE) return;
   try {
     const id = state.sheetId;
-    const [ar, hr] = await Promise.all([
+    const [ar, hr, er] = await Promise.all([
       gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A2:G1000`),
-      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A2:B1000`)
+      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A2:B1000`),
+      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Events!A2:C1000`).catch(() => ({ json: async () => ({ values: [] }) }))
     ]);
     const ad = await ar.json();
     const hd = await hr.json();
+    const ed = await er.json();
     state.accounts = (ad.values || []).map(r => {
       const type = r[2] || '';
       const isCrypto = isCryptoType(type);
@@ -1969,7 +1971,6 @@ async function loadFromSheet() {
         lastPrice: parseFloat(r[6]) || 0
       };
     });
-    // seed prices from last known prices stored in sheet
     state.accounts.forEach(a => {
       if (isCryptoType(a.type) && a.lastPrice > 0) {
         if (!state.prices[a.type] || state.prices[a.type] === 0) {
@@ -1980,6 +1981,9 @@ async function loadFromSheet() {
     state.history = (hd.values || []).map(r => ({
       date: parseInt(r[0]), total: parseFloat(r[1]) || 0
     }));
+    state.events = (ed.values || []).map(r => ({
+      date: parseInt(r[0]), type: r[1] || '', label: r[2] || ''
+    })).filter(e => e.date && e.type);
   } catch(e) { console.error('load error', e); }
 }
 
@@ -2008,7 +2012,28 @@ async function saveAccountsToSheet() {
   showToast('Saved to Google Sheet');
 }
 
-async function saveHistoryToSheet() {
+async function saveEventsToSheet() {
+  if (DEMO_MODE) return;
+  const rows = state.events.map(e => [e.date, e.type, e.label]);
+  const values = [['date','type','label'], ...rows];
+  try {
+    await gapi('PUT',
+      `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Events!A1:C${values.length}?valueInputOption=RAW`,
+      { values }
+    );
+  } catch(e) {
+    // Events tab may not exist yet — create it then retry
+    try {
+      await gapi('POST', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}:batchUpdate`, {
+        requests: [{ addSheet: { properties: { title: 'Events' } } }]
+      });
+      await gapi('PUT',
+        `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Events!A1:C${values.length}?valueInputOption=RAW`,
+        { values }
+      );
+    } catch(e2) { console.error('events save error', e2); }
+  }
+}
   if (DEMO_MODE) {
     localStorage.setItem('grounded_demo_hist', JSON.stringify(state.history));
     return;
@@ -2367,8 +2392,24 @@ function render() {
   const histEl = document.getElementById('history');
 
   // merge history snapshots + events into one timeline
+  // group same-day account_added/removed events together
   const snapshots = state.history.map(h => ({ date: h.date, type: 'snapshot', total: h.total }));
-  const allEvents = [...snapshots, ...state.events].sort((a,b) => b.date - a.date);
+  const grouped = [];
+  const dayMap = {};
+  state.events.forEach(e => {
+    if (e.type === 'account_added' || e.type === 'account_removed') {
+      const dayKey = new Date(e.date).toDateString();
+      if (!dayMap[dayKey]) {
+        dayMap[dayKey] = { date: e.date, type: 'accounts_changed', labels: [] };
+        grouped.push(dayMap[dayKey]);
+      }
+      const prefix = e.type === 'account_added' ? '+' : '−';
+      dayMap[dayKey].labels.push(`${prefix} ${e.label.replace(' added','').replace(' removed','')}`);
+    } else {
+      grouped.push(e);
+    }
+  });
+  const allEvents = [...snapshots, ...grouped].sort((a,b) => b.date - a.date);
 
   if (!allEvents.length) {
     histEl.innerHTML = '<div class="empty-row">Your net worth history will appear here as you update your accounts over time</div>';
@@ -2396,6 +2437,19 @@ function render() {
         return `<div class="hist-row" style="cursor:pointer;" onclick="openMilestoneHistory()">
           <span class="hist-date">${dateStr}</span>
           <div class="hist-right"><span style="color:var(--accent);font-size:13px;">🎉 ${item.label}</span></div>
+        </div>`;
+      } else if (item.type === 'accounts_changed') {
+        const summary = item.labels.length === 1
+          ? item.labels[0]
+          : `${item.labels.length} accounts updated`;
+        const detail = item.labels.length > 1
+          ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${item.labels.join(' · ')}</div>`
+          : '';
+        return `<div class="hist-row" style="flex-direction:column;align-items:flex-start;gap:2px;">
+          <div style="display:flex;justify-content:space-between;width:100%;">
+            <span class="hist-date">${dateStr}</span>
+            <span style="color:var(--muted);font-size:13px;">${summary}</span>
+          </div>${detail}
         </div>`;
       } else if (item.type === 'account_added') {
         return `<div class="hist-row">
@@ -2677,6 +2731,7 @@ async function saveAccount() {
   closeModal();
   render();
   await saveAccountsToSheet();
+  await saveEventsToSheet();
   autoSnapshot();
 }
 
@@ -2687,6 +2742,7 @@ async function deleteAccount() {
   closeModal();
   render();
   await saveAccountsToSheet();
+  await saveEventsToSheet();
   autoSnapshot();
 }
 
@@ -2996,6 +3052,7 @@ function checkMilestone(prevTotal, newTotal) {
     crossed >= 1000000 ? `Hit $${crossed/1000000}M` :
     crossed >= 1000 ? `Hit $${crossed/1000}K` : `Hit $${crossed}`;
   state.events.push({ date: Date.now(), type: 'milestone', label });
+  saveEventsToSheet();
   showCelebration(crossed, newTotal);
 }
 
