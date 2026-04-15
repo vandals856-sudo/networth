@@ -217,10 +217,10 @@
 
   /* Feature spotlight */
   .auth-feature-section {
-    background: #0d1117; padding: 80px 2rem;
+    background: #0d1117; padding: 80px 2rem; overflow: hidden;
   }
   .auth-feature-inner {
-    max-width: 680px; margin: 0 auto;
+    max-width: 680px; margin: 0 auto; width: 100%;
     display: flex; flex-direction: column; gap: 48px;
   }
   @media(min-width: 600px) {
@@ -1271,9 +1271,9 @@
         <div class="auth-feature-desc" style="color:#6e7a8a;">Every week, AI looks at your accounts and surfaces what actually matters — a pattern, a risk, or a win you might have missed.</div>
         <div style="font-size:11px;color:#b0b8c8;margin-top:14px;">AI-generated observations only · not financial advice</div>
       </div>
-      <div style="flex:1;min-width:0;max-width:100%;overflow:hidden;">
-        <div style="overflow:hidden;border-radius:14px;position:relative;width:100%;" id="ai-window">
-          <div id="ai-track" style="display:flex;transition:transform 0.42s cubic-bezier(0.4,0,0.2,1);will-change:transform;">
+      <div style="flex:1;min-width:0;width:100%;">
+        <div style="overflow:hidden;border-radius:14px;position:relative;width:100%;box-sizing:border-box;" id="ai-window">
+          <div id="ai-track" style="display:flex;width:100%;transition:transform 0.42s cubic-bezier(0.4,0,0.2,1);will-change:transform;">
             <div class="ai-card" style="min-width:100%;box-sizing:border-box;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;">
               <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px;">
                 <span style="font-size:12px;">💡</span>
