@@ -1688,7 +1688,7 @@ const TYPE_LABEL = {
 const CRYPTO_COINS = ['btc','eth','ada','sol','xrp','doge','avax','link','dot','matic'];
 const NON_CRYPTO_TYPES = new Set(['checking','savings','other_cash','401k','roth','brokerage','other_invest','property','vehicle','other_property','creditcard','loan','mortgage','other_debt','crypto_group']);
 function isCryptoType(type) {
-  return isCryptoType(type) || (!NON_CRYPTO_TYPES.has(type) && type && type.length > 0);
+  return CRYPTO_COINS.includes(type) || (!NON_CRYPTO_TYPES.has(type) && type && type.length > 0);
 }
 const DEBT_TYPES = ['creditcard','loan','mortgage','other_debt'];
 
