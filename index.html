@@ -1640,6 +1640,11 @@
       <input type="number" id="f-val" placeholder="0.00" step="any" />
       <div class="crypto-hint" id="f-hint" style="display:none;">Enter your coin amount — dollar value updates automatically from live price</div>
     </div>
+    <div class="field" id="f-manual-price-field" style="display:none;">
+      <label>Price per coin ($)</label>
+      <input type="number" id="f-manual-price" placeholder="0.00" step="any" />
+      <div class="crypto-hint">Enter current price manually — dollar value = amount × price</div>
+    </div>
     <div class="field">
       <label>Note <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></label>
       <input type="text" id="f-note" placeholder="e.g. got bonus, opened new account..." maxlength="120" />
@@ -1681,6 +1686,10 @@ const TYPE_LABEL = {
   creditcard:'Credit Card', loan:'Loan', mortgage:'Mortgage', other_debt:'Other'
 };
 const CRYPTO_COINS = ['btc','eth','ada','sol','xrp','doge','avax','link','dot','matic'];
+const NON_CRYPTO_TYPES = new Set(['checking','savings','other_cash','401k','roth','brokerage','other_invest','property','vehicle','other_property','creditcard','loan','mortgage','other_debt','crypto_group']);
+function isCryptoType(type) {
+  return isCryptoType(type) || (!NON_CRYPTO_TYPES.has(type) && type && type.length > 0);
+}
 const DEBT_TYPES = ['creditcard','loan','mortgage','other_debt'];
 
 const GROUP_TYPES = {
@@ -2044,7 +2053,7 @@ async function fetchPrices() {
 
 
 function getBal(acc) {
-  if (CRYPTO_COINS.includes(acc.type)) {
+  if (isCryptoType(acc.type)) {
     const price = state.prices[acc.type];
     if (!price || price === 0) return 0;
     return (acc.amount || 0) * price;
@@ -2053,7 +2062,7 @@ function getBal(acc) {
 }
 
 function getBalDisplay(acc) {
-  if (CRYPTO_COINS.includes(acc.type)) {
+  if (isCryptoType(acc.type)) {
     const price = state.prices[acc.type];
     if (!price || price === 0) return '$0';
     return fmt((acc.amount || 0) * price);
@@ -2094,7 +2103,7 @@ function renderGroup(group) {
     el.innerHTML = allInvest.map(acc => {
       const bal = getBal(acc);
       const balDisp = getBalDisplay(acc);
-      const isCrypto = CRYPTO_COINS.includes(acc.type);
+      const isCrypto = isCryptoType(acc.type);
       const iconContent = CRYPTO_ICONS[acc.type]
         ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
         : TYPE_ICONS[acc.type]
@@ -2153,7 +2162,7 @@ function renderGroup(group) {
   const isDebt = group === 'debt';
   el.innerHTML = accs.map(acc => {
     const bal = getBal(acc);
-    const isCrypto = CRYPTO_COINS.includes(acc.type);
+    const isCrypto = isCryptoType(acc.type);
     const iconContent = CRYPTO_ICONS[acc.type]
       ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
       : TYPE_ICONS[acc.type]
@@ -2485,16 +2494,18 @@ function pickCoin(ticker, name, hasLivePrice) {
 
   const infoEl = document.getElementById('coin-selected-info');
   if (!hasLivePrice) {
-    infoEl.textContent = 'No live price — balance will be updated manually.';
+    infoEl.textContent = 'No live price — enter coin amount and current price manually.';
     infoEl.style.display = 'block';
-    document.getElementById('f-val-label').textContent = 'Balance ($)';
-    document.getElementById('f-val').placeholder = '0.00';
+    document.getElementById('f-val-label').textContent = 'Amount of coins';
+    document.getElementById('f-val').placeholder = '0.00000000';
     document.getElementById('f-hint').style.display = 'none';
+    document.getElementById('f-manual-price-field').style.display = 'block';
   } else {
     infoEl.style.display = 'none';
     document.getElementById('f-val-label').textContent = 'Amount of coins';
     document.getElementById('f-val').placeholder = '0.00000000';
     document.getElementById('f-hint').style.display = 'block';
+    document.getElementById('f-manual-price-field').style.display = 'none';
   }
 
   // update name placeholder
@@ -2575,7 +2586,7 @@ function openEdit(id) {
   filterTypeOptions(addingGroup);
   document.getElementById('f-type').value = acc.type;
   document.getElementById('f-name').value = acc.name;
-  document.getElementById('f-val').value = CRYPTO_COINS.includes(acc.type) ? acc.amount : acc.balance;
+  document.getElementById('f-val').value = isCryptoType(acc.type) ? acc.amount : acc.balance;
   document.getElementById('f-note').value = acc.note || '';
   onTypeChange();
   document.getElementById('btn-delete').style.display = 'block';
@@ -2628,24 +2639,30 @@ function onTypeChange() {
 
 async function saveAccount() {
   let type = document.getElementById('f-type').value;
-  // resolve crypto_group to selected coin from combobox
   if (type === 'crypto_group') {
     type = (document.getElementById('f-coin-picker').dataset.selected || '').toLowerCase() || 'crypto';
   }
   const name = document.getElementById('f-name').value.trim();
   const val = parseFloat(document.getElementById('f-val').value) || 0;
   const note = document.getElementById('f-note').value.trim();
+  const manualPrice = parseFloat(document.getElementById('f-manual-price').value) || 0;
   if (!name) { document.getElementById('f-name').focus(); return; }
-  const isCrypto = CRYPTO_COINS.includes(type);
+  const isCrypto = isCryptoType(type);
+  const isCustom = isCrypto && !CRYPTO_COINS.includes(type);
+
   if (editingId) {
     const acc = state.accounts.find(a=>a.id===editingId);
     acc.name = name; acc.type = type; acc.note = note;
-    if (isCrypto) { acc.amount = val; }
-    else { acc.balance = val; acc.updatedAt = Date.now(); }
+    if (isCrypto) {
+      acc.amount = val;
+      if (isCustom && manualPrice > 0) state.prices[type] = manualPrice;
+    } else { acc.balance = val; acc.updatedAt = Date.now(); }
   } else {
     const acc = { id: Date.now().toString(), name, type, note };
-    if (isCrypto) { acc.amount = val; acc.balance = 0; }
-    else { acc.balance = val; acc.amount = 0; acc.updatedAt = Date.now(); }
+    if (isCrypto) {
+      acc.amount = val; acc.balance = 0;
+      if (isCustom && manualPrice > 0) state.prices[type] = manualPrice;
+    } else { acc.balance = val; acc.amount = 0; acc.updatedAt = Date.now(); }
     state.accounts.push(acc);
     state.events.push({ date: Date.now(), type: 'account_added', label: `${name} added` });
   }
@@ -2665,7 +2682,13 @@ async function deleteAccount() {
   autoSnapshot();
 }
 
-function closeModal() { document.getElementById('overlay').classList.remove('open'); editingId = null; unlockScroll(); }
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('f-manual-price-field').style.display = 'none';
+  document.getElementById('f-manual-price').value = '';
+  editingId = null;
+  unlockScroll();
+}
 // ---- BOTTOM SHEET DRAG TO CLOSE ----
 function initBottomSheet(overlayEl, closeFn) {
   const modal = overlayEl.querySelector('.modal');
