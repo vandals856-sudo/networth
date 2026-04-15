@@ -1917,17 +1917,21 @@ async function createSheet() {
       properties: { title: SHEET_TITLE },
       sheets: [
         { properties: { title: 'Accounts', sheetId: 0 } },
-        { properties: { title: 'History', sheetId: 1 } }
+        { properties: { title: 'History', sheetId: 1 } },
+        { properties: { title: 'Events', sheetId: 2 } }
       ]
     });
     if (!r.ok) return null;
     const d = await r.json();
     const id = d.spreadsheetId;
-    await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A1:F1?valueInputOption=RAW`, {
-      values: [['id','name','type','balance_or_amount','updated_at','notes']]
+    await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A1:G1?valueInputOption=RAW`, {
+      values: [['id','name','type','balance_or_amount','updated_at','notes','last_price']]
     });
     await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A1:B1?valueInputOption=RAW`, {
       values: [['date','total']]
+    });
+    await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Events!A1:C1?valueInputOption=RAW`, {
+      values: [['date','type','label']]
     });
     return id;
   } catch(e) { console.error(e); return null; }
@@ -1953,11 +1957,11 @@ async function loadFromSheet() {
     const [ar, hr, er] = await Promise.all([
       gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Accounts!A2:G1000`),
       gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/History!A2:B1000`),
-      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Events!A2:C1000`).catch(() => ({ json: async () => ({ values: [] }) }))
+      gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Events!A2:C1000`).catch(() => null)
     ]);
     const ad = await ar.json();
     const hd = await hr.json();
-    const ed = await er.json();
+    const ed = er ? await er.json() : { values: [] };
     state.accounts = (ad.values || []).map(r => {
       const type = r[2] || '';
       const isCrypto = isCryptoType(type);
@@ -2014,24 +2018,18 @@ async function saveAccountsToSheet() {
 
 async function saveEventsToSheet() {
   if (DEMO_MODE) return;
+  if (!state.sheetId) return;
   const rows = state.events.map(e => [e.date, e.type, e.label]);
   const values = [['date','type','label'], ...rows];
-  try {
-    await gapi('PUT',
-      `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Events!A1:C${values.length}?valueInputOption=RAW`,
-      { values }
-    );
-  } catch(e) {
-    // Events tab may not exist yet — create it then retry
-    try {
-      await gapi('POST', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}:batchUpdate`, {
-        requests: [{ addSheet: { properties: { title: 'Events' } } }]
-      });
-      await gapi('PUT',
-        `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Events!A1:C${values.length}?valueInputOption=RAW`,
-        { values }
-      );
-    } catch(e2) { console.error('events save error', e2); }
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Events!A1:C${values.length}?valueInputOption=RAW`;
+  let r = await gapi('PUT', url, { values });
+  if (!r.ok) {
+    // Tab missing — create it then retry
+    await gapi('POST', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}:batchUpdate`, {
+      requests: [{ addSheet: { properties: { title: 'Events' } } }]
+    }).catch(() => {});
+    r = await gapi('PUT', url, { values });
+    if (!r.ok) console.error('events save failed', await r.text());
   }
 }
 
