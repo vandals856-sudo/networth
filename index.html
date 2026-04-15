@@ -2646,11 +2646,35 @@ function openEdit(id) {
   document.getElementById('modal-title').textContent = 'Edit account';
   document.getElementById('f-category-picker').style.display = 'none';
   filterTypeOptions(addingGroup);
-  document.getElementById('f-type').value = acc.type;
+
+  const isCrypto = isCryptoType(acc.type);
+  if (isCrypto) {
+    // set dropdown to crypto_group so coin picker shows
+    document.getElementById('f-type').value = 'crypto_group';
+    // pre-fill coin picker with current coin
+    const coinPicker = document.getElementById('f-coin-picker');
+    coinPicker.dataset.selected = acc.type;
+    const isKnown = CRYPTO_COINS.includes(acc.type);
+    const displayName = acc.type.toUpperCase();
+    document.getElementById('coin-search').value = displayName + ' — ' + (isKnown ? displayName : 'Custom');
+    document.getElementById('f-coin-picker').style.display = 'block';
+    document.getElementById('f-val-label').textContent = 'Amount of coins';
+    document.getElementById('f-val').placeholder = '0.00000000';
+    document.getElementById('f-hint').style.display = isKnown ? 'block' : 'none';
+    if (!isKnown) {
+      document.getElementById('f-manual-price-field').style.display = 'block';
+      document.getElementById('f-manual-price').value = state.prices[acc.type] || '';
+    }
+    const infoEl = document.getElementById('coin-selected-info');
+    if (infoEl) infoEl.style.display = 'none';
+  } else {
+    document.getElementById('f-type').value = acc.type;
+  }
+
   document.getElementById('f-name').value = acc.name;
-  document.getElementById('f-val').value = isCryptoType(acc.type) ? acc.amount : acc.balance;
+  document.getElementById('f-val').value = isCrypto ? acc.amount : acc.balance;
   document.getElementById('f-note').value = acc.note || '';
-  onTypeChange();
+  if (!isCrypto) onTypeChange();
   document.getElementById('btn-delete').style.display = 'block';
   document.getElementById('overlay').classList.add('open');
   lockScroll();
