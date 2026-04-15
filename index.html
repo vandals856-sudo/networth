@@ -358,8 +358,8 @@
   }
   .auth-logo { display: flex; align-items: center; gap: 8px; }
   .topbar-logo { display: flex; align-items: center; gap: 8px; }
-  .topbar-logo svg path { fill: var(--text); }
-  [data-theme="light"] .topbar-logo svg path { fill: #111827; }
+  .topbar-logo svg:last-child path { fill: var(--text); }
+  [data-theme="light"] .topbar-logo svg:last-child path { fill: #111827; }
   .privacy-btn {
     background: none; border: none; cursor: pointer;
     color: var(--muted); padding: 6px; border-radius: 8px;
@@ -1325,7 +1325,7 @@
 <!-- APP -->
 <div id="app-screen">
   <div class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><svg width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><svg class="icon-svg" width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_17_224)">
 <rect width="120" height="120" rx="60" fill="#22C47A"/>
 <rect width="84" height="8" transform="matrix(-1 0 0 1 102 78)" fill="#111827"/>
