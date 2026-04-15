@@ -69,10 +69,11 @@
   }
   .auth-topbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-    padding: 20px 32px;
+    padding: 20px 32px; height: 60px;
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0,0,0,0.06);
+    box-sizing: border-box;
   }
   .auth-logo { font-size: 20px; font-weight: 300; letter-spacing: -1px; color: #111827; }
   .auth-logo span { color: #22c47a; font-weight: 600; }
@@ -162,7 +163,7 @@
 
   /* Mini chart in mockup */
   .hero-mockup-chart {
-    width: 100%; height: 64px; margin-bottom: 16px; position: relative;
+    width: 100%; height: 60px; margin-bottom: 16px; position: relative;
   }
   .hero-mockup-chart svg { width: 100%; height: 100%; }
 
@@ -942,7 +943,7 @@
 <path d="M66.1758 5.09961C67.1758 5.09961 68.0595 5.31667 68.8262 5.75C69.5927 6.18332 70.1927 6.78321 70.626 7.5498C71.0593 8.31647 71.2764 9.2002 71.2764 10.2002V17.6221L68.4756 18.9248V10.9502C68.4756 10.2669 68.3506 9.69128 68.1006 9.22461C67.8507 8.74156 67.4927 8.37494 67.0264 8.125C66.5764 7.85833 66.0589 7.72461 65.4756 7.72461C64.8925 7.72467 64.3679 7.85847 63.9014 8.125C63.4514 8.375 63.1006 8.74128 62.8506 9.22461C62.6006 9.70794 62.4756 10.2835 62.4756 10.9502V17.6113L59.6514 18.9248V5.39941H62.3506V7.04297C62.6717 6.51166 63.0956 6.0878 63.626 5.77441C64.3592 5.32452 65.2093 5.09964 66.1758 5.09961Z" fill="#111827"/>
 <path d="M27.4873 7.7998H26.3115C25.3784 7.79989 24.6203 8.09162 24.0371 8.6748C23.4704 9.24147 23.1865 10.0583 23.1865 11.125V17.6113L20.3623 18.9248V5.39941H23.0615V7.12988C23.3562 6.5511 23.7559 6.11612 24.2617 5.8252C24.9284 5.4252 25.7288 5.22461 26.6621 5.22461H27.4873V7.7998Z" fill="#111827"/>
 </svg></div>
-    <button id="topbar-cta" onclick="signIn()" style="display:none;opacity:0;transition:opacity 0.3s ease;background:#22c47a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:-0.2px;">Get started</button>
+    <button id="topbar-cta" onclick="signIn()" style="visibility:hidden;opacity:0;transition:opacity 0.3s ease,visibility 0.3s ease;background:#22c47a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:-0.2px;white-space:nowrap;">Get started</button>
   </div>
 
   <!-- Hero -->
@@ -1308,7 +1309,7 @@
 
   <!-- Bottom CTA -->
   <div class="auth-bottom-cta">
-    <div style="font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:-1px;color:#e8edf2;line-height:1.15;margin-bottom:16px;max-width:680px;"><span style="white-space:nowrap;">Markets go up. Markets go down.</span><br><span style="color:#3dd68c;">Stay Grounded.</span></div>
+    <div style="font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:-1px;color:#e8edf2;line-height:1.15;margin-bottom:16px;max-width:680px;">Markets go up.<br>Markets go down.<br><span style="color:#3dd68c;">Stay Grounded.</span></div>
     <div style="font-size:15px;color:#6e7a8a;margin-bottom:36px;">Your data. Your Google Drive. Nobody else's business.</div>
     <button class="google-btn" onclick="signIn()" style="min-width:260px;background:#ffffff;color:#111827;">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -4223,11 +4224,11 @@ function aiClickDot(i) {
   const obs = new IntersectionObserver(entries => {
     const visible = entries[0].isIntersecting;
     if (!visible) {
-      topbarCta.style.display = 'block';
-      requestAnimationFrame(() => { topbarCta.style.opacity = '1'; });
+      topbarCta.style.visibility = 'visible';
+      topbarCta.style.opacity = '1';
     } else {
       topbarCta.style.opacity = '0';
-      setTimeout(() => { topbarCta.style.display = 'none'; }, 300);
+      topbarCta.style.visibility = 'hidden';
     }
   }, { threshold: 0 });
   obs.observe(heroCta);
