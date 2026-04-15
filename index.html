@@ -2034,6 +2034,8 @@ async function saveEventsToSheet() {
     } catch(e2) { console.error('events save error', e2); }
   }
 }
+
+async function saveHistoryToSheet() {
   if (DEMO_MODE) {
     localStorage.setItem('grounded_demo_hist', JSON.stringify(state.history));
     return;
