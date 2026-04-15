@@ -1956,17 +1956,22 @@ async function loadFromSheet() {
     ]);
     const ad = await ar.json();
     const hd = await hr.json();
-    state.accounts = (ad.values || []).map(r => ({
-      id: r[0], name: r[1], type: r[2],
-      balance: parseFloat(r[3]) || 0,
-      amount: parseFloat(r[3]) || 0,
-      updatedAt: parseInt(r[4]) || null,
-      note: r[5] || '',
-      lastPrice: parseFloat(r[6]) || 0
-    }));
+    state.accounts = (ad.values || []).map(r => {
+      const type = r[2] || '';
+      const isCrypto = isCryptoType(type);
+      const val = parseFloat(r[3]) || 0;
+      return {
+        id: r[0], name: r[1], type,
+        balance: isCrypto ? 0 : val,
+        amount: isCrypto ? val : 0,
+        updatedAt: parseInt(r[4]) || null,
+        note: r[5] || '',
+        lastPrice: parseFloat(r[6]) || 0
+      };
+    });
     // seed prices from last known prices stored in sheet
     state.accounts.forEach(a => {
-      if (CRYPTO_COINS.includes(a.type) && a.lastPrice > 0) {
+      if (isCryptoType(a.type) && a.lastPrice > 0) {
         if (!state.prices[a.type] || state.prices[a.type] === 0) {
           state.prices[a.type] = a.lastPrice;
         }
@@ -1985,9 +1990,9 @@ async function saveAccountsToSheet() {
   }
   const rows = state.accounts.map(a => [
     a.id, a.name, a.type,
-    CRYPTO_COINS.includes(a.type) ? a.amount : a.balance,
+    isCryptoType(a.type) ? a.amount : a.balance,
     a.updatedAt || '', a.note || '',
-    CRYPTO_COINS.includes(a.type) ? (state.prices[a.type] || a.lastPrice || '') : ''
+    isCryptoType(a.type) ? (state.prices[a.type] || a.lastPrice || '') : ''
   ]);
   const values = [['id','name','type','balance_or_amount','updated_at','notes','last_price'], ...rows];
   await gapi('PUT',
