@@ -1690,6 +1690,9 @@ const NON_CRYPTO_TYPES = new Set(['checking','savings','other_cash','401k','roth
 function isCryptoType(type) {
   return CRYPTO_COINS.includes(type) || (!NON_CRYPTO_TYPES.has(type) && type && type.length > 0);
 }
+function getGroup(type) {
+  return TYPE_GROUP[type] || (isCryptoType(type) ? 'investments' : undefined);
+}
 const DEBT_TYPES = ['creditcard','loan','mortgage','other_debt'];
 
 const GROUP_TYPES = {
@@ -2090,7 +2093,7 @@ function renderGroup(group) {
   // investments: all mixed together sorted by balance
   if (group === 'investments') {
     const allInvest = state.accounts
-      .filter(a => TYPE_GROUP[a.type] === 'investments')
+      .filter(a => getGroup(a.type) === 'investments')
       .sort((a, b) => getBal(b) - getBal(a));
     const stEl = document.getElementById('st-investments');
     if (stEl) stEl.textContent = allInvest.length ? fmt(allInvest.reduce((s,a)=>s+getBal(a),0)) : '';
@@ -2147,7 +2150,7 @@ function renderGroup(group) {
   }
 
   const accs = state.accounts
-    .filter(a => TYPE_GROUP[a.type] === group)
+    .filter(a => getGroup(a.type) === group)
     .sort((a, b) => getBal(b) - getBal(a));
 
   const stEl = document.getElementById('st-' + group);
@@ -2221,7 +2224,7 @@ function renderGroup(group) {
 function render() {
   ['cash','investments','property'].forEach(renderGroup);
   const totals = { cash:0, investments:0, property:0, debt:0 };
-  state.accounts.forEach(a => { totals[TYPE_GROUP[a.type]] += getBal(a); });
+  state.accounts.forEach(a => { totals[getGroup(a.type)] += getBal(a); });
   const totalAssets = totals.cash + totals.investments + totals.property;
   const totalDebt = totals.debt;
   const netWorth = totalAssets - totalDebt;
@@ -2244,7 +2247,7 @@ function render() {
 
   // hide/show empty asset subsections
   ['cash','investments','property'].forEach(group => {
-    const hasAccounts = state.accounts.some(a => TYPE_GROUP[a.type] === group);
+    const hasAccounts = state.accounts.some(a => getGroup(a.type) === group);
     const sec = document.getElementById('section-' + group);
     if (sec) sec.style.display = hasAccounts ? '' : 'none';
   });
@@ -2580,7 +2583,7 @@ function openEdit(id) {
   const acc = state.accounts.find(a=>a.id===id);
   if (!acc) return;
   editingId = id;
-  addingGroup = TYPE_GROUP[acc.type];
+  addingGroup = getGroup(acc.type);
   document.getElementById('modal-title').textContent = 'Edit account';
   document.getElementById('f-category-picker').style.display = 'none';
   filterTypeOptions(addingGroup);
