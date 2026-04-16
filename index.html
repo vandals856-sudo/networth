@@ -362,6 +362,9 @@
   .topbar-logo { display: flex; align-items: center; gap: 8px; }
   .topbar-logo svg:last-child path { fill: var(--text); }
   [data-theme="light"] .topbar-logo svg:last-child path { fill: #111827; }
+  @media(max-width:430px) {
+    .topbar-logo svg:first-child { width: 24px !important; height: 24px !important; }
+  }
   .privacy-btn {
     background: none; border: none; cursor: pointer;
     color: var(--muted); padding: 6px; border-radius: 8px;
@@ -868,8 +871,9 @@
     cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
     flex-shrink: 0;
   }
-  @media(max-width:400px) {
-    .cf { padding: 5px 7px; font-size: 11px; }
+  @media(max-width:430px) {
+    .chart-filters { gap: 0; justify-content: space-between; width: 100%; }
+    .cf { flex: 1; text-align: center; padding: 6px 2px; font-size: 11px; border-radius: 8px; }
   }
   .cf:hover { border-color: var(--border2); color: var(--text); }
   .cf.active { background: var(--accent); color: var(--check-color); border-color: var(--accent); font-weight: 500; }
@@ -877,6 +881,9 @@
     background: var(--bg2); border: 1px solid var(--border);
     border-radius: 14px; padding: 16px 16px 8px;
     position: relative;
+  }
+  @media(max-width:400px) {
+    .chart-wrap { padding: 12px 8px 8px; }
   }
   .chart-canvas-wrap { position: relative; height: 180px; }
   .chart-empty {
@@ -3907,7 +3914,8 @@ function renderChart() {
   const ctx = canvas.getContext('2d');
   ctx.scale(PR, PR);
 
-  const PAD = { top: 12, right: 4, bottom: 28, left: 44 };
+  const isMobile = W < 400;
+  const PAD = { top: 12, right: 4, bottom: 28, left: isMobile ? 36 : 44 };
   const cW = W - PAD.left - PAD.right;
   const cH = H - PAD.top - PAD.bottom;
 
