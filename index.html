@@ -1914,7 +1914,7 @@ async function getUser() {
 
 // ---- SHEET SETUP ----
 async function initApp() {
-  showSetup('signing you in...');
+  showSetup('Signing you in...');
   const user = await getUser();
   if (!user) return false;
   state.user = user;
@@ -1931,7 +1931,7 @@ async function initApp() {
   document.getElementById('dropdown-name').textContent = user.name || user.email.split('@')[0];
   document.getElementById('dropdown-email').textContent = user.email;
 
-  showSetup('finding your sheet...');
+  showSetup('Finding your sheet...');
   const cachedId = localStorage.getItem('grounded_sheet_' + user.sub);
 
   if (cachedId) {
@@ -1949,7 +1949,7 @@ async function initApp() {
   if (!state.sheetId) return false;
   localStorage.setItem('grounded_sheet_' + user.sub, state.sheetId);
 
-  showSetup('loading your data...');
+  showSetup('Loading your data...');
   await loadFromSheet();
   showApp();
   await fetchPrices();
