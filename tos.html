@@ -13,12 +13,9 @@
   .topbar {
     background: #ffffff;
     border-bottom: 1px solid rgba(0,0,0,0.06);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    padding: 0 24px; height: 60px; box-sizing: border-box;
+    display: flex; align-items: center;
+    position: sticky; top: 0; z-index: 10;
   }
   .topbar a { text-decoration: none; }
   .container { max-width: 680px; margin: 0 auto; padding: 60px 2rem 100px; }
@@ -37,6 +34,9 @@
   .footer a { color: #8a94a6; text-decoration: none; }
   .footer a:hover { color: #111827; }
   @media (max-width: 600px) { .container { padding: 40px 1.25rem 80px; } }
+  @media(max-width:430px) {
+    .topbar a svg:first-child { width: 24px !important; height: 24px !important; }
+  }
 </style>
 </head>
 <body>

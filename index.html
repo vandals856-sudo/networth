@@ -69,11 +69,10 @@
   }
   .auth-topbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-    padding: 20px 32px; height: 60px;
+    padding: 0 24px; height: 60px; box-sizing: border-box;
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0,0,0,0.06);
-    box-sizing: border-box;
   }
   .auth-logo { font-size: 20px; font-weight: 300; letter-spacing: -1px; color: #111827; }
   .auth-logo span { color: #22c47a; font-weight: 600; }
@@ -353,7 +352,7 @@
     background: var(--topbar-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    padding: 14px 20px;
+    padding: 0 24px; height: 60px; box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-between;
