@@ -859,16 +859,17 @@
   /* Chart */
   .chart-section { margin-bottom: 28px; }
   .chart-filters {
-    display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap;
+    display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: nowrap;
   }
   .cf {
     background: none; border: 1px solid var(--border);
     color: var(--muted); border-radius: 8px;
-    padding: 5px 11px; font-size: 12px; font-family: var(--font-display);
+    padding: 5px 9px; font-size: 12px; font-family: var(--font-display);
     cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em;
+    flex-shrink: 0;
   }
-  @media(max-width:500px) {
-    .chart-filters { gap: 10px; }
+  @media(max-width:400px) {
+    .cf { padding: 5px 7px; font-size: 11px; }
   }
   .cf:hover { border-color: var(--border2); color: var(--text); }
   .cf.active { background: var(--accent); color: var(--check-color); border-color: var(--accent); font-weight: 500; }
@@ -991,8 +992,8 @@
               <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$300K</div>
               <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$100K</div>
             </div>
-            <div style="flex:1;height:clamp(75px,18vw,95px);">
-              <svg viewBox="0 0 480 95" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;">
+            <div style="flex:1;height:clamp(75px,18vw,95px);position:relative;">
+              <svg viewBox="0 0 480 95" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
                 <defs>
                   <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="#22c47a" stop-opacity="0.20"/>
@@ -1001,8 +1002,11 @@
                 </defs>
                 <path class="mock-chart-fill" d="M0 88 C40 82 70 70 120 58 C155 50 175 52 210 42 C240 34 260 36 290 50 C315 62 335 48 370 32 C400 18 440 14 480 8 L480 95 L0 95 Z" fill="url(#mg)"/>
                 <path class="mock-chart-path" d="M0 88 C40 82 70 70 120 58 C155 50 175 52 210 42 C240 34 260 36 290 50 C315 62 335 48 370 32 C400 18 440 14 480 8" fill="none" stroke="#22c47a" stroke-width="2"/>
-                <circle id="mock-chart-dot" cx="480" cy="6" r="10" fill="#22c47a" opacity="0"/>
-                <circle id="mock-chart-dot-solid" cx="480" cy="6" r="4" fill="#22c47a" opacity="0"/>
+              </svg>
+              <!-- Dot overlay — separate SVG so circles aren't distorted by preserveAspectRatio:none -->
+              <svg style="position:absolute;top:calc(8.4% - 10px);right:-10px;width:20px;height:20px;overflow:visible;">
+                <circle id="mock-chart-dot" cx="10" cy="10" r="10" fill="#22c47a" opacity="0"/>
+                <circle id="mock-chart-dot-solid" cx="10" cy="10" r="4" fill="#22c47a" opacity="0"/>
               </svg>
             </div>
           </div>
@@ -3903,7 +3907,7 @@ function renderChart() {
   const ctx = canvas.getContext('2d');
   ctx.scale(PR, PR);
 
-  const PAD = { top: 12, right: 8, bottom: 28, left: 48 };
+  const PAD = { top: 12, right: 4, bottom: 28, left: 44 };
   const cW = W - PAD.left - PAD.right;
   const cH = H - PAD.top - PAD.bottom;
 
