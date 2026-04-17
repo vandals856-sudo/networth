@@ -3180,9 +3180,25 @@ const stored = localStorage.getItem('grounded_milestone_' + m.val);
 // auto-fulfill if current net worth exceeds this milestone
 const hit = !!stored || netWorth >= m.val;
 const ts = stored && stored !== '1' ? parseInt(stored) : null;
-const dateStr = ts
-? new Date(ts).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
-: hit ? new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : null;
+// fallback 1: check Events sheet
+const eventMatch = !ts && state.events.find(e => e.type === 'milestone' && e.label && e.label.includes(m.label));
+const eventTs = eventMatch ? eventMatch.date : null;
+// fallback 2: inherit previous milestone's date
+const prevMilestone = i > 0 ? arr[i-1] : null;
+const prevStored = prevMilestone ? localStorage.getItem('grounded_milestone_' + prevMilestone.val) : null;
+const prevTs = prevStored && prevStored !== '1' ? parseInt(prevStored) : null;
+const prevEventMatch = !prevTs && prevMilestone && state.events.find(e => e.type === 'milestone' && e.label && e.label.includes(prevMilestone.label));
+const prevEventTs = prevEventMatch ? prevEventMatch.date : null;
+const inheritedTs = prevTs || prevEventTs;
+// resolve final timestamp
+let finalTs = ts || eventTs || (hit ? (inheritedTs || Date.now()) : null);
+// if hit and no stored timestamp, lock in today so it doesn't drift
+if (hit && !ts && !eventTs) {
+  localStorage.setItem('grounded_milestone_' + m.val, String(finalTs));
+}
+const dateStr = finalTs
+? new Date(finalTs).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+: null;
 
 const remaining = milestones.filter(x => !localStorage.getItem('grounded_milestone_' + x.val) && netWorth < x.val);
 const isNext = !hit && remaining.length > 0 && remaining[0].val === m.val;
