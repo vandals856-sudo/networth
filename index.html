@@ -1492,6 +1492,9 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 </button>
 </div>
 <div class="hero-change" id="hero-change"></div>
+<div id="insight-nudge" style="display:none;margin-top:6px;">
+  <button onclick="reopenInsight()" style="background:none;border:none;padding:0;font-size:12px;color:var(--accent);cursor:pointer;font-family:inherit;">💡 This week's insight →</button>
+</div>
 <div id="milestone-bar" style="display:none;margin-top:14px;">
 <div class="milestone-track"><div class="milestone-fill" id="milestone-fill"></div></div>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
@@ -3912,7 +3915,12 @@ return;
 }
 }
 
-if (!shouldShowInsight(netWorth)) return;
+if (!shouldShowInsight(netWorth)) {
+  // show nudge if there's a cached insight they can peek at
+  const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
+  if (cached) document.getElementById('insight-nudge').style.display = 'block';
+  return;
+}
 
 // check cache first
 const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
@@ -3924,11 +3932,12 @@ textEl.textContent = cached;
 textEl.style.display = 'block';
 loadingEl.style.display = 'none';
 card.style.display = 'block';
+document.getElementById('insight-nudge').style.display = 'none';
 const dismissed = localStorage.getItem(INSIGHT_DISMISS_KEY);
 const metaEl = document.getElementById('insight-meta');
 if (metaEl && dismissed) {
-const daysLeft = Math.max(0, 7 - Math.floor((Date.now() - parseInt(dismissed)) / 86400000));
-metaEl.textContent = daysLeft > 0 ? `refreshes in ${daysLeft} day${daysLeft===1?'':'s'} · tap ↺ for a new one` : 'tap ↺ for a new insight';
+  const nextDate = new Date(parseInt(dismissed) + 7 * 86400000).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  metaEl.textContent = `Next insight ${nextDate}`;
 }
 return;
 }
@@ -4066,7 +4075,10 @@ loadingEl.style.display = 'none';
 const labelEl = document.getElementById('insight-label');
 if (labelEl) labelEl.textContent = '💡 Your weekly insight';
 const metaEl = document.getElementById('insight-meta');
-if (metaEl) metaEl.textContent = 'just updated · refreshes in 7 days or tap ↺ anytime';
+if (metaEl) {
+  const nextDate = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  metaEl.textContent = `Updated today · next insight ${nextDate}`;
+}
 } else {
 showFallbackTip(textEl, loadingEl);
 }
@@ -4197,9 +4209,39 @@ await maybeShowInsight(netWorth);
 setTimeout(() => { _forceInsight = false; }, 100);
 }
 
+const INSIGHT_SESSION_KEY = 'grounded_insight_session';
+
 function dismissInsight() {
-localStorage.setItem(INSIGHT_DISMISS_KEY, Date.now().toString());
-document.getElementById('insight-card').style.display = 'none';
+  const sessionId = localStorage.getItem(INSIGHT_SESSION_KEY);
+  const currentSession = sessionStorage.getItem('grounded_current_session');
+
+  if (sessionId && sessionId !== currentSession) {
+    // Second close in a different session — honor it fully until next insight
+    localStorage.setItem(INSIGHT_DISMISS_KEY, Date.now().toString());
+    localStorage.setItem(INSIGHT_SESSION_KEY, 'honored');
+  } else {
+    // First close — store session ID so we know next session gets one more chance
+    localStorage.setItem(INSIGHT_SESSION_KEY, currentSession || 'session1');
+    localStorage.setItem(INSIGHT_DISMISS_KEY, Date.now().toString());
+  }
+
+  document.getElementById('insight-card').style.display = 'none';
+  // Show the nudge link
+  const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
+  if (cached) document.getElementById('insight-nudge').style.display = 'block';
+}
+
+function reopenInsight() {
+  document.getElementById('insight-nudge').style.display = 'none';
+  const card = document.getElementById('insight-card');
+  const textEl = document.getElementById('insight-text');
+  const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
+  if (cached) {
+    textEl.textContent = cached;
+    textEl.style.display = 'block';
+    document.getElementById('insight-loading').style.display = 'none';
+    card.style.display = 'block';
+  }
 }
 
 // ---- CHART ----
@@ -4399,6 +4441,9 @@ document.getElementById('chart-tooltip').classList.remove('show');
 // ---- BOOT ----
 (async () => {
 initTheme();
+if (!sessionStorage.getItem('grounded_current_session')) {
+  sessionStorage.setItem('grounded_current_session', Date.now().toString());
+}
 const handled = await handleAuthCallback();
 if (!handled) showAuth();
 })();
