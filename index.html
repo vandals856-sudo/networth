@@ -4036,12 +4036,12 @@ const avoidNote = avoidTopics.length
 ? `Do NOT mention or repeat topics from previous insights (already covered: ${avoidTopics.join(', ')}). Find a genuinely fresh angle.`
 : '';
 
-const response = await fetch('https://api.anthropic.com/v1/messages', {
+const response = await fetch('https://grounded-api.vandals856.workers.dev/insight', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
-model: 'claude-sonnet-4-5',
-max_tokens: 1000,
+model: 'claude-haiku-4-5-20251001',
+max_tokens: 300,
 system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} If their history is short or their balance recently jumped due to adding accounts, briefly acknowledge they're getting started and focus on something positive — do not dwell on or repeat concerns about data mismatches. Never use bullet points. Keep it warm, specific, and human.`,
 messages: [{ role: 'user', content: fullContext }]
 })
