@@ -1991,11 +1991,12 @@ function updateFeedbackDropdownItem() {
     item.style.opacity = '0.4';
     item.style.cursor = 'default';
     item.onclick = null;
-    tooltip.textContent = `You can share feedback again in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`;
+    tooltip.textContent = `Available in ${daysLeft}d`;
     item.onmouseenter = () => {
       const rect = item.getBoundingClientRect();
       tooltip.style.top = (rect.top - 36) + 'px';
-      tooltip.style.left = rect.left + 'px';
+      tooltip.style.right = (window.innerWidth - rect.right) + 'px';
+      tooltip.style.left = 'auto';
       tooltip.style.position = 'fixed';
       tooltip.style.display = 'block';
     };
