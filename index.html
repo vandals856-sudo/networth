@@ -1999,7 +1999,6 @@ function setFeedbackStar(val) {
 }
 
 async function submitFeedback() {
-  const btn = document.getElementById('feedback-submit-btn');
   const like = document.getElementById('feedback-like').value.trim();
   const frustration = document.getElementById('feedback-frustration').value.trim();
   const missing = document.getElementById('feedback-missing').value.trim();
@@ -2008,13 +2007,27 @@ async function submitFeedback() {
   if (!feedbackRating) {
     document.querySelectorAll('#feedback-stars span').forEach(s => {
       s.style.color = 'var(--danger)';
-      setTimeout(() => s.style.color = i < feedbackRating ? '#22c47a' : 'var(--muted)', 800);
+      setTimeout(() => { s.style.color = 'var(--muted)'; }, 800);
     });
     return;
   }
 
-  // Show loading state
-  const originalContent = modal.innerHTML;
+  window._pendingFeedback = {
+    timestamp: new Date().toISOString(),
+    email: state.user?.email || 'anonymous',
+    rating: feedbackRating,
+    like, frustration, missing
+  };
+
+  await sendFeedbackToWorker(modal, window._pendingFeedback);
+}
+
+async function retryFeedback() {
+  const modal = document.querySelector('#feedback-overlay .modal');
+  await sendFeedbackToWorker(modal, window._pendingFeedback || {});
+}
+
+async function sendFeedbackToWorker(modal, data) {
   modal.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;min-height:200px;">
       <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
@@ -2025,19 +2038,11 @@ async function submitFeedback() {
     const res = await fetch('https://grounded-api.vandals856.workers.dev/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        timestamp: new Date().toISOString(),
-        email: state.user?.email || 'anonymous',
-        rating: feedbackRating,
-        like,
-        frustration,
-        missing
-      })
+      body: JSON.stringify(data)
     });
+    const resData = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(resData.error || `Status ${res.status}`);
 
-    if (!res.ok) throw new Error('Server error');
-
-    // Success state
     modal.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;min-height:200px;text-align:center;">
         <div style="width:52px;height:52px;border-radius:50%;background:rgba(61,214,140,0.12);display:flex;align-items:center;justify-content:center;">
@@ -2049,7 +2054,7 @@ async function submitFeedback() {
       </div>`;
 
   } catch(e) {
-    // Error state
+    console.error('Feedback error:', e.message);
     modal.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;min-height:200px;text-align:center;">
         <div style="width:52px;height:52px;border-radius:50%;background:rgba(240,96,96,0.1);display:flex;align-items:center;justify-content:center;">
@@ -2057,9 +2062,10 @@ async function submitFeedback() {
         </div>
         <div style="font-size:18px;font-weight:500;color:var(--text);">Something went wrong</div>
         <div style="font-size:14px;color:var(--muted);max-width:260px;line-height:1.6;">We couldn't send your feedback. Please try again.</div>
+        <div style="font-size:11px;color:var(--muted);opacity:0.5;margin-top:-8px;">${e.message}</div>
         <div style="display:flex;gap:10px;width:100%;margin-top:8px;">
           <button class="btn-cancel2" onclick="closeFeedback()" style="flex:1;">Cancel</button>
-          <button class="btn-save" onclick="closeFeedback();setTimeout(openFeedback,100);" style="flex:1;">Try again</button>
+          <button class="btn-save" onclick="retryFeedback()" style="flex:1;">Try again</button>
         </div>
       </div>`;
   }
