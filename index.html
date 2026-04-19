@@ -2142,7 +2142,6 @@ async function sendFeedbackToWorker(modal, data) {
         </div>
         <div style="font-size:18px;font-weight:500;color:var(--text);">Something went wrong</div>
         <div style="font-size:14px;color:var(--muted);max-width:260px;line-height:1.6;">We couldn't send your feedback. Please try again.</div>
-        <div style="font-size:11px;color:var(--muted);opacity:0.5;margin-top:-8px;">${e.message}</div>
         <div style="display:flex;gap:10px;width:100%;margin-top:8px;">
           <button class="btn-cancel2" onclick="closeFeedback()" style="flex:1;">Cancel</button>
           <button class="btn-save" onclick="retryFeedback()" style="flex:1;">Try again</button>
