@@ -1450,9 +1450,10 @@ Milestones
 </div>
 </div>
 <div class="dropdown-divider"></div>
-<div class="dropdown-item" onclick="openFeedback();document.getElementById('user-menu').classList.remove('open');">
+<div id="feedback-dropdown-item" class="dropdown-item" onclick="openFeedback();document.getElementById('user-menu').classList.remove('open');" style="position:relative;">
 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
 Share feedback
+<div id="feedback-tooltip" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 6px);background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--muted);white-space:nowrap;pointer-events:none;z-index:100;"></div>
 </div>
 <div class="dropdown-divider"></div>
 <div class="dropdown-item danger" onclick="signOut()">
@@ -1971,7 +1972,40 @@ window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 // ---- FEEDBACK ----
 let feedbackRating = 0;
 
+const FEEDBACK_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
+function getFeedbackCooldownDaysLeft() {
+  const last = parseInt(localStorage.getItem('grounded_feedback_sent') || '0');
+  if (!last) return 0;
+  const elapsed = Date.now() - last;
+  const remaining = FEEDBACK_COOLDOWN_MS - elapsed;
+  return remaining > 0 ? Math.ceil(remaining / (24 * 60 * 60 * 1000)) : 0;
+}
+
+function updateFeedbackDropdownItem() {
+  const item = document.getElementById('feedback-dropdown-item');
+  const tooltip = document.getElementById('feedback-tooltip');
+  if (!item) return;
+  const daysLeft = getFeedbackCooldownDaysLeft();
+  if (daysLeft > 0) {
+    item.style.opacity = '0.4';
+    item.style.cursor = 'default';
+    item.onclick = null;
+    tooltip.textContent = `You can share feedback again in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`;
+    item.onmouseenter = () => tooltip.style.display = 'block';
+    item.onmouseleave = () => tooltip.style.display = 'none';
+  } else {
+    item.style.opacity = '';
+    item.style.cursor = '';
+    item.onclick = () => { openFeedback(); document.getElementById('user-menu').classList.remove('open'); };
+    item.onmouseenter = null;
+    item.onmouseleave = null;
+    tooltip.style.display = 'none';
+  }
+}
+
 function openFeedback() {
+  if (getFeedbackCooldownDaysLeft() > 0) return;
   feedbackRating = 0;
   document.getElementById('feedback-like').value = '';
   document.getElementById('feedback-frustration').value = '';
@@ -1986,6 +2020,38 @@ function openFeedback() {
 
 function closeFeedback() {
   document.getElementById('feedback-overlay').style.display = 'none';
+  feedbackRating = 0;
+  window._pendingFeedback = null;
+  // Restore modal to original form so it can be reopened
+  document.querySelector('#feedback-overlay .modal').innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>Share feedback</h3>
+    <div class="field">
+      <label>How would you rate Grounded overall?</label>
+      <div id="feedback-stars" style="display:flex;gap:8px;margin-top:4px;">
+        <span data-val="1" onclick="setFeedbackStar(1)" style="font-size:28px;cursor:pointer;color:var(--muted);">☆</span>
+        <span data-val="2" onclick="setFeedbackStar(2)" style="font-size:28px;cursor:pointer;color:var(--muted);">☆</span>
+        <span data-val="3" onclick="setFeedbackStar(3)" style="font-size:28px;cursor:pointer;color:var(--muted);">☆</span>
+        <span data-val="4" onclick="setFeedbackStar(4)" style="font-size:28px;cursor:pointer;color:var(--muted);">☆</span>
+        <span data-val="5" onclick="setFeedbackStar(5)" style="font-size:28px;cursor:pointer;color:var(--muted);">☆</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>What do you like most about Grounded?</label>
+      <textarea id="feedback-like" rows="3" placeholder="e.g. The privacy, the simplicity..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
+    </div>
+    <div class="field">
+      <label>What was confusing or frustrating?</label>
+      <textarea id="feedback-frustration" rows="3" placeholder="e.g. Setting up the sheet took a while..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
+    </div>
+    <div class="field">
+      <label>Is there anything missing you'd want to see?</label>
+      <textarea id="feedback-missing" rows="3" placeholder="e.g. Budget tracking, bill reminders..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel2" onclick="closeFeedback()">Cancel</button>
+      <button class="btn-save" id="feedback-submit-btn" onclick="submitFeedback()">Submit</button>
+    </div>`;
   unlockScroll();
 }
 
@@ -2042,6 +2108,10 @@ async function sendFeedbackToWorker(modal, data) {
     });
     const resData = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(resData.error || `Status ${res.status}`);
+
+    // Lock feedback for 3 days
+    localStorage.setItem('grounded_feedback_sent', String(Date.now()));
+    updateFeedbackDropdownItem();
 
     modal.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;min-height:200px;text-align:center;">
@@ -3251,6 +3321,7 @@ reapplyPrivacyAfterRender();
 
 function toggleUserMenu() {
 document.getElementById('user-menu').classList.toggle('open');
+updateFeedbackDropdownItem();
 }
 document.addEventListener('click', (e) => {
 const menu = document.getElementById('user-menu');
