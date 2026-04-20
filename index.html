@@ -4190,7 +4190,7 @@ headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 model: 'claude-haiku-4-5-20251001',
 max_tokens: 300,
-system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} Never use bullet points. Keep it warm, specific, and human. Never give specific investment advice.`,
+system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} Never use bullet points. Keep it warm, specific, and human. Never give specific investment advice. Avoid filler phrases like "I love that", "sitting pretty", "great job", "awesome", or any overly enthusiastic openers. Start with the observation, not a compliment.`,
 messages: [{ role: 'user', content: finalContext }]
 })
 });
