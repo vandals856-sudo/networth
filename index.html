@@ -2299,7 +2299,8 @@ properties: { title: SHEET_TITLE },
 sheets: [
 { properties: { title: 'Accounts', sheetId: 0 } },
 { properties: { title: 'History', sheetId: 1 } },
-{ properties: { title: 'Events', sheetId: 2 } }
+{ properties: { title: 'Events', sheetId: 2 } },
+{ properties: { title: 'Meta', sheetId: 3 } }
 ]
 });
 if (!r.ok) return null;
@@ -2313,6 +2314,9 @@ values: [['date','total']]
 });
 await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Events!A1:C1?valueInputOption=RAW`, {
 values: [['date','type','label']]
+});
+await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Meta!A1:B1?valueInputOption=RAW`, {
+values: [['key','value']]
 });
 return id;
 } catch(e) { console.error(e); return null; }
@@ -2329,6 +2333,41 @@ headers: {
 };
 if (body) opts.body = JSON.stringify(body);
 return fetch(url, opts);
+}
+
+// ---- META SHEET (key-value store for cross-device state) ----
+async function readMeta(key) {
+  if (DEMO_MODE || !state.sheetId) return null;
+  try {
+    const r = await gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Meta!A2:B100`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const row = (d.values || []).find(r => r[0] === key);
+    return row ? row[1] : null;
+  } catch(e) { return null; }
+}
+
+async function writeMeta(key, value) {
+  if (DEMO_MODE || !state.sheetId) return;
+  try {
+    // Try to find existing row first
+    const r = await gapi('GET', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Meta!A2:B100`);
+    const d = r.ok ? await r.json() : { values: [] };
+    const rows = d.values || [];
+    const rowIdx = rows.findIndex(r => r[0] === key);
+
+    if (rowIdx >= 0) {
+      // Update existing row
+      await gapi('PUT', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Meta!A${rowIdx+2}:B${rowIdx+2}?valueInputOption=RAW`, {
+        values: [[key, value]]
+      });
+    } else {
+      // Append new row
+      await gapi('POST', `https://sheets.googleapis.com/v4/spreadsheets/${state.sheetId}/values/Meta!A1:B1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+        values: [[key, value]]
+      });
+    }
+  } catch(e) { console.error('writeMeta error', e); }
 }
 
 async function loadFromSheet() {
@@ -3921,12 +3960,28 @@ if (!shouldShowInsight(netWorth)) {
   return;
 }
 
-// check cache first
-const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
+// check sheet first for cross-device consistency, fall back to localStorage
+const SEVEN_DAYS = 7 * 86400000;
+let cached = localStorage.getItem(INSIGHT_CACHE_KEY);
+let cachedTs = parseInt(localStorage.getItem(INSIGHT_DISMISS_KEY) || '0');
+
+// try to load from sheet if local cache is missing or stale
+if (!cached || (Date.now() - cachedTs) > SEVEN_DAYS) {
+  const sheetInsight = await readMeta('insight_text');
+  const sheetTs = parseInt(await readMeta('insight_date') || '0');
+  if (sheetInsight && sheetTs && (Date.now() - sheetTs) < SEVEN_DAYS) {
+    cached = sheetInsight;
+    cachedTs = sheetTs;
+    // sync to localStorage
+    localStorage.setItem(INSIGHT_CACHE_KEY, sheetInsight);
+    localStorage.setItem(INSIGHT_NW_KEY, netWorth.toString());
+  }
+}
+
 const cachedNW = parseFloat(localStorage.getItem(INSIGHT_NW_KEY) || '0');
 const pctChange = cachedNW > 0 ? Math.abs((netWorth - cachedNW) / cachedNW) : 1;
 
-if (cached && pctChange < 0.05) {
+if (cached && pctChange < 0.05 && cachedTs && (Date.now() - cachedTs) < SEVEN_DAYS) {
 textEl.textContent = cached;
 textEl.style.display = 'block';
 loadingEl.style.display = 'none';
@@ -4066,8 +4121,13 @@ return;
 const insight = data.content?.[0]?.text || '';
 
 if (insight) {
+const insightTs = Date.now();
 localStorage.setItem(INSIGHT_CACHE_KEY, insight);
 localStorage.setItem(INSIGHT_NW_KEY, netWorth.toString());
+localStorage.setItem(INSIGHT_DISMISS_KEY, insightTs.toString());
+// save to sheet for cross-device consistency
+writeMeta('insight_text', insight);
+writeMeta('insight_date', insightTs.toString());
 textEl.textContent = insight;
 textEl.style.display = 'block';
 loadingEl.style.display = 'none';
@@ -4075,7 +4135,7 @@ const labelEl = document.getElementById('insight-label');
 if (labelEl) labelEl.textContent = '💡 Your weekly insight';
 const metaEl = document.getElementById('insight-meta');
 if (metaEl) {
-  const nextDate = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const nextDate = new Date(insightTs + 7 * 86400000).toLocaleDateString('en-US', {month:'short', day:'numeric'});
   metaEl.textContent = `Updated today · next insight ${nextDate}`;
 }
 } else {
