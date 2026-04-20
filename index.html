@@ -4072,32 +4072,117 @@ ageContext = `User age range: ${ageBracket}. Median net worth for this age group
 
 const fullContext = [userMessage, ageContext, projectionContext].filter(Boolean).join(' ');
 
-// rotate through angles, track last 2 used so Claude doesn't repeat
-const ANGLES = ['PROJECTION', 'PEER_COMPARISON', 'TREND', 'COMPOSITION', 'CRYPTO_MARKET'];
+// ---- ACCOUNT ADDITION DETECTION ----
+const sevenDaysAgo = Date.now() - 7 * 86400000;
+const recentAdditions = state.events.filter(e => e.type === 'account_added' && e.date >= sevenDaysAgo);
+const recentRemovals = state.events.filter(e => e.type === 'account_removed' && e.date >= sevenDaysAgo);
+let dataCompletionContext = '';
+if (recentAdditions.length > 0) {
+  const names = recentAdditions.map(e => e.label.replace(' added', '')).join(', ');
+  dataCompletionContext = `IMPORTANT: The user added ${recentAdditions.length} new account(s) this week (${names}). Any net worth jump this week is likely from completing their financial picture, NOT real growth. Do NOT project milestones or growth rates based on this week's data. Focus on composition, ratios, or their overall financial snapshot instead.`;
+}
+
+// ---- HISTORY DEPTH CHECK ----
+const historyDays = state.history.length >= 2
+  ? Math.round((state.history[state.history.length-1].date - state.history[0].date) / 86400000)
+  : 0;
+const isNewUser = historyDays < 14 || state.history.length < 3;
+const hasSteadyHistory = historyDays >= 60 && state.history.length >= 5 && !recentAdditions.length;
+
+// ---- COMPUTE EXTRA CONTEXT FOR NEW ANGLES ----
+const totalAssets2 = state.accounts.filter(a => !DEBT_TYPES.includes(a.type)).reduce((s,a) => s+getBal(a), 0);
+const totalDebt2 = state.accounts.filter(a => DEBT_TYPES.includes(a.type)).reduce((s,a) => s+getBal(a), 0);
+const cashTotal = state.accounts.filter(a => ['checking','savings','hysa','cd','other_cash'].includes(a.type)).reduce((s,a) => s+getBal(a), 0);
+const debtToAsset = totalAssets2 > 0 ? (totalDebt2 / totalAssets2 * 100).toFixed(1) : 0;
+const cashPct = totalAssets2 > 0 ? (cashTotal / totalAssets2 * 100).toFixed(1) : 0;
+const biggestAccount = state.accounts.filter(a => !DEBT_TYPES.includes(a.type)).sort((a,b) => getBal(b)-getBal(a))[0];
+const creditCardDebt = state.accounts.filter(a => a.type === 'creditcard').reduce((s,a) => s+getBal(a), 0);
+
+const ratioContext = `Debt-to-assets ratio: ${debtToAsset}%. Cash as % of assets: ${cashPct}%. Biggest asset: ${biggestAccount ? `${biggestAccount.name} at ${fmt(getBal(biggestAccount))}` : 'none'}. Credit card debt: ${fmt(creditCardDebt)}.`;
+
+// ---- EXTRA CONTEXT FOR NEW ANGLES ----
+const investmentTotal = state.accounts.filter(a => ['401k','roth','hsa','529','pension','treasury','brokerage','other_invest'].includes(a.type) || CRYPTO_COINS.includes(a.type)).reduce((s,a) => s+getBal(a), 0);
+const investmentPct = totalAssets2 > 0 ? (investmentTotal / totalAssets2 * 100).toFixed(1) : 0;
+
+const propertyValue = state.accounts.filter(a => a.type === 'property').reduce((s,a) => s+getBal(a), 0);
+const mortgageBalance = state.accounts.filter(a => a.type === 'mortgage').reduce((s,a) => s+getBal(a), 0);
+const propertyEquity = propertyValue - mortgageBalance;
+
+const hasProperty = propertyValue > 0;
+const hasMortgage = mortgageBalance > 0;
+
+// debt trend — compare current debt to 30 days ago
+const thirtyDaysAgo = Date.now() - 30 * 86400000;
+const oldSnapshot = state.history.filter(h => h.date <= thirtyDaysAgo).sort((a,b) => b.date - a.date)[0];
+const currentDebtPct = totalAssets2 > 0 ? totalDebt2 / totalAssets2 : 0;
+let debtTrendContext = '';
+if (oldSnapshot && totalDebt2 > 0) {
+  const debtChange = totalDebt2 - (oldSnapshot.total - totalAssets2 + totalDebt2);
+  const debtChangePct = totalDebt2 > 0 ? Math.abs(debtChange / totalDebt2 * 100) : 0;
+  if (debtChangePct >= 5) {
+    debtTrendContext = `Debt trend (last 30 days): debt ${debtChange > 0 ? 'increased' : 'decreased'} by $${Math.abs(Math.round(debtChange)).toLocaleString()} (${debtChangePct.toFixed(1)}%).`;
+  }
+}
+
+const debtTypes = state.accounts.filter(a => DEBT_TYPES.includes(a.type)).map(a => `${a.name} (${TYPE_LABEL[a.type]}): ${fmt(getBal(a))}`).join(', ');
+const goodDebt = state.accounts.filter(a => ['mortgage','loan'].includes(a.type)).reduce((s,a) => s+getBal(a), 0);
+const expensiveDebt = state.accounts.filter(a => ['creditcard','other_debt'].includes(a.type)).reduce((s,a) => s+getBal(a), 0);
+
+// ---- ANGLE SELECTION ----
+// For new users or recent account additions, avoid projection and trend angles
+const ALL_ANGLES = ['PROJECTION', 'PEER_COMPARISON', 'TREND', 'COMPOSITION', 'DEBT_HEALTH', 'LIQUIDITY', 'BIGGEST_MOVER', 'MILESTONE_PROXIMITY', 'DIVERSIFICATION', 'DEBT_TREND', 'DEBT_COMPOSITION', 'INVESTMENT_RATIO', 'PROPERTY_EQUITY', 'CASH_DRAG'];
+const HISTORY_REQUIRED = ['PROJECTION', 'TREND', 'BIGGEST_MOVER', 'DEBT_TREND'];
 const hasCryptoHoldings = state.accounts.some(a => CRYPTO_COINS.includes(a.type));
-const eligibleAngles = hasCryptoHoldings ? ANGLES : ANGLES.filter(a => a !== 'CRYPTO_MARKET');
+
+let eligibleAngles = ALL_ANGLES.filter(a => {
+  if (a === 'CRYPTO_MARKET') return hasCryptoHoldings;
+  if (HISTORY_REQUIRED.includes(a) && (isNewUser || recentAdditions.length > 0)) return false;
+  if (a === 'DEBT_TREND' && !debtTrendContext) return false;
+  if (a === 'PEER_COMPARISON' && !ageBracket) return false;
+  if (a === 'PROPERTY_EQUITY' && !hasProperty) return false;
+  if (a === 'DEBT_COMPOSITION' && totalDebt2 === 0) return false;
+  if (a === 'DEBT_HEALTH' && totalDebt2 === 0) return false;
+  if (a === 'CASH_DRAG' && parseFloat(cashPct) < 25) return false;
+  if (a === 'INVESTMENT_RATIO' && totalAssets2 === 0) return false;
+  return true;
+});
+if (hasCryptoHoldings) eligibleAngles.push('CRYPTO_MARKET');
+
+const recentAngles = JSON.parse(localStorage.getItem('grounded_insight_recent') || '[]');
+// avoid repeating last 2 angles if possible
+const freshAngles = eligibleAngles.filter(a => !recentAngles.includes(a));
+const anglePool = freshAngles.length > 0 ? freshAngles : eligibleAngles;
 const angleIndex = parseInt(localStorage.getItem('grounded_insight_angle') || '0');
-const angle = eligibleAngles[angleIndex % eligibleAngles.length];
+const angle = anglePool[angleIndex % anglePool.length];
 localStorage.setItem('grounded_insight_angle', String(angleIndex + 1));
 
-// track recently used angles to avoid nagging on same topic
-const recentAngles = JSON.parse(localStorage.getItem('grounded_insight_recent') || '[]');
 recentAngles.push(angle);
 if (recentAngles.length > 2) recentAngles.shift();
 localStorage.setItem('grounded_insight_recent', JSON.stringify(recentAngles));
-const avoidTopics = recentAngles.slice(0, -1); // all except current
 
 const angleInstructions = {
-PROJECTION: `Focus on PROJECTION: mention when they might hit their next milestone at this pace. Frame it as an estimate. Be specific with the month/year. If there's no steady growth data, pick something encouraging instead.`,
-PEER_COMPARISON: ageBracket ? `Focus on PEER COMPARISON: naturally mention how they compare to their age group median. Make it motivating not judgmental.` : `Focus on TREND: something encouraging in their recent history.`,
-TREND: `Focus on TREND: something positive or notable in their recent history — consistent growth, a recovery, good momentum.`,
-COMPOSITION: `Focus on COMPOSITION: something interesting about what's driving their net worth — which account is doing the heavy lifting, or what's working well.`,
-CRYPTO_MARKET: `Focus on CRYPTO CONTEXT: crypto markets go through cycles — volatility is normal and long-term holders historically do well. Reference their specific crypto holdings. Keep it grounded and reassuring without giving financial advice. Use a relevant statistic if helpful (e.g. Bitcoin's historical recovery pattern). Stay positive and remind them that short-term swings are part of the ride.`,
+PROJECTION: `Focus on PROJECTION: mention when they might hit their next milestone at this pace. Be specific with the month/year. Only use this if growth has been steady — if it hasn't, pivot to something else useful.`,
+PEER_COMPARISON: `Focus on PEER COMPARISON: naturally mention how they compare to their age group median. Make it motivating not judgmental.`,
+TREND: `Focus on TREND: something positive or notable in their recent history — consistent growth, a recovery, good momentum. Reference specific numbers.`,
+COMPOSITION: `Focus on COMPOSITION: something interesting about what's driving their net worth — which account is doing the heavy lifting, a ratio worth noting, or what's working well.`,
+DEBT_HEALTH: `Focus on DEBT HEALTH: comment on their debt-to-asset ratio of ${debtToAsset}%. The general healthy benchmark is under 36%. If they have credit card debt of ${fmt(creditCardDebt)}, mention the impact of paying it down. Be encouraging not alarming.`,
+LIQUIDITY: `Focus on LIQUIDITY: their cash is ${cashPct}% of total assets. Too low (under 10%) is risky, too high (over 30%) may be opportunity cost. Give them something useful based on where they stand.`,
+BIGGEST_MOVER: `Focus on BIGGEST MOVER: identify which account grew or changed the most recently and call it out specifically. Make it feel like a personal observation.`,
+MILESTONE_PROXIMITY: `Focus on MILESTONE PROXIMITY: they're $${Math.round(Math.max(0, ([1000,5000,10000,25000,50000,100000,250000,500000,1000000].find(m => m > netWorth) || 0) - netWorth)).toLocaleString()} away from their next milestone. Make it feel close and motivating without over-projecting.`,
+DIVERSIFICATION: `Focus on DIVERSIFICATION: observe how their assets are spread across cash, investments, and property. Note if they're heavily concentrated in one area — not as advice, just as an interesting observation about their financial picture.`,
+DEBT_TREND: `Focus on DEBT TREND: ${debtTrendContext} Call out whether debt is moving in the right direction. Keep it observational and encouraging.`,
+DEBT_COMPOSITION: `Focus on DEBT COMPOSITION: they have ${debtTypes}. Good debt (mortgage, loans tied to assets) builds equity. Expensive debt (credit cards) costs more over time. Help them understand what type of debt they're carrying in plain language.`,
+INVESTMENT_RATIO: `Focus on INVESTMENT RATIO: investments make up ${investmentPct}% of their total assets. Observe what this means for their financial picture — heavy in cash or property vs investments is worth noting as context, not advice.`,
+PROPERTY_EQUITY: `Focus on PROPERTY EQUITY: ${hasProperty && hasMortgage ? `their home equity is approximately ${fmt(propertyEquity)} (${fmt(propertyValue)} property minus ${fmt(mortgageBalance)} mortgage).` : hasProperty ? `they own property worth ${fmt(propertyValue)} with no mortgage.` : ''} Frame equity as real wealth in their net worth.`,
+CASH_DRAG: `Focus on CASH DRAG: they have ${cashPct}% of assets in cash (${fmt(cashTotal)}). That's above average. Observe that while cash feels safe, inflation quietly erodes its value over time. Keep it informational, not prescriptive.`,
+CRYPTO_MARKET: `Focus on CRYPTO CONTEXT: crypto markets go through cycles — volatility is normal and long-term holders historically do well. Reference their specific crypto holdings. Keep it grounded and reassuring.`,
 };
 
-const avoidNote = avoidTopics.length
-? `Do NOT mention or repeat topics from previous insights (already covered: ${avoidTopics.join(', ')}). Find a genuinely fresh angle.`
+const avoidNote = recentAngles.slice(0,-1).length
+? `Do NOT repeat topics already covered recently (${recentAngles.slice(0,-1).join(', ')}).`
 : '';
+
+const finalContext = [fullContext, ratioContext, debtTrendContext, dataCompletionContext].filter(Boolean).join(' ');
 
 const response = await fetch('https://grounded-api.vandals856.workers.dev/insight', {
 method: 'POST',
@@ -4105,8 +4190,8 @@ headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 model: 'claude-haiku-4-5-20251001',
 max_tokens: 300,
-system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} If their history is short or their balance recently jumped due to adding accounts, briefly acknowledge they're getting started and focus on something positive — do not dwell on or repeat concerns about data mismatches. Never use bullet points. Keep it warm, specific, and human.`,
-messages: [{ role: 'user', content: fullContext }]
+system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} Never use bullet points. Keep it warm, specific, and human. Never give specific investment advice.`,
+messages: [{ role: 'user', content: finalContext }]
 })
 });
 
