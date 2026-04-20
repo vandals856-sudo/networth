@@ -4535,12 +4535,14 @@ ctx.strokeStyle = accentColor;
 ctx.lineWidth = 2;
 ctx.stroke();
 
-// end dot
+// end dot — only show when not hovering
 const lastX = px(chartData.length-1), lastY = py(chartData[chartData.length-1].total);
+if (!canvas._hovering) {
 ctx.beginPath();
 ctx.arc(lastX, lastY, 4, 0, Math.PI*2);
 ctx.fillStyle = accentColor;
 ctx.fill();
+}
 
 // x-axis labels
 ctx.fillStyle = 'rgba(122,125,130,0.8)';
@@ -4562,6 +4564,7 @@ drawChartContent();
 
 // hover
 canvas.onmousemove = canvas.ontouchmove = (e) => {
+canvas._hovering = true;
 const rect = canvas.getBoundingClientRect();
 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
 const mx = clientX - rect.left;
@@ -4609,6 +4612,7 @@ tt.style.top = (hy - 20) + 'px';
 tt.classList.add('show');
 };
 canvas.onmouseleave = canvas.ontouchend = () => {
+canvas._hovering = false;
 document.getElementById('chart-tooltip').classList.remove('show');
 drawChartContent();
 };
