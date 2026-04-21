@@ -1,0 +1,39 @@
+# Grounded
+
+> Grounded is a free, private net worth tracker that stores all financial data in the user's own Google Sheet — not on any third-party server. Users track assets, investments, crypto, property, and debt in one place and watch their net worth grow over time.
+
+## What Grounded Does
+
+Grounded connects to Google Drive via OAuth and creates a private Google Sheet in the user's own account. All account data, history, and snapshots are stored there. Grounded can only access files it created — nothing else in the user's Drive.
+
+Key features:
+- Track cash, investments, crypto, property, and debt accounts
+- Live crypto prices via CoinGecko
+- Net worth history chart with time filters
+- Weekly AI-powered financial insights
+- Milestone system ($1K to $1M net worth milestones)
+- No backend servers, no data storage by Grounded, no subscriptions
+
+## Privacy Model
+
+Grounded uses Google OAuth with the `drive.file` scope — the most restrictive Drive permission available. This means Grounded can only read and write files it created itself. User financial data never touches Grounded's servers.
+
+## Pages
+
+- [Homepage](https://usegrounded.app/): Product overview, sign in with Google, feature highlights
+- [Privacy Policy](https://usegrounded.app/privacy.html): Full privacy policy explaining data handling
+- [Terms of Service](https://usegrounded.app/tos.html): Terms governing use of Grounded
+
+## Technical
+
+- Single HTML file hosted on GitHub Pages
+- Google OAuth (implicit flow) for authentication
+- Data stored in user's Google Sheet (Accounts, History, Events, Meta tabs)
+- AI insights powered by Claude API via Cloudflare Worker proxy
+- No cookies, no tracking beyond Google Analytics
+
+## Contact
+
+- Website: https://usegrounded.app
+- Email: hello@usegrounded.app
+- Twitter/X: @usegrounded
