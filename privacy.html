@@ -197,7 +197,7 @@
 
   <div class="eyebrow">Legal</div>
   <h1>Privacy Policy</h1>
-  <div class="effective-date">Effective date: April 10, 2026</div>
+  <div class="effective-date">Effective date: April 25, 2026</div>
 
   <div class="highlight-box">
     <p>Grounded is built on a simple privacy principle: <strong>your financial data lives in your Google Sheet, not on our servers.</strong> We never see it, store it, or have access to it beyond what's needed to run the app.</p>
@@ -231,11 +231,25 @@
   <p>Grounded uses Google Sign-In and requests the following permissions:</p>
   <ul>
     <li><strong>openid, email, profile</strong> — to identify you and display your name</li>
-    <li><strong>drive.file</strong> — to create and read only the Google Sheet that Grounded itself creates</li>
+    <li><strong>drive.file</strong> — to create and locate only the Google Sheet that Grounded itself creates</li>
+    <li><strong>spreadsheets</strong> — to read and write data to specific cells and tabs within your Grounded Google Sheet (Accounts, History, Events, and Meta tabs)</li>
   </ul>
-  <p>The <code>drive.file</code> scope is intentionally limited. It does not give us access to the rest of your Google Drive — only files that Grounded creates.</p>
+  <p>The <code>drive.file</code> scope is intentionally limited. It does not give us access to the rest of your Google Drive — only files that Grounded creates. The <code>spreadsheets</code> scope is required because Grounded reads and writes specific sheet ranges directly via the Google Sheets API (e.g. <code>Accounts!A2:H1000</code>). This scope cannot be substituted with <code>drive.file</code> alone for cell-level operations.</p>
 
-  <h2>5. How we use your information</h2>
+  <h2>5. Data protection</h2>
+  <p>Grounded applies the following protections for your sensitive financial data:</p>
+  <ul>
+    <li><strong>Encryption in transit</strong> — all communication between your browser, Google's APIs, and our Cloudflare Worker proxy is encrypted via HTTPS/TLS</li>
+    <li><strong>No server-side storage</strong> — Grounded does not store, log, or cache your financial data on any Grounded-controlled server. All data is written directly to your Google Sheet via Google's API</li>
+    <li><strong>Token handling</strong> — your Google OAuth access token is stored only in your browser's localStorage and is never transmitted to Grounded's servers</li>
+    <li><strong>Minimal data sharing for AI insights</strong> — when AI-powered insights are generated, only anonymized aggregate totals (net worth value, category summaries) are sent to the Cloudflare Worker. No account names, balances, or personally identifiable financial details are transmitted</li>
+    <li><strong>Principle of least privilege</strong> — Grounded requests only the Google API scopes necessary to operate. No other files in your Google Drive are accessible</li>
+    <li><strong>Revocable access</strong> — you can revoke Grounded's access at any time via Google Account → Security → Third-party apps, immediately ending all API access</li>
+    <li><strong>Rate limiting</strong> — our Cloudflare Worker enforces rate limits on AI insight and feedback endpoints to prevent abuse</li>
+    <li><strong>Input sanitization</strong> — all inputs submitted through Grounded's Cloudflare Worker are sanitized before processing</li>
+  </ul>
+
+  <h2>6. How we use your information</h2>
   <p>We use your Google account information to:</p>
   <ul>
     <li>Identify your account when you sign in</li>
@@ -244,7 +258,7 @@
   </ul>
   <p>We do not sell your information. We do not use your information for advertising. We do not share your information with third parties.</p>
 
-  <h2>6. Cookies and local storage</h2>
+  <h2>7. Cookies and local storage</h2>
   <p>Grounded uses your browser's localStorage to store:</p>
   <ul>
     <li>Your authentication token (so you stay signed in)</li>
@@ -253,7 +267,7 @@
   </ul>
   <p>This data never leaves your device. It is not transmitted to any server. You can clear it at any time by clearing your browser's site data.</p>
 
-  <h2>7. Third-party services</h2>
+  <h2>8. Third-party services</h2>
   <p>Grounded uses the following third-party services:</p>
   <ul>
     <li><strong>Google OAuth</strong> — for authentication</li>
@@ -262,7 +276,7 @@
   </ul>
   <p>Grounded may in the future use the Anthropic API to generate AI-powered financial insights. When enabled, only your net worth totals and account category summaries are sent — never account names or specific balances.</p>
 
-  <h2>8. Data retention and deletion</h2>
+  <h2>9. Data retention and deletion</h2>
   <p>Because your financial data lives in your own Google Sheet, you are in full control of it:</p>
   <ul>
     <li>To delete your data, simply delete the Google Sheet from your Google Drive</li>
@@ -271,13 +285,13 @@
   </ul>
   <p>We do not retain copies of your financial data. Once you delete your Google Sheet and revoke access, no record of your financial information remains.</p>
 
-  <h2>9. Children's privacy</h2>
+  <h2>10. Children's privacy</h2>
   <p>Grounded is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
 
-  <h2>10. Changes to this policy</h2>
+  <h2>11. Changes to this policy</h2>
   <p>We may update this Privacy Policy from time to time. When we do, we will update the effective date at the top of this page. Continued use of Grounded after changes constitutes acceptance of the new policy.</p>
 
-  <h2>11. Contact</h2>
+  <h2>12. Contact</h2>
   <p>If you have questions or concerns about this Privacy Policy, please contact us at <a href="mailto:hello@usegrounded.app">hello@usegrounded.app</a>.</p>
 
   <hr class="divider">
