@@ -459,7 +459,7 @@ flex-shrink: 0;
 .user-dropdown {
 display: none; position: absolute; top: calc(100% + 8px); right: 0;
 background: var(--bg2); border: 1px solid var(--border2);
-border-radius: 12px; padding: 6px; min-width: 160px;
+border-radius: 12px; padding: 6px; min-width: 180px;
 z-index: 100; animation: fadedown 0.15s ease;
 }
 @keyframes fadedown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
@@ -469,6 +469,7 @@ display: flex; align-items: center; gap: 10px;
 padding: 9px 12px; border-radius: 8px;
 font-size: 13px; color: var(--muted); cursor: pointer;
 transition: background 0.1s, color 0.1s;
+white-space: nowrap;
 }
 .dropdown-item:hover { background: var(--bg3); color: var(--text); }
 .dropdown-item.danger:hover { background: rgba(240,96,96,0.08); color: var(--danger); }
@@ -480,7 +481,7 @@ font-size: 12px; cursor: pointer; font-family: var(--font-display);
 padding: 4px 8px; border-radius: 6px;
 }
 
-.main { padding: 24px 20px 80px; max-width: 800px; margin: 0 auto; }
+.main { padding: 24px 20px 24px; max-width: 1100px; margin: 0 auto; }
 
 /* Celebration */
 #celebrate-overlay {
@@ -599,6 +600,74 @@ border: 1px solid var(--border2);
 border-radius: 20px; padding: 2px 9px;
 }
 
+/* Two-column dashboard grid (desktop only) */
+.cols { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+@media (min-width: 900px) {
+.cols { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+/* Category card (white container around Assets / Debt) */
+.cat-card {
+background: var(--bg2); border: 1px solid var(--border);
+border-radius: 16px; padding: 4px 20px 20px;
+}
+.cat-card-head {
+display: flex; align-items: center; justify-content: space-between;
+padding: 20px 0 12px;
+}
+/* Override account row inside cat-card so it's on a contrasting bg */
+.cat-card .acct-row { background: var(--bg); border-color: transparent; }
+[data-theme="light"] .cat-card .acct-row { background: var(--bg); }
+
+/* Trust footer */
+.trust-footer {
+display: flex; align-items: center; justify-content: center;
+gap: 6px; margin-top: 32px; padding: 16px 0;
+font-size: 12px; color: var(--muted);
+text-align: center;
+}
+.trust-footer svg { flex-shrink: 0; opacity: 0.7; }
+
+/* At a glance */
+.glance-section { margin-top: 8px; margin-bottom: 8px; }
+.glance-wrap {
+background: var(--bg2);
+border: 1px solid var(--border);
+border-radius: 16px;
+padding: 16px;
+}
+.glance-title {
+font-size: 22px; font-weight: 600; letter-spacing: -0.5px;
+color: var(--text); margin-bottom: 12px;
+padding: 4px 4px 0;
+}
+.glance-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 10px;
+}
+@media (min-width: 700px) { .glance-grid { grid-template-columns: repeat(4, 1fr); } }
+.glance-card {
+display: flex; align-items: center; gap: 12px;
+background: var(--bg);
+border-radius: 12px;
+padding: 14px;
+}
+.glance-icon {
+width: 40px; height: 40px; flex-shrink: 0;
+border-radius: 10px;
+display: flex; align-items: center; justify-content: center;
+}
+.glance-body { min-width: 0; flex: 1; }
+.glance-val {
+font-size: 20px; font-weight: 500; font-family: var(--font-mono);
+color: var(--text); line-height: 1.2;
+white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.glance-val.glance-val-text { font-family: var(--font-display); }
+.glance-label { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+.glance-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
 /* Account note */
 .acct-note { font-size: 11px; color: var(--muted); margin-top: 2px; font-style: italic; opacity: 0.7; }
 
@@ -661,6 +730,7 @@ background: var(--accent); color: var(--check-color);
 
 /* Section */
 .section { margin-bottom: 20px; }
+.cat-card .section:last-child { margin-bottom: 0; }
 .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 6px 0; }
 .section-label { font-size: 13px; color: var(--muted); letter-spacing: 0.03em; font-weight: 500; }
 .add-link {
@@ -884,11 +954,13 @@ color: var(--muted); transition: all 0.15s;
 .type-btn.active { background: var(--accent); color: var(--check-color); border-color: var(--accent); font-weight: 500; }
 
 .hist-toggle {
-width: 100%; padding: 10px; margin-top: 0;
+display: block; width: calc(100% + 20px);
+margin: 0 -10px; padding: 13px 10px 12px;
 background: none; border: none; border-top: 1px dashed var(--border);
-border-radius: 0; color: var(--muted); font-size: 13px;
+border-radius: 8px; color: var(--muted); font-size: 13px;
 font-family: var(--font-display); cursor: pointer;
-transition: all 0.15s;
+text-align: center; line-height: 1;
+transition: background 0.15s, color 0.15s;
 }
 .hist-toggle:hover { color: var(--text); background: var(--bg3); }
 
@@ -1032,13 +1104,15 @@ Continue with Google
 <div style="margin-bottom:16px;text-align:left;">
 <div style="font-size:10px;color:#8a94a6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Net worth</div>
 <div class="mock-nw-num" id="mock-nw" style="text-align:left;">$0</div>
-<div style="font-size:12px;color:#22c47a;margin-top:4px;text-align:left;" id="mock-change">↑ +$8,240 this year</div>
+<div style="font-size:12px;color:#22c47a;margin-top:4px;text-align:left;" id="mock-change">↑ +$11,200 this year</div>
 </div>
 
 <!-- Time filters -->
 <div style="display:flex;gap:4px;margin-bottom:10px;">
 <div style="padding:3px 8px;border-radius:6px;font-size:10px;color:#8a94a6;border:1px solid #eaecf2;">1M</div>
 <div style="padding:3px 8px;border-radius:6px;font-size:10px;color:#8a94a6;border:1px solid #eaecf2;">3M</div>
+<div style="padding:3px 8px;border-radius:6px;font-size:10px;color:#8a94a6;border:1px solid #eaecf2;">6M</div>
+<div style="padding:3px 8px;border-radius:6px;font-size:10px;color:#8a94a6;border:1px solid #eaecf2;">YTD</div>
 <div style="padding:3px 8px;border-radius:6px;font-size:10px;color:#8a94a6;border:1px solid #eaecf2;">1Y</div>
 <div style="padding:3px 8px;border-radius:6px;font-size:10px;background:#22c47a;color:#fff;border:1px solid #22c47a;font-weight:500;">All</div>
 </div>
@@ -1046,11 +1120,11 @@ Continue with Google
 <!-- Chart — wrapped in card like real app -->
 <div style="background:#f4f6f9;border-radius:12px;padding:12px 12px 8px;margin-bottom:14px;">
 <!-- Y-axis labels on left -->
-<div style="display:flex;gap:8px;">
-<div style="display:flex;flex-direction:column;justify-content:space-between;min-width:36px;">
-<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$550K</div>
-<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$300K</div>
+<div style="display:flex;gap:4px;">
+<div style="display:flex;flex-direction:column;justify-content:space-between;min-width:32px;">
 <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$100K</div>
+<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$50K</div>
+<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;text-align:right;">$0</div>
 </div>
 <div style="flex:1;height:clamp(75px,18vw,95px);position:relative;">
 <svg viewBox="0 0 480 95" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
@@ -1060,6 +1134,10 @@ Continue with Google
 <stop offset="100%" stop-color="#22c47a" stop-opacity="0"/>
 </linearGradient>
 </defs>
+<!-- Gridlines -->
+<line x1="0" y1="8" x2="480" y2="8" stroke="rgba(122,125,130,0.12)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="0" y1="47.5" x2="480" y2="47.5" stroke="rgba(122,125,130,0.12)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+<line x1="0" y1="87" x2="480" y2="87" stroke="rgba(122,125,130,0.12)" stroke-width="1" vector-effect="non-scaling-stroke"/>
 <path class="mock-chart-fill" d="M0 88 C40 82 70 70 120 58 C155 50 175 52 210 42 C240 34 260 36 290 50 C315 62 335 48 370 32 C400 18 440 14 480 8 L480 95 L0 95 Z" fill="url(#mg)"/>
 <path class="mock-chart-path" d="M0 88 C40 82 70 70 120 58 C155 50 175 52 210 42 C240 34 260 36 290 50 C315 62 335 48 370 32 C400 18 440 14 480 8" fill="none" stroke="#22c47a" stroke-width="2"/>
 </svg>
@@ -1071,7 +1149,7 @@ Continue with Google
 </div>
 </div>
 <!-- X-axis dates -->
-<div style="display:flex;justify-content:space-between;margin-top:4px;padding-left:44px;">
+<div style="display:flex;justify-content:space-between;margin-top:4px;padding-left:36px;">
 <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jan '24</div>
 <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jun '24</div>
 <div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jan '25</div>
@@ -1080,30 +1158,30 @@ Continue with Google
 
 <!-- 4 stat tiles -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;">
-<div style="background:#f4f6f9;border-radius:10px;padding:8px;">
-<div style="font-size:9px;color:#8a94a6;margin-bottom:3px;font-weight:500;">Cash</div>
-<div style="font-size:12px;font-weight:500;font-family:'Fira Code',monospace;color:#5BAF8E;">$22K</div>
+<div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
+<div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Cash</div>
+<div id="mock-tile-cash" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#5BAF8E;min-height:18px;">$0</div>
 </div>
-<div style="background:#f4f6f9;border-radius:10px;padding:8px;">
-<div style="font-size:9px;color:#8a94a6;margin-bottom:3px;font-weight:500;">Invest</div>
-<div style="font-size:12px;font-weight:500;font-family:'Fira Code',monospace;color:#4A7FC1;">$138K</div>
+<div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
+<div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Invest</div>
+<div id="mock-tile-invest" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#4A7FC1;min-height:18px;">$0</div>
 </div>
-<div style="background:#f4f6f9;border-radius:10px;padding:8px;">
-<div style="font-size:9px;color:#8a94a6;margin-bottom:3px;font-weight:500;">Property</div>
-<div style="font-size:12px;font-weight:500;font-family:'Fira Code',monospace;color:#4AA8C0;">$448K</div>
+<div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
+<div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Property</div>
+<div id="mock-tile-property" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#4AA8C0;min-height:18px;">$0</div>
 </div>
-<div style="background:#f4f6f9;border-radius:10px;padding:8px;">
-<div style="font-size:9px;color:#8a94a6;margin-bottom:3px;font-weight:500;">Debt</div>
-<div style="font-size:12px;font-weight:500;font-family:'Fira Code',monospace;color:#e05555;">-$2.4K</div>
+<div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
+<div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Debt</div>
+<div id="mock-tile-debt" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#e05555;min-height:18px;">$0</div>
 </div>
 </div>
 
 <!-- Stacked bar -->
 <div style="display:flex;height:6px;border-radius:4px;overflow:hidden;gap:3px;margin-bottom:14px;">
-<div style="flex:2;background:#5BAF8E;border-radius:3px 0 0 3px;"></div>
-<div style="flex:5;background:#4A7FC1;"></div>
-<div style="flex:14;background:#4AA8C0;"></div>
-<div style="flex:1;background:#e05555;border-radius:0 3px 3px 0;"></div>
+<div style="flex:157;background:#5BAF8E;border-radius:3px 0 0 3px;"></div>
+<div style="flex:774;background:#4A7FC1;"></div>
+<div style="flex:145;background:#4AA8C0;"></div>
+<div style="flex:28;background:#e05555;border-radius:0 3px 3px 0;"></div>
 </div>
 
 <!-- Account rows - stagger in with scroll-up effect, only 3 visible at a time -->
@@ -1113,19 +1191,32 @@ Continue with Google
 <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
 <div style="display:flex;align-items:center;gap:8px;">
 <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
 </div>
 <div>
-<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Ally Savings</div>
-<div style="font-size:10px;color:#8a94a6;text-align:left;">Savings</div>
+<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Chase Checking</div>
+<div style="font-size:10px;color:#8a94a6;text-align:left;">Checking</div>
 </div>
 </div>
-<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$18,500</div>
+<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$3,200</div>
 </div>
 <!-- Row 2 -->
 <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
 <div style="display:flex;align-items:center;gap:8px;">
-<div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,127,193,0.12);display:flex;align-items:center;justify-content:center;color:#4A7FC1;">
+<div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+</div>
+<div>
+<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Ally HYSA</div>
+<div style="font-size:10px;color:#8a94a6;text-align:left;">HYSA</div>
+</div>
+</div>
+<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$12,500</div>
+</div>
+<!-- Row 3 -->
+<div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+<div style="display:flex;align-items:center;gap:8px;">
+<div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
 </div>
 <div>
@@ -1133,20 +1224,7 @@ Continue with Google
 <div style="font-size:10px;color:#8a94a6;text-align:left;">401k</div>
 </div>
 </div>
-<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$94,000</div>
-</div>
-<!-- Row 3 -->
-<div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-<div style="display:flex;align-items:center;gap:8px;">
-<div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,168,192,0.12);display:flex;align-items:center;justify-content:center;color:#4AA8C0;">
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-</div>
-<div>
-<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Primary Home</div>
-<div style="font-size:10px;color:#8a94a6;text-align:left;">Real estate</div>
-</div>
-</div>
-<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$420,000</div>
+<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$58,000</div>
 </div>
 <!-- Row 4 — debt (causes dip) -->
 <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
@@ -1159,33 +1237,33 @@ Continue with Google
 <div style="font-size:10px;color:#8a94a6;text-align:left;">Credit card</div>
 </div>
 </div>
-<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#D96060;">-$8,400</div>
+<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#D96060;">-$2,800</div>
 </div>
 <!-- Row 5 -->
 <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
 <div style="display:flex;align-items:center;gap:8px;">
-<div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,127,193,0.12);display:flex;align-items:center;justify-content:center;color:#4A7FC1;">
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+<div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(74,168,192,0.12);display:flex;align-items:center;justify-content:center;color:#4AA8C0;">
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17l1.5-5h11L19 17M5 17v3M19 17v3M7 12V8a2 2 0 012-2h6a2 2 0 012 2v4"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/></svg>
 </div>
 <div>
-<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Robinhood</div>
-<div style="font-size:10px;color:#8a94a6;text-align:left;">Brokerage</div>
+<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Toyota Camry</div>
+<div style="font-size:10px;color:#8a94a6;text-align:left;">Vehicle</div>
 </div>
 </div>
-<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$34,000</div>
+<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$14,500</div>
 </div>
 <!-- Row 6 -->
 <div class="mock-row-anim" style="background:#f4f6f9;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
 <div style="display:flex;align-items:center;gap:8px;">
 <div style="width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(91,175,142,0.12);display:flex;align-items:center;justify-content:center;color:#5BAF8E;">
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
 </div>
 <div>
-<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Chase Checking</div>
-<div style="font-size:10px;color:#8a94a6;text-align:left;">Checking</div>
+<div style="font-size:12px;font-weight:500;color:#111827;text-align:left;">Vanguard Roth IRA</div>
+<div style="font-size:10px;color:#8a94a6;text-align:left;">Roth IRA</div>
 </div>
 </div>
-<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$4,200</div>
+<div style="font-size:13px;font-weight:500;font-family:'Fira Code',monospace;color:#111827;">$19,400</div>
 </div>
 </div>
 </div>
@@ -1605,7 +1683,12 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 <div id="stacked-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;"></div>
 </div>
 
-<div class="cat-header">
+<!-- Two-column grid: Assets | Debt -->
+<div class="cols">
+
+<!-- Assets column -->
+<div class="cat-card">
+<div class="cat-card-head">
 <div class="cat-header-left">
 <span class="cat-title">Assets</span>
 <span class="cat-total" id="cat-total-assets"></span>
@@ -1642,8 +1725,11 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 </div>
 <div id="g-property"></div>
 </div>
+</div><!-- /Assets column -->
 
-<div id="cat-header-debt" class="cat-header" style="margin-top:12px;">
+<!-- Debt column -->
+<div class="cat-card">
+<div id="cat-header-debt" class="cat-card-head">
 <div class="cat-header-left">
 <span class="cat-title">Debt</span>
 <span class="cat-total" id="cat-total-debt"></span>
@@ -1651,14 +1737,69 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 <button class="add-link" onclick="openAddCategory('debt')">+ Add</button>
 </div>
 <div id="debt-subcategories"></div>
+</div><!-- /Debt column -->
 
-<div class="section" style="margin-top:40px;">
-<div class="section-head">
-<span style="font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--text);">History</span>
+</div><!-- /cols -->
+
+<!-- At a glance -->
+<div class="glance-section" id="glance-section" style="display:none;">
+<div class="glance-wrap">
+<div class="glance-title">At a glance</div>
+<div class="glance-grid">
+<div class="glance-card">
+<div class="glance-icon" style="background:rgba(34,196,122,0.12);color:var(--cash-color);">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
 </div>
-<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:4px 16px;">
+<div class="glance-body">
+<div class="glance-val" id="glance-ytd-val">$0</div>
+<div class="glance-label">YTD growth</div>
+<div class="glance-sub" id="glance-ytd-sub"></div>
+</div>
+</div>
+<div class="glance-card">
+<div class="glance-icon" style="background:rgba(74,127,193,0.12);color:var(--broker-color);">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+</div>
+<div class="glance-body">
+<div class="glance-val" id="glance-mover-val">$0</div>
+<div class="glance-label">Avg monthly growth</div>
+<div class="glance-sub" id="glance-mover-sub"></div>
+</div>
+</div>
+<div class="glance-card">
+<div class="glance-icon" style="background:rgba(74,168,192,0.12);color:var(--property-color);">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+</div>
+<div class="glance-body">
+<div class="glance-val" id="glance-invested-val">0%</div>
+<div class="glance-label">Invested</div>
+<div class="glance-sub">of total assets</div>
+</div>
+</div>
+<div class="glance-card">
+<div class="glance-icon" style="background:rgba(34,196,122,0.12);color:var(--accent);">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+</div>
+<div class="glance-body">
+<div class="glance-val" id="glance-since-val">$0</div>
+<div class="glance-label">All-time high</div>
+<div class="glance-sub" id="glance-since-sub"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="glance-section" style="margin-top:24px;">
+<div class="glance-wrap">
+<div class="glance-title">History</div>
 <div id="history"></div>
 </div>
+</div>
+
+<div class="trust-footer">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<span>Your data lives in your Google Drive, not on our servers.</span>
 </div>
 </div>
 </div>
@@ -2568,8 +2709,8 @@ if (!ts) return null;
 const days = Math.floor((Date.now() - ts) / 86400000);
 if (days === 0) return { text: 'updated today', cls: '', tappable: false };
 if (days === 1) return { text: 'updated 1d ago', cls: '', tappable: false };
-if (days <= 7) return { text: `updated ${days}d ago`, cls: '', tappable: false };
-if (days <= 14) return { text: `updated ${days}d ago`, cls: 'stale1', tappable: true };
+if (days <= 14) return { text: `updated ${days}d ago`, cls: '', tappable: false };
+if (days <= 30) return { text: `updated ${days}d ago`, cls: 'stale1', tappable: true };
 return { text: `updated ${days}d ago`, cls: 'stale2', tappable: true };
 }
 
@@ -2731,6 +2872,70 @@ document.getElementById('s-debt').textContent = fmt(totalDebt);
 // category totals
 document.getElementById('cat-total-assets').textContent = fmt(totalAssets);
 document.getElementById('cat-total-debt').textContent = fmt(totalDebt);
+
+// At a glance — compute and show only if enough data
+(function renderGlance() {
+const section = document.getElementById('glance-section');
+if (!section) return;
+const hist = (state.history || []).slice().sort((a,b) => a.date - b.date);
+if (hist.length < 2) { section.style.display = 'none'; return; }
+section.style.display = '';
+
+// YTD growth
+const now = new Date();
+const yearStart = new Date(now.getFullYear(), 0, 1).getTime();
+const yearStartSnap = hist.find(h => h.date >= yearStart) || hist[0];
+const ytdDelta = netWorth - yearStartSnap.total;
+const ytdPct = yearStartSnap.total !== 0 ? (ytdDelta / Math.abs(yearStartSnap.total)) * 100 : 0;
+const ytdEl = document.getElementById('glance-ytd-val');
+const ytdSub = document.getElementById('glance-ytd-sub');
+if (ytdEl) {
+ytdEl.textContent = (ytdDelta >= 0 ? '+' : '-') + '$' + Math.abs(Math.round(ytdDelta)).toLocaleString();
+ytdEl.style.color = ytdDelta >= 0 ? 'var(--accent)' : 'var(--danger)';
+}
+if (ytdSub) {
+ytdSub.textContent = (ytdPct >= 0 ? '+' : '') + ytdPct.toFixed(1) + '%';
+ytdSub.style.color = ytdDelta >= 0 ? 'var(--accent)' : 'var(--danger)';
+}
+
+// Avg monthly growth — total delta divided by months between first and last snapshot
+const first = hist[0];
+const last = hist[hist.length - 1];
+const monthsTracked = Math.max(1, (last.date - first.date) / (1000 * 60 * 60 * 24 * 30.44));
+const totalDelta = last.total - first.total;
+const avgMonthly = totalDelta / monthsTracked;
+const moverEl = document.getElementById('glance-mover-val');
+const moverSub = document.getElementById('glance-mover-sub');
+if (moverEl) {
+moverEl.textContent = (avgMonthly >= 0 ? '+' : '-') + '$' + Math.abs(Math.round(avgMonthly)).toLocaleString();
+moverEl.style.color = avgMonthly >= 0 ? 'var(--accent)' : 'var(--danger)';
+}
+if (moverSub) moverSub.textContent = 'over ' + Math.round(monthsTracked) + ' months';
+
+// Invested ratio
+const investedEl = document.getElementById('glance-invested-val');
+if (investedEl) {
+const ratio = totalAssets > 0 ? (totals.investments / totalAssets) * 100 : 0;
+investedEl.textContent = ratio.toFixed(1) + '%';
+}
+
+// All-time high
+const sinceEl = document.getElementById('glance-since-val');
+const sinceSub = document.getElementById('glance-since-sub');
+const peak = hist.reduce((max, h) => h.total > max.total ? h : max, hist[0]);
+if (sinceEl) sinceEl.textContent = '$' + Math.round(peak.total).toLocaleString();
+if (sinceSub) {
+const isCurrent = peak.date === last.date;
+if (isCurrent) {
+sinceSub.textContent = 'Right now';
+sinceSub.style.color = 'var(--accent)';
+} else {
+const daysAgo = Math.round((last.date - peak.date) / (1000 * 60 * 60 * 24));
+sinceSub.textContent = daysAgo + (daysAgo === 1 ? ' day ago' : ' days ago');
+sinceSub.style.color = '';
+}
+}
+})();
 
 // hide/show empty asset subsections
 ['cash','investments','property'].forEach(group => {
@@ -3705,7 +3910,7 @@ const PRIVACY_SELECTORS_DOTS = [
 '.stat-tile-val', '.breakdown-amt', '.milestone-next strong', '#milestone-next'
 ];
 const PRIVACY_SELECTORS_HIDE = [
-'#hero-change', '.acct-sub', '.section-total', '#cat-total-assets', '#cat-total-debt',
+'#hero-change', '.acct-sub', '.section-total', '#cat-total-assets', '#cat-total-debt', '#glance-ytd-val', '#glance-mover-val', '.glance-sub',
 '.milestone-next', '.hist-change'
 ];
 
@@ -4681,6 +4886,21 @@ else if (onDone) onDone();
 requestAnimationFrame(step);
 }
 
+function animateMockTile(elId, from, to, duration) {
+const el = document.getElementById(elId);
+if (!el) return;
+const startTime = performance.now();
+function step(now) {
+const progress = Math.min((now - startTime) / duration, 1);
+const eased = 1 - Math.pow(1 - progress, 3);
+const current = Math.round(from + (to - from) * eased);
+const prefix = current < 0 ? '-$' : '$';
+el.textContent = prefix + Math.abs(current).toLocaleString();
+if (progress < 1) requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+}
+
 function animateMockChartSegment(fromOffset, toOffset, duration, delay) {
 setTimeout(() => {
 const path = document.querySelector('.mock-chart-path');
@@ -4704,18 +4924,23 @@ const nwEl = document.getElementById('mock-nw');
 if (!nwEl) return;
 
 const TOTAL_DASH = 496;
-const FINAL_NW = 562300;
+const FINAL_NW = 104800;
 
+// Each step: total = running net worth; tile = which tile to update; tileFrom/tileTo = animation values
 const steps = [
-{ total: 18500,delay: 400},
-{ total: 112500, delay: 900},
-{ total: 532500, delay: 1400 },
-{ total: 524100, delay: 1900 },
-{ total: 558100, delay: 2400 },
-{ total: 562300, delay: 2900 },
+{ total: 3200, delay: 400, tile: 'mock-tile-cash', tileFrom: 0, tileTo: 3200 },
+{ total: 15700, delay: 900, tile: 'mock-tile-cash', tileFrom: 3200, tileTo: 15700 },
+{ total: 73700, delay: 1400, tile: 'mock-tile-invest', tileFrom: 0, tileTo: 58000 },
+{ total: 70900, delay: 1900, tile: 'mock-tile-debt', tileFrom: 0, tileTo: -2800 },
+{ total: 85400, delay: 2400, tile: 'mock-tile-property', tileFrom: 0, tileTo: 14500 },
+{ total: 104800, delay: 2900, tile: 'mock-tile-invest', tileFrom: 58000, tileTo: 77400 },
 ];
 
 nwEl.textContent = '$0';
+['mock-tile-cash', 'mock-tile-invest', 'mock-tile-property', 'mock-tile-debt'].forEach(id => {
+const el = document.getElementById(id);
+if (el) el.textContent = '$0';
+});
 const path = document.querySelector('.mock-chart-path');
 if (path) path.style.strokeDashoffset = TOTAL_DASH;
 const rows = document.querySelectorAll('.mock-row-anim');
@@ -4767,12 +4992,20 @@ rowsContainer.style.transform = `translateY(-${(i - 2) * actualRowHeight}px)`;
 const from = i === 0 ? 0 : steps[i - 1].total;
 const isLast = i === steps.length - 1;
 animateMockNW(from, step.total, 400, null);
+if (step.tile) animateMockTile(step.tile, step.tileFrom, step.tileTo, 400);
 }, step.delay);
 });
 }
 
 if (document.getElementById('auth-screen')) {
-window.addEventListener('load', () => setTimeout(runMockupAnimations, 400));
+window.addEventListener('load', () => {
+const start = () => setTimeout(runMockupAnimations, 200);
+if (document.fonts && document.fonts.ready) {
+document.fonts.ready.then(start);
+} else {
+setTimeout(start, 400);
+}
+});
 }
 
 // AI insight carousel — horizontal, seamless infinite loop
