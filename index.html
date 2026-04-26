@@ -432,6 +432,10 @@ transform: translateY(-50%);
 #s-investments.private-val::before,
 #s-property.private-val::before,
 #s-debt.private-val::before,
+#glance-ytd-val.private-val::before,
+#glance-mover-val.private-val::before,
+#glance-invested-val.private-val::before,
+#glance-since-val.private-val::before,
 .stat-tile-val.private-val::before { right: auto; left: 0; }
 #hero-total.private-val { width: auto; display: inline-block; }
 #hero-total.private-val::before { left: 0; right: auto; }
@@ -3056,8 +3060,6 @@ if (cryptoBtn) cryptoBtn.style.display = hasCrypto ? 'inline-flex' : 'none';
 
 renderChart();
 
-if (privacyOn) applyPrivacy();
-
 const histEl = document.getElementById('history');
 
 // merge history snapshots + events into one timeline
@@ -3141,6 +3143,8 @@ const toggleBtn = allEvents.length > 5
 
 histEl.innerHTML = rows + toggleBtn;
 }
+
+if (privacyOn) reapplyPrivacyAfterRender();
 }
 
 // ---- MODAL ----
