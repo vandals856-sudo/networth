@@ -192,6 +192,10 @@ stroke-dashoffset: 496;
 100% { r: 10; opacity: 0; }
 }
 .mock-nw-num { font-size:32px;font-weight:600;letter-spacing:-1.5px;color:#111827;font-family:'Fira Code',monospace;line-height:1; }
+@media (max-width: 480px) {
+.mock-tile-val { font-size: 12px !important; }
+.mock-nw-num { font-size: 26px; letter-spacing: -1px; }
+}
 .hero-mockup-topbar {
 background: #ffffff; border-bottom: 1px solid rgba(0,0,0,0.06);
 padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
@@ -295,7 +299,16 @@ justify-content: center; flex-shrink: 0;
 .mock-check-empty {
 width: 20px; height: 20px; border-radius: 50%;
 border: 1.5px dashed #3dd68c; flex-shrink: 0;
+animation: mockRingSpin 6s linear infinite;
 }
+@keyframes mockRingSpin { to { transform: rotate(360deg); } }
+/* Stack ring + check in same slot for cross-fade */
+.mock-icon-stack { position: relative; width: 20px; height: 20px; flex-shrink: 0; }
+.mock-icon-stack > * { position: absolute; inset: 0; transition: opacity 0.4s ease, transform 0.4s ease; }
+.mock-double-collapsed #mock-double-ring { opacity: 0; }
+.mock-double-collapsed #mock-double-check { opacity: 1 !important; transform: scale(1) !important; }
+.mock-double-collapsed #mock-double-progress-wrap { display: none; }
+.mock-double-collapsed #mock-double-date { display: block !important; opacity: 1 !important; transition: opacity 0.4s ease 0.2s; }
 .mock-check-ring {
 width: 20px; height: 20px; border-radius: 50%;
 border: 1.5px solid rgba(255,255,255,0.15); flex-shrink: 0;
@@ -307,7 +320,9 @@ border: 1.5px solid rgba(255,255,255,0.15); flex-shrink: 0;
 .mock-milestone-next-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .mock-progress-bar { width: 48px; height: 3px; background: #1e242d; border-radius: 2px; overflow: hidden; }
 .mock-progress-fill { height: 100%; background: #3dd68c; border-radius: 2px; }
-.mock-milestone-pct { font-size: 11px; color: #3dd68c; }
+.mock-milestone-pct { font-size: 11px; color: #3dd68c; min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+.mock-milestone.mock-milestone-pending { opacity: 0.35; transition: opacity 0.5s ease; }
+.mock-milestone.mock-milestone-pending.mock-milestone-active { opacity: 1; }
 
 /* How it works */
 .auth-steps-section {
@@ -1161,9 +1176,9 @@ Continue with Google
 </div>
 <!-- X-axis dates -->
 <div style="display:flex;justify-content:space-between;margin-top:4px;padding-left:36px;">
-<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jan '24</div>
-<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jun '24</div>
-<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jan '25</div>
+<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Nov '24</div>
+<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Jun '25</div>
+<div style="font-size:10px;color:#b0b8c8;font-family:'Fira Code',monospace;">Apr '26</div>
 </div>
 </div>
 
@@ -1171,19 +1186,19 @@ Continue with Google
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;">
 <div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
 <div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Cash</div>
-<div id="mock-tile-cash" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#5BAF8E;min-height:18px;">$0</div>
+<div id="mock-tile-cash" class="mock-tile-val" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#5BAF8E;min-height:18px;">$0</div>
 </div>
 <div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
 <div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Invest</div>
-<div id="mock-tile-invest" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#4A7FC1;min-height:18px;">$0</div>
+<div id="mock-tile-invest" class="mock-tile-val" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#4A7FC1;min-height:18px;">$0</div>
 </div>
 <div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
 <div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Property</div>
-<div id="mock-tile-property" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#4AA8C0;min-height:18px;">$0</div>
+<div id="mock-tile-property" class="mock-tile-val" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#4AA8C0;min-height:18px;">$0</div>
 </div>
 <div style="background:#f4f6f9;border-radius:10px;padding:10px;text-align:left;">
 <div style="font-size:9px;color:#8a94a6;margin-bottom:4px;font-weight:500;letter-spacing:0.03em;">Debt</div>
-<div id="mock-tile-debt" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#e05555;min-height:18px;">$0</div>
+<div id="mock-tile-debt" class="mock-tile-val" style="font-size:14px;font-weight:600;font-family:'Fira Code',monospace;color:#e05555;min-height:18px;">$0</div>
 </div>
 </div>
 
@@ -1340,7 +1355,7 @@ Continue with Google
 <div class="mock-milestone-name">First Thousand</div>
 <div class="mock-milestone-label">$1K</div>
 </div>
-<div class="mock-milestone-date">Jan 12, 2024</div>
+<div class="mock-milestone-date">Dec 8, 2024</div>
 </div>
 <div class="mock-milestone done">
 <div class="mock-check">
@@ -1350,27 +1365,34 @@ Continue with Google
 <div class="mock-milestone-name">Solid Foundation</div>
 <div class="mock-milestone-label">$5K</div>
 </div>
-<div class="mock-milestone-date">Mar 4, 2024</div>
+<div class="mock-milestone-date">Apr 22, 2025</div>
 </div>
-<div class="mock-milestone done">
-<div class="mock-check">
+<div class="mock-milestone done" id="mock-double-milestone">
+<div class="mock-icon-stack">
+<div class="mock-check-empty" id="mock-double-ring"></div>
+<div class="mock-check" id="mock-double-check" style="opacity:0;transform:scale(0.6);">
 <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
 </div>
 <div class="mock-milestone-text">
 <div class="mock-milestone-name">Double Digits</div>
 <div class="mock-milestone-label">$10K</div>
 </div>
-<div class="mock-milestone-date">Aug 19, 2024</div>
+<div class="mock-milestone-next-wrap" id="mock-double-progress-wrap">
+<div class="mock-progress-bar"><div class="mock-progress-fill" id="mock-double-fill" style="width:0%;"></div></div>
+<div class="mock-milestone-pct" id="mock-double-pct">0%</div>
 </div>
-<div class="mock-milestone next">
-<div class="mock-check-empty"></div>
+<div class="mock-milestone-date" id="mock-double-date" style="opacity:0;display:none;">Oct 14, 2025</div>
+</div>
+<div class="mock-milestone next mock-milestone-pending" id="mock-rise-milestone">
+<div class="mock-check-empty" id="mock-rise-ring"></div>
 <div class="mock-milestone-text">
 <div class="mock-milestone-name">On the Rise</div>
 <div class="mock-milestone-label">$25K</div>
 </div>
 <div class="mock-milestone-next-wrap">
-<div class="mock-progress-bar"><div class="mock-progress-fill" style="width:67%"></div></div>
-<div class="mock-milestone-pct">67%</div>
+<div class="mock-progress-bar"><div class="mock-progress-fill" id="mock-rise-fill" style="width:0%;transition:width 1.4s cubic-bezier(0.4,0,0.2,1);"></div></div>
+<div class="mock-milestone-pct" id="mock-rise-pct">0%</div>
 </div>
 </div>
 <div class="mock-milestone locked">
@@ -5029,6 +5051,58 @@ let aiIndex = 0;
 let aiTimer = null;
 let aiAnimating = false;
 
+// Milestone progress animation — one-shot when scrolled into view
+(function animateMilestoneProgress() {
+const doubleFill = document.getElementById('mock-double-fill');
+const doublePct = document.getElementById('mock-double-pct');
+const doubleMilestone = document.getElementById('mock-double-milestone');
+const riseFill = document.getElementById('mock-rise-fill');
+const risePct = document.getElementById('mock-rise-pct');
+if (!doubleFill || !riseFill) return;
+
+function tweenPct(el, from, to, duration, onDone) {
+const start = performance.now();
+function step(now) {
+const t = Math.min((now - start) / duration, 1);
+const eased = 1 - Math.pow(1 - t, 3);
+const current = Math.round(from + (to - from) * eased);
+el.textContent = current + '%';
+if (t < 1) requestAnimationFrame(step);
+else if (onDone) onDone();
+}
+requestAnimationFrame(step);
+}
+
+function runSequence() {
+doubleFill.style.transition = 'width 2.2s cubic-bezier(0.4,0,0.2,1)';
+doubleFill.style.width = '100%';
+tweenPct(doublePct, 0, 100, 2200, () => {
+setTimeout(() => {
+doubleMilestone.classList.add('mock-double-collapsed');
+const riseMilestone = document.getElementById('mock-rise-milestone');
+if (riseMilestone) riseMilestone.classList.add('mock-milestone-active');
+setTimeout(() => {
+riseFill.style.transition = 'width 1.8s cubic-bezier(0.4,0,0.2,1)';
+riseFill.style.width = '67%';
+tweenPct(risePct, 0, 67, 1800);
+}, 700);
+}, 700);
+});
+}
+
+if ('IntersectionObserver' in window) {
+const obs = new IntersectionObserver(entries => {
+if (entries[0].isIntersecting) {
+obs.disconnect();
+setTimeout(runSequence, 400);
+}
+}, { threshold: 0.3 });
+obs.observe(doubleFill);
+} else {
+setTimeout(runSequence, 800);
+}
+})();
+
 function aiGoTo(next) {
 const track = document.getElementById('ai-track');
 const dots = document.querySelectorAll('.ai-dot');
@@ -5074,6 +5148,62 @@ aiGoTo(i);
 (function initAiCarousel() {
 const track = document.getElementById('ai-track');
 if (!track) return;
+
+// Touch swipe support
+let touchStartX = 0;
+let touchStartY = 0;
+let touchDeltaX = 0;
+let isSwiping = false;
+
+track.addEventListener('touchstart', (e) => {
+if (aiAnimating) return;
+touchStartX = e.touches[0].clientX;
+touchStartY = e.touches[0].clientY;
+touchDeltaX = 0;
+isSwiping = false;
+clearTimeout(aiTimer);
+}, { passive: true });
+
+track.addEventListener('touchmove', (e) => {
+if (aiAnimating) return;
+const dx = e.touches[0].clientX - touchStartX;
+const dy = e.touches[0].clientY - touchStartY;
+if (!isSwiping && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
+isSwiping = true;
+}
+if (isSwiping) {
+touchDeltaX = dx;
+const trackWidth = track.offsetWidth;
+const baseOffset = -aiIndex * 100;
+const dragPct = (dx / trackWidth) * 100;
+track.style.transition = 'none';
+track.style.transform = `translateX(${baseOffset + dragPct}%)`;
+}
+}, { passive: true });
+
+track.addEventListener('touchend', () => {
+if (!isSwiping) {
+track.style.transition = 'transform 0.42s cubic-bezier(0.4,0,0.2,1)';
+track.style.transform = `translateX(-${aiIndex * 100}%)`;
+aiTimer = setTimeout(() => aiGoTo(aiIndex === 2 ? 3 : aiIndex + 1), 6000);
+return;
+}
+const trackWidth = track.offsetWidth;
+const threshold = trackWidth * 0.18;
+if (touchDeltaX < -threshold && aiIndex < 2) {
+aiGoTo(aiIndex + 1);
+} else if (touchDeltaX < -threshold && aiIndex === 2) {
+aiGoTo(3);
+} else if (touchDeltaX > threshold && aiIndex > 0) {
+aiGoTo(aiIndex - 1);
+} else {
+track.style.transition = 'transform 0.42s cubic-bezier(0.4,0,0.2,1)';
+track.style.transform = `translateX(-${aiIndex * 100}%)`;
+aiTimer = setTimeout(() => aiGoTo(aiIndex === 2 ? 3 : aiIndex + 1), 6000);
+}
+isSwiping = false;
+});
+
 // Clone first card and append for seamless loop
 const firstCard = track.querySelector('.ai-card');
 if (firstCard) {
