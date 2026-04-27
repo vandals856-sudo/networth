@@ -4331,15 +4331,55 @@ const totalDebt = state.accounts
 .filter(a => DEBT_TYPES.includes(a.type))
 .reduce((s,a) => s+getBal(a), 0);
 
-const userMessage = `Net worth: ${fmt(netWorth)}. Assets: ${fmt(totalAssets)}. Debt: ${fmt(totalDebt)}. Accounts: ${accountSummary}. Last 90 days of net worth history: ${recentHistory.map(h => `${h.date}: $${h.total.toLocaleString()}`).join(', ')}.`;
+// ---- HISTORY DEPTH CHECK (computed early so we can gate context) ----
+const sevenDaysAgo = Date.now() - 7 * 86400000;
+const recentAdditions = state.events.filter(e => e.type === 'account_added' && e.date >= sevenDaysAgo);
+const recentRemovals = state.events.filter(e => e.type === 'account_removed' && e.date >= sevenDaysAgo);
+const historyDays = state.history.length >= 2
+  ? Math.round((state.history[state.history.length-1].date - state.history[0].date) / 86400000)
+  : 0;
+// "Too new" for any historical/projection angle — needs real time depth and snapshots
+const isNewUser = historyDays < 60 || state.history.length < 8;
 
-// calculate growth projection from last 3-6 months
+// Variance check — calculate coefficient of variation of monthly deltas
+// High variance means growth has been wildly inconsistent, so projections are unreliable
+let growthVarianceOK = true;
+if (state.history.length >= 4) {
+  const sortedHist = [...state.history].sort((a,b) => a.date - b.date);
+  const deltas = [];
+  for (let i = 1; i < sortedHist.length; i++) {
+    const daysGap = (sortedHist[i].date - sortedHist[i-1].date) / 86400000;
+    if (daysGap > 0) {
+      deltas.push((sortedHist[i].total - sortedHist[i-1].total) / daysGap * 30); // monthly delta
+    }
+  }
+  if (deltas.length >= 3) {
+    const mean = deltas.reduce((s,d) => s+d, 0) / deltas.length;
+    const variance = deltas.reduce((s,d) => s + Math.pow(d - mean, 2), 0) / deltas.length;
+    const stdDev = Math.sqrt(variance);
+    // If stdDev > 1.5x mean (and mean is positive), growth is too inconsistent for projections
+    growthVarianceOK = mean > 0 && stdDev / Math.abs(mean) < 1.5;
+  }
+}
+
+// Stable enough to make calibrated projections — high bar: time depth, snapshot count, no recent additions, low variance
+const hasSteadyHistory = historyDays >= 90 && state.history.length >= 10 && !recentAdditions.length && growthVarianceOK;
+
+// History data shared with the model — only include when user has enough depth
+const historyForContext = isNewUser
+  ? `Net worth history: ${state.history.length} snapshot(s) over ${historyDays} days. Not enough history yet for trends or projections.`
+  : `Last 90 days of net worth history: ${recentHistory.map(h => `${h.date}: $${h.total.toLocaleString()}`).join(', ')}.`;
+
+const userMessage = `Net worth: ${fmt(netWorth)}. Assets: ${fmt(totalAssets)}. Debt: ${fmt(totalDebt)}. Accounts: ${accountSummary}. ${historyForContext}`;
+
+// calculate growth projection — ONLY if hasSteadyHistory (otherwise projection math leaks into model output)
+let projectionContext = '';
+if (hasSteadyHistory) {
 const threeMonthsAgo = Date.now() - 90 * 86400000;
 const sixMonthsAgo = Date.now() - 180 * 86400000;
 const recentForProjection = state.history.filter(h => h.date >= threeMonthsAgo).sort((a,b) => a.date - b.date);
 const longerForProjection = state.history.filter(h => h.date >= sixMonthsAgo).sort((a,b) => a.date - b.date);
 const projectionBase = recentForProjection.length >= 2 ? recentForProjection : longerForProjection;
-let projectionContext = '';
 if (projectionBase.length >= 2) {
 const oldest = projectionBase[0];
 const newest = projectionBase[projectionBase.length - 1];
@@ -4354,6 +4394,7 @@ const monthsToNext = (nextMilestone - netWorth) / monthlyGrowth;
 const projDate = new Date(Date.now() + monthsToNext * 30 * 86400000);
 const projLabel = projDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 projectionContext = `Monthly growth rate (last ${Math.round(daySpan/30)} months): $${Math.round(monthlyGrowth).toLocaleString()}/month. At this pace, user would reach $${nextMilestone.toLocaleString()} around ${projLabel}. Note: this is an estimate based on recent trends.`;
+}
 }
 }
 }
@@ -4383,22 +4424,18 @@ ageContext = `User age range: ${ageBracket}. Median net worth for this age group
 
 const fullContext = [userMessage, ageContext, projectionContext].filter(Boolean).join(' ');
 
-// ---- ACCOUNT ADDITION DETECTION ----
-const sevenDaysAgo = Date.now() - 7 * 86400000;
-const recentAdditions = state.events.filter(e => e.type === 'account_added' && e.date >= sevenDaysAgo);
-const recentRemovals = state.events.filter(e => e.type === 'account_removed' && e.date >= sevenDaysAgo);
+// ---- ACCOUNT ADDITION DETECTION (context note for prompt) ----
 let dataCompletionContext = '';
 if (recentAdditions.length > 0) {
   const names = recentAdditions.map(e => e.label.replace(' added', '')).join(', ');
   dataCompletionContext = `IMPORTANT: The user added ${recentAdditions.length} new account(s) this week (${names}). Any net worth jump this week is likely from completing their financial picture, NOT real growth. Do NOT project milestones or growth rates based on this week's data. Focus on composition, ratios, or their overall financial snapshot instead.`;
 }
 
-// ---- HISTORY DEPTH CHECK ----
-const historyDays = state.history.length >= 2
-  ? Math.round((state.history[state.history.length-1].date - state.history[0].date) / 86400000)
-  : 0;
-const isNewUser = historyDays < 14 || state.history.length < 3;
-const hasSteadyHistory = historyDays >= 60 && state.history.length >= 5 && !recentAdditions.length;
+// New user note for the prompt
+let newUserContext = '';
+if (isNewUser) {
+  newUserContext = `IMPORTANT: This user has only ${historyDays} day(s) of net worth history (${state.history.length} snapshot(s)). Do NOT make ANY projections, predictions, growth rate estimates, or future milestone predictions. Do NOT use phrases like "at this pace", "you'd hit", "you'll reach", "in X months", or any future date. Focus only on the current snapshot — composition, ratios, what their accounts look like right now.`;
+}
 
 // ---- COMPUTE EXTRA CONTEXT FOR NEW ANGLES ----
 const totalAssets2 = state.accounts.filter(a => !DEBT_TYPES.includes(a.type)).reduce((s,a) => s+getBal(a), 0);
@@ -4447,6 +4484,7 @@ const hasCryptoHoldings = state.accounts.some(a => CRYPTO_COINS.includes(a.type)
 
 let eligibleAngles = ALL_ANGLES.filter(a => {
   if (a === 'CRYPTO_MARKET') return hasCryptoHoldings;
+  if (a === 'PROJECTION' && !hasSteadyHistory) return false;
   if (HISTORY_REQUIRED.includes(a) && (isNewUser || recentAdditions.length > 0)) return false;
   if (a === 'DEBT_TREND' && !debtTrendContext) return false;
   if (a === 'PEER_COMPARISON' && !ageBracket) return false;
@@ -4472,7 +4510,7 @@ if (recentAngles.length > 2) recentAngles.shift();
 localStorage.setItem('grounded_insight_recent', JSON.stringify(recentAngles));
 
 const angleInstructions = {
-PROJECTION: `Focus on PROJECTION: mention when they might hit their next milestone at this pace. Be specific with the month/year. Only use this if growth has been steady — if it hasn't, pivot to something else useful.`,
+PROJECTION: `Focus on PROJECTION: based on their recent steady growth, share when they could reach their next milestone if their pace holds. Use hedge language like "if growth continues at this pace", "based on your current trajectory", or "if you stay on track". Never state it as a guarantee — frame it as a possibility based on current patterns. Be specific with the month/year as a target, not a promise.`,
 PEER_COMPARISON: `Focus on PEER COMPARISON: naturally mention how they compare to their age group median. Make it motivating not judgmental.`,
 TREND: `Focus on TREND: something positive or notable in their recent history — consistent growth, a recovery, good momentum. Reference specific numbers.`,
 COMPOSITION: `Focus on COMPOSITION: something interesting about what's driving their net worth — which account is doing the heavy lifting, a ratio worth noting, or what's working well.`,
@@ -4493,7 +4531,7 @@ const avoidNote = recentAngles.slice(0,-1).length
 ? `Do NOT repeat topics already covered recently (${recentAngles.slice(0,-1).join(', ')}).`
 : '';
 
-const finalContext = [fullContext, ratioContext, debtTrendContext, dataCompletionContext].filter(Boolean).join(' ');
+const finalContext = [fullContext, ratioContext, debtTrendContext, dataCompletionContext, newUserContext].filter(Boolean).join(' ');
 
 const response = await fetch('https://grounded-api.vandals856.workers.dev/insight', {
 method: 'POST',
@@ -4501,7 +4539,7 @@ headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 model: 'claude-haiku-4-5-20251001',
 max_tokens: 300,
-system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} Never use bullet points. Keep it warm, specific, and human. Never give specific investment advice. Avoid filler phrases like "I love that", "sitting pretty", "great job", "awesome", or any overly enthusiastic openers. Start with the observation, not a compliment.`,
+system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} Never use bullet points. Keep it warm, specific, and human. Never give specific investment advice. Avoid filler phrases like "I love that", "sitting pretty", "great job", "awesome", or any overly enthusiastic openers. Start with the observation, not a compliment. ${angle !== 'PROJECTION' ? 'IMPORTANT: Do not make forward-looking projections, predict future net worth values, or estimate when they will hit any future milestone. Do not include phrases like "at this pace", "you would reach", "in X months", or any specific future date. Stick to describing what is true right now or has been true historically.' : ''}`,
 messages: [{ role: 'user', content: finalContext }]
 })
 });
