@@ -707,8 +707,21 @@ color: var(--text); line-height: 1.2;
 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .glance-val.glance-val-text { font-family: var(--font-display); }
-.glance-label { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 500; }
-.glance-sub { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.glance-label-row {
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+margin-top: 2px;
+font-size: 12px;
+color: var(--muted);
+line-height: 1.35;
+}
+.glance-label { font-weight: 500; }
+.glance-sub:empty { display: none; }
+.glance-sub:empty::before { content: none; }
+.glance-sub::before { content: " "; }
+.glance-sub { font-weight: 400; }
 @media (max-width: 480px) {
 .glance-card { gap: 12px; }
 }
@@ -1809,8 +1822,7 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 </div>
 <div class="glance-body">
 <div class="glance-val" id="glance-ytd-val">$0</div>
-<div class="glance-label">YTD growth</div>
-<div class="glance-sub" id="glance-ytd-sub"></div>
+<div class="glance-label-row"><span class="glance-label">YTD growth</span><span class="glance-sub" id="glance-ytd-sub"></span></div>
 </div>
 </div>
 <div class="glance-card">
@@ -1819,8 +1831,7 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 </div>
 <div class="glance-body">
 <div class="glance-val" id="glance-mover-val">$0</div>
-<div class="glance-label">Avg monthly growth</div>
-<div class="glance-sub" id="glance-mover-sub"></div>
+<div class="glance-label-row"><span class="glance-label">Avg monthly growth</span><span class="glance-sub" id="glance-mover-sub"></span></div>
 </div>
 </div>
 <div class="glance-card">
@@ -1829,8 +1840,7 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 </div>
 <div class="glance-body">
 <div class="glance-val" id="glance-invested-val">0%</div>
-<div class="glance-label">Invested</div>
-<div class="glance-sub">of total assets</div>
+<div class="glance-label-row"><span class="glance-label">Invested</span><span class="glance-sub">of total assets</span></div>
 </div>
 </div>
 <div class="glance-card">
@@ -1839,8 +1849,7 @@ open <code>index.html</code> and replace <code>888736831379-tnffoch56c3shfcu6erl
 </div>
 <div class="glance-body">
 <div class="glance-val" id="glance-since-val">$0</div>
-<div class="glance-label">All-time high</div>
-<div class="glance-sub" id="glance-since-sub"></div>
+<div class="glance-label-row"><span class="glance-label">All-time high</span><span class="glance-sub" id="glance-since-sub"></span></div>
 </div>
 </div>
 </div>
