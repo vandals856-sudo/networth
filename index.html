@@ -4148,16 +4148,12 @@ unlockScroll();
 function saveProfile() {
 const age = document.getElementById('p-age').value;
 localStorage.setItem(PROFILE_KEY, JSON.stringify({ age }));
-// clear insight cache so it regenerates with new context
-localStorage.removeItem('grounded_insight_cache');
-localStorage.removeItem('grounded_insight_nw');
-localStorage.removeItem('grounded_insight_dismissed');
+// clear insight session cache so it regenerates with new age context
+_sessionInsightCache = null;
 closeProfile();
 showToast('Profile saved');
 // clear dismiss so insight shows and stays visible
 localStorage.removeItem(INSIGHT_DISMISS_KEY);
-localStorage.removeItem(INSIGHT_CACHE_KEY);
-localStorage.removeItem(INSIGHT_NW_KEY);
 render();
 // force a fresh insight with new age context
 document.getElementById('insight-card').style.display = 'none';
@@ -4205,8 +4201,9 @@ return true;
 
 // ---- AI INSIGHT ----
 const INSIGHT_DISMISS_KEY = 'grounded_insight_dismissed';
-const INSIGHT_CACHE_KEY = 'grounded_insight_cache';
-const INSIGHT_NW_KEY = 'grounded_insight_nw';
+// Insight content + net worth at generation now live in the user's Meta tab
+// (single source of truth, syncs across devices). Cached in memory for the session.
+let _sessionInsightCache = null;
 
 let _forceInsight = false;
 
@@ -4216,7 +4213,7 @@ if (netWorth === 0) return false;
 if (state.history.length < 2) return false;
 
 const dismissed = localStorage.getItem(INSIGHT_DISMISS_KEY);
-const cachedNW = parseFloat(localStorage.getItem(INSIGHT_NW_KEY) || '0');
+const cachedNW = _sessionInsightCache ? _sessionInsightCache.nw : 0;
 const pctChange = cachedNW > 0 ? Math.abs((netWorth - cachedNW) / cachedNW) : 1;
 
 if (dismissed) {
@@ -4264,32 +4261,29 @@ return;
 }
 }
 
-if (!shouldShowInsight(netWorth)) {
-  // show nudge if there's a cached insight they can peek at
-  const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
-  if (cached) document.getElementById('insight-nudge').style.display = 'block';
-  return;
-}
-
-// check sheet first for cross-device consistency, fall back to localStorage
+// Load insight + nw from Meta tab (single source of truth, syncs across devices)
 const SEVEN_DAYS = 7 * 86400000;
-let cached = localStorage.getItem(INSIGHT_CACHE_KEY);
-let cachedTs = parseInt(localStorage.getItem(INSIGHT_DISMISS_KEY) || '0');
-
-// try to load from sheet if local cache is missing or stale
-if (!cached || (Date.now() - cachedTs) > SEVEN_DAYS) {
+if (!_sessionInsightCache) {
   const sheetInsight = await readMeta('insight_text');
   const sheetTs = parseInt(await readMeta('insight_date') || '0');
-  if (sheetInsight && sheetTs && (Date.now() - sheetTs) < SEVEN_DAYS) {
-    cached = sheetInsight;
-    cachedTs = sheetTs;
-    // sync to localStorage
-    localStorage.setItem(INSIGHT_CACHE_KEY, sheetInsight);
-    localStorage.setItem(INSIGHT_NW_KEY, netWorth.toString());
+  const sheetNW = parseFloat(await readMeta('insight_nw') || '0');
+  if (sheetInsight && sheetTs) {
+    _sessionInsightCache = { text: sheetInsight, ts: sheetTs, nw: sheetNW };
   }
 }
 
-const cachedNW = parseFloat(localStorage.getItem(INSIGHT_NW_KEY) || '0');
+if (!shouldShowInsight(netWorth)) {
+  // show nudge if there's a cached insight they can peek at
+  if (_sessionInsightCache && _sessionInsightCache.text) {
+    document.getElementById('insight-nudge').style.display = 'block';
+  }
+  return;
+}
+
+const cached = _sessionInsightCache && (Date.now() - _sessionInsightCache.ts) < SEVEN_DAYS
+  ? _sessionInsightCache.text : null;
+const cachedTs = _sessionInsightCache ? _sessionInsightCache.ts : 0;
+const cachedNW = _sessionInsightCache ? _sessionInsightCache.nw : 0;
 const pctChange = cachedNW > 0 ? Math.abs((netWorth - cachedNW) / cachedNW) : 1;
 
 if (cached && pctChange < 0.05 && cachedTs && (Date.now() - cachedTs) < SEVEN_DAYS) {
@@ -4556,12 +4550,13 @@ const insight = data.content?.[0]?.text || '';
 
 if (insight) {
 const insightTs = Date.now();
-localStorage.setItem(INSIGHT_CACHE_KEY, insight);
-localStorage.setItem(INSIGHT_NW_KEY, netWorth.toString());
 localStorage.setItem(INSIGHT_DISMISS_KEY, insightTs.toString());
-// save to sheet for cross-device consistency
+// save to sheet (single source of truth, cross-device)
 writeMeta('insight_text', insight);
 writeMeta('insight_date', insightTs.toString());
+writeMeta('insight_nw', netWorth.toString());
+// update session cache
+_sessionInsightCache = { text: insight, ts: insightTs, nw: netWorth };
 textEl.textContent = insight;
 textEl.style.display = 'block';
 loadingEl.style.display = 'none';
@@ -4687,8 +4682,7 @@ if (refreshBtn) refreshBtn.style.display = 'none';
 }
 
 function refreshInsight() {
-localStorage.removeItem(INSIGHT_CACHE_KEY);
-localStorage.removeItem(INSIGHT_NW_KEY);
+_sessionInsightCache = null;
 localStorage.removeItem(INSIGHT_DISMISS_KEY);
 localStorage.removeItem('grounded_insight_recent');
 document.getElementById('insight-card').style.display = 'none';
@@ -4720,17 +4714,17 @@ function dismissInsight() {
 
   document.getElementById('insight-card').style.display = 'none';
   // Show the nudge link
-  const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
-  if (cached) document.getElementById('insight-nudge').style.display = 'block';
+  if (_sessionInsightCache && _sessionInsightCache.text) {
+    document.getElementById('insight-nudge').style.display = 'block';
+  }
 }
 
 function reopenInsight() {
   document.getElementById('insight-nudge').style.display = 'none';
   const card = document.getElementById('insight-card');
   const textEl = document.getElementById('insight-text');
-  const cached = localStorage.getItem(INSIGHT_CACHE_KEY);
-  if (cached) {
-    textEl.textContent = cached;
+  if (_sessionInsightCache && _sessionInsightCache.text) {
+    textEl.textContent = _sessionInsightCache.text;
     textEl.style.display = 'block';
     document.getElementById('insight-loading').style.display = 'none';
     card.style.display = 'block';
