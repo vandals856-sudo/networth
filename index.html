@@ -2204,11 +2204,15 @@ fetchPrices();
 // ---- GOOGLE AUTH ----
 function signIn() {
 if (DEMO_MODE) { initDemo(); return; }
+// Generate a random nonce (required for id_token in implicit flow)
+const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2,'0')).join('');
+sessionStorage.setItem('grounded_nonce', nonce);
 const params = new URLSearchParams({
 client_id: GOOGLE_CLIENT_ID,
 redirect_uri: window.location.href.split('#')[0],
-response_type: 'token',
+response_type: 'token id_token',
 scope: SCOPES,
+nonce: nonce,
 prompt: 'select_account'
 });
 window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
@@ -2395,6 +2399,7 @@ async function sendFeedbackToWorker(modal, data) {
 function signOut() {
 localStorage.removeItem('grounded_token');
 localStorage.removeItem('grounded_token_expiry');
+localStorage.removeItem('grounded_id_token');
 localStorage.removeItem('grounded_sheet');
 window.location.reload();
 }
@@ -2402,25 +2407,30 @@ window.location.reload();
 async function handleAuthCallback() {
 const hash = new URLSearchParams(window.location.hash.slice(1));
 const token = hash.get('access_token');
+const idToken = hash.get('id_token');
 const expiresIn = hash.get('expires_in');
 
 if (token) {
 const expiry = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
 localStorage.setItem('grounded_token', token);
 localStorage.setItem('grounded_token_expiry', expiry);
+if (idToken) localStorage.setItem('grounded_id_token', idToken);
 window.history.replaceState({}, '', window.location.pathname);
 state.accessToken = token;
+state.idToken = idToken || null;
 const ok = await initApp();
 if (!ok) { localStorage.removeItem('grounded_token'); showAuth(); }
 return true;
 }
 
 const saved = localStorage.getItem('grounded_token');
+const savedId = localStorage.getItem('grounded_id_token');
 const expiry = parseInt(localStorage.getItem('grounded_token_expiry') || '0');
 const isExpired = expiry && Date.now() > expiry - 60000;
 
 if (saved && !isExpired) {
 state.accessToken = saved;
+state.idToken = savedId || null;
 const ok = await initApp();
 if (!ok) {
 localStorage.removeItem('grounded_token');
@@ -4533,10 +4543,24 @@ headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 model: 'claude-haiku-4-5-20251001',
 max_tokens: 300,
+id_token: state.idToken || null,
 system: `You are a friendly financial coach inside a net worth tracker called Grounded. Write 2-3 sentences max in warm, plain conversational language like a smart friend, not a financial advisor. ${angleInstructions[angle]} ${avoidNote} Never use bullet points. Keep it warm, specific, and human. Never give specific investment advice. Avoid filler phrases like "I love that", "sitting pretty", "great job", "awesome", or any overly enthusiastic openers. Start with the observation, not a compliment. ${angle !== 'PROJECTION' ? 'IMPORTANT: Do not make forward-looking projections, predict future net worth values, or estimate when they will hit any future milestone. Do not include phrases like "at this pace", "you would reach", "in X months", or any specific future date. Stick to describing what is true right now or has been true historically.' : ''}`,
 messages: [{ role: 'user', content: finalContext }]
 })
 });
+
+// Handle rate limit (429) gracefully — show user-friendly message
+if (response.status === 429) {
+const errData = await response.json().catch(() => ({}));
+const retryAfter = response.headers.get('Retry-After');
+const hours = retryAfter ? Math.ceil(parseInt(retryAfter) / 3600) : 24;
+loadingEl.style.display = 'none';
+textEl.style.display = 'block';
+textEl.textContent = errData.error || `You've reached your insight limit for now. Your next insight will be available in about ${hours} hour${hours === 1 ? '' : 's'}.`;
+const refreshBtn = document.getElementById('insight-refresh-btn');
+if (refreshBtn) refreshBtn.style.display = 'none';
+return;
+}
 
 const data = await response.json();
 console.log('Insight response status:', response.status, 'data:', JSON.stringify(data).slice(0, 300));
