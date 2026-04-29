@@ -4548,12 +4548,9 @@ messages: [{ role: 'user', content: finalContext }]
 
 // Handle rate limit (429) gracefully — show user-friendly message
 if (response.status === 429) {
-const errData = await response.json().catch(() => ({}));
-const retryAfter = response.headers.get('Retry-After');
-const hours = retryAfter ? Math.ceil(parseInt(retryAfter) / 3600) : 24;
 loadingEl.style.display = 'none';
 textEl.style.display = 'block';
-textEl.textContent = errData.error || `You've reached your insight limit for now. Your next insight will be available in about ${hours} hour${hours === 1 ? '' : 's'}.`;
+textEl.textContent = 'Your insight is taking a break. Check back later for a fresh one.';
 return;
 }
 
