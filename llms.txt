@@ -30,7 +30,8 @@ Grounded uses Google OAuth with the `drive.file` scope — the most restrictive 
 - Google OAuth (implicit flow) for authentication
 - Data stored in user's Google Sheet (Accounts, History, Events, Meta tabs)
 - AI insights powered by Claude API via Cloudflare Worker proxy
-- No cookies, no tracking beyond Google Analytics
+- Per-user rate limiting on AI insights via Google ID token verification
+- Aggregate pageview tracking via Google Analytics — never collects financial data
 
 ## Contact
 
