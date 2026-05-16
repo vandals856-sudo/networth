@@ -2091,6 +2091,18 @@ btc:'investments', eth:'investments', ada:'investments', other_invest:'investmen
 property:'property', vehicle:'property', other_property:'property',
 creditcard:'debt', loan:'debt', mortgage:'debt', other_debt:'debt'
 };
+
+// Escape user-controlled strings before inserting into innerHTML
+// Prevents XSS via account names, notes, and other user input
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const TYPE_LABEL = {
 checking:'Checking', savings:'Savings', hysa:'High Yield Savings', cd:'CD', other_cash:'Other',
 '401k':'401k', roth:'Roth IRA', hsa:'HSA', '529':'529', pension:'Pension', treasury:'Treasury/I-Bond', brokerage:'Brokerage',
@@ -2825,7 +2837,7 @@ const iconContent = CRYPTO_ICONS[acc.type]
 ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
 : TYPE_ICONS[acc.type]
 ? `<div class="acct-icon icon-invest">${TYPE_ICONS[acc.type]}</div>`
-: `<div class="acct-icon icon-invest">${acc.name.charAt(0).toUpperCase()}</div>`;
+: `<div class="acct-icon icon-invest">${esc(acc.name.charAt(0).toUpperCase())}</div>`;
 const price = state.prices[acc.type];
 const s = isCrypto ? null : staleness(acc.updatedAt);
 const change24h = state.changes[acc.type];
@@ -2843,9 +2855,9 @@ const staleBtn = (s && s.tappable)
 : '';
 return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
 <div class="acct-left">${iconContent}<div>
-<div class="acct-name">${acc.name}</div>
+<div class="acct-name">${esc(acc.name)}</div>
 <div class="acct-meta">${meta}</div>
-${acc.note ? `<div class="acct-note">${acc.note}</div>` : ''}
+${acc.note ? `<div class="acct-note">${esc(acc.note)}</div>` : ''}
 </div></div>
 <div class="acct-right">
 <div>
@@ -2884,7 +2896,7 @@ const iconContent = CRYPTO_ICONS[acc.type]
 ? `<div class="acct-icon" style="background:transparent;padding:0;">${CRYPTO_ICONS[acc.type]}</div>`
 : TYPE_ICONS[acc.type]
 ? `<div class="acct-icon ${ICON_CLASS[group]}">${TYPE_ICONS[acc.type]}</div>`
-: `<div class="acct-icon ${ICON_CLASS[group]}">${acc.name.charAt(0).toUpperCase()}</div>`;
+: `<div class="acct-icon ${ICON_CLASS[group]}">${esc(acc.name.charAt(0).toUpperCase())}</div>`;
 const price = state.prices[acc.type];
 const change24h2 = state.changes[acc.type];
 const changeStr2 = change24h2 !== undefined
@@ -2910,9 +2922,9 @@ return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc
 <div class="acct-left">
 ${iconContent}
 <div>
-<div class="acct-name">${acc.name}</div>
+<div class="acct-name">${esc(acc.name)}</div>
 <div class="acct-meta">${meta}</div>
-${acc.note ? `<div class="acct-note">${acc.note}</div>` : ''}
+${acc.note ? `<div class="acct-note">${esc(acc.note)}</div>` : ''}
 </div>
 </div>
 <div class="acct-right">
@@ -3050,9 +3062,9 @@ const sorted = [...accs].sort((a,b) => getBal(b)-getBal(a));
 const subtotal = sorted.reduce((s,a)=>s+getBal(a),0);
 const rows = sorted.map(acc => `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
 <div class="acct-left">
-<div class="acct-icon icon-debt">${TYPE_ICONS[acc.type] || acc.name.charAt(0).toUpperCase()}</div>
+<div class="acct-icon icon-debt">${TYPE_ICONS[acc.type] || esc(acc.name.charAt(0).toUpperCase())}</div>
 <div>
-<div class="acct-name">${acc.name}</div>
+<div class="acct-name">${esc(acc.name)}</div>
 </div>
 </div>
 <div class="acct-right">
@@ -3182,14 +3194,14 @@ ontouchstart="startLongPress(${idx},event,this)" ontouchend="cancelLongPress(thi
 } else if (item.type === 'milestone') {
 return `<div class="hist-row" style="cursor:pointer;" onclick="openMilestoneHistory()">
 <span class="hist-date">${dateStr}</span>
-<div class="hist-right"><span style="color:var(--accent);font-size:13px;">🎉 ${item.label}</span></div>
+<div class="hist-right"><span style="color:var(--accent);font-size:13px;">🎉 ${esc(item.label)}</span></div>
 </div>`;
 } else if (item.type === 'accounts_changed') {
 const summary = item.labels.length === 1
-? item.labels[0]
+? esc(item.labels[0])
 : `${item.labels.length} accounts updated`;
 const detail = item.labels.length > 1
-? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${item.labels.join(' · ')}</div>`
+? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${item.labels.map(esc).join(' · ')}</div>`
 : '';
 return `<div class="hist-row" style="flex-direction:column;align-items:flex-start;gap:2px;">
 <div style="display:flex;justify-content:space-between;width:100%;">
@@ -3200,12 +3212,12 @@ return `<div class="hist-row" style="flex-direction:column;align-items:flex-star
 } else if (item.type === 'account_added') {
 return `<div class="hist-row">
 <span class="hist-date">${dateStr}</span>
-<div class="hist-right"><span style="color:var(--muted);font-size:13px;">+ ${item.label}</span></div>
+<div class="hist-right"><span style="color:var(--muted);font-size:13px;">+ ${esc(item.label)}</span></div>
 </div>`;
 } else if (item.type === 'account_removed') {
 return `<div class="hist-row">
 <span class="hist-date">${dateStr}</span>
-<div class="hist-right"><span style="color:var(--muted);font-size:13px;">− ${item.label}</span></div>
+<div class="hist-right"><span style="color:var(--muted);font-size:13px;">− ${esc(item.label)}</span></div>
 </div>`;
 }
 return '';
