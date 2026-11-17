@@ -3093,18 +3093,30 @@ debtContainer.innerHTML = '';
 debtContainer.innerHTML = Object.entries(debtByType).map(([type, accs]) => {
 const sorted = [...accs].sort((a,b) => getBal(b)-getBal(a));
 const subtotal = sorted.reduce((s,a)=>s+getBal(a),0);
-const rows = sorted.map(acc => `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
+const rows = sorted.map(acc => {
+  // Debt meta: note first (if any), then staleness, joined by middot.
+  // Type label is skipped since the section header already shows it.
+  const s = staleness(acc.updatedAt);
+  const metaParts = [];
+  if (acc.note) metaParts.push(esc(acc.note));
+  if (s) metaParts.push(`<span class="${s.cls}">${s.text}</span>`);
+  const metaHtml = metaParts.length
+    ? `<div class="acct-meta">${metaParts.join(' · ')}</div>`
+    : '';
+  return `<div class="acct-row" onclick="if(window.innerWidth<=768)openEdit('${acc.id}')">
 <div class="acct-left">
 <div class="acct-icon icon-debt">${TYPE_ICONS[acc.type] || esc(acc.name.charAt(0).toUpperCase())}</div>
 <div>
 <div class="acct-name">${esc(acc.name)}</div>
+${metaHtml}
 </div>
 </div>
 <div class="acct-right">
 <div class="acct-bal" style="color:var(--danger)">-${fmt(getBal(acc))}</div>
 <button class="edit-ico" onclick="event.stopPropagation();openEdit('${acc.id}')" title="Edit">✎</button>
 </div>
-</div>`).join('');
+</div>`;
+}).join('');
 const groupId = 'debt-' + type;
 return `<div class="section" id="section-${groupId}">
 <div class="section-head collapsible" onclick="toggleSection('${groupId}')">
