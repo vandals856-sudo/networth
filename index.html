@@ -1942,6 +1942,21 @@ Delete snapshot
 </div>
 </div>
 
+<!-- CONFIRM DELETE ACCOUNT -->
+<div class="overlay" id="confirm-delete-overlay" onclick="overlayClickGeneric(event,closeConfirmDelete)" style="display:none;">
+<div class="modal" onclick="event.stopPropagation()">
+<div class="modal-handle"></div>
+<h3>Remove this account?</h3>
+<div style="font-size:14px;color:var(--muted);margin:-4px 0 18px;line-height:1.5;">
+<span id="confirm-delete-name" style="color:var(--text);font-weight:500;"></span> will be removed from your dashboard. Your past net worth history stays intact.
+</div>
+<div class="modal-actions">
+<button class="btn-cancel2" onclick="closeConfirmDelete()">Cancel</button>
+<button class="btn-save" style="background:var(--danger);color:#fff;" onclick="confirmDeleteAccount()">Remove</button>
+</div>
+</div>
+</div>
+
 <!-- CELEBRATION -->
 <div class="overlay" id="feedback-overlay" onclick="overlayClickGeneric(event,closeFeedback)" style="display:none;">
   <div class="modal" onclick="event.stopPropagation()">
@@ -2745,6 +2760,9 @@ showToast('snapshot saved');
 
 // ---- PRICES ----
 async function fetchPrices() {
+// Only fetch when user is signed in and viewing the dashboard —
+// no point hitting CoinGecko from the homepage/auth screen
+if (!state.user) return;
 try {
 const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana,ripple,dogecoin,avalanche-2,chainlink,polkadot,matic-network&vs_currencies=usd&include_24hr_change=true');
 const d = await r.json();
@@ -2772,8 +2790,8 @@ setChange('link',d.chainlink?.usd_24h_change);
 setChange('dot', d.polkadot?.usd_24h_change);
 setChange('matic', d['matic-network']?.usd_24h_change);
 } catch(e) {
-console.error('price fetch error', e);
-// if we have any cached prices treat as loaded, else keep waiting
+// CoinGecko can be flaky or rate-limited; cached prices stay in state.prices
+console.warn('price fetch skipped:', e.message || e);
 }
 render();
 autoSnapshot();
@@ -3550,10 +3568,27 @@ await saveEventsToSheet();
 autoSnapshot();
 }
 
-async function deleteAccount() {
+// Opens a confirmation modal before removing the account
+// (destructive action, easy to misclick especially on mobile)
+function deleteAccount() {
+const acc = state.accounts.find(a => a.id === editingId);
+if (!acc) return;
+document.getElementById('confirm-delete-name').textContent = acc.name;
+document.getElementById('confirm-delete-overlay').style.display = 'flex';
+document.getElementById('confirm-delete-overlay').classList.add('open');
+}
+
+function closeConfirmDelete() {
+const o = document.getElementById('confirm-delete-overlay');
+o.classList.remove('open');
+o.style.display = 'none';
+}
+
+async function confirmDeleteAccount() {
 const acc = state.accounts.find(a => a.id === editingId);
 if (acc) state.events.push({ date: Date.now(), type: 'account_removed', label: `${acc.name} removed` });
 state.accounts = state.accounts.filter(a=>a.id!==editingId);
+closeConfirmDelete();
 closeModal();
 render();
 await saveAccountsToSheet();
