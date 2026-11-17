@@ -1948,11 +1948,26 @@ Delete snapshot
 <div class="modal-handle"></div>
 <h3>Remove this account?</h3>
 <div style="font-size:14px;color:var(--muted);margin:-4px 0 18px;line-height:1.5;">
-<span id="confirm-delete-name" style="color:var(--text);font-weight:500;"></span> will be removed from your dashboard. Your past net worth history stays intact.
+<span id="confirm-delete-name" style="color:var(--text);font-weight:500;"></span> will be removed from your dashboard.
 </div>
 <div class="modal-actions">
 <button class="btn-cancel2" onclick="closeConfirmDelete()">Cancel</button>
 <button class="btn-save" style="background:var(--danger);color:#fff;" onclick="confirmDeleteAccount()">Remove</button>
+</div>
+</div>
+</div>
+
+<!-- CONFIRM DELETE SNAPSHOT -->
+<div class="overlay" id="confirm-delete-snapshot-overlay" onclick="overlayClickGeneric(event,closeConfirmDeleteSnapshot)" style="display:none;">
+<div class="modal" onclick="event.stopPropagation()">
+<div class="modal-handle"></div>
+<h3>Delete this snapshot?</h3>
+<div style="font-size:14px;color:var(--muted);margin:-4px 0 18px;line-height:1.5;">
+<span id="confirm-delete-snapshot-date" style="color:var(--text);font-weight:500;"></span> will be removed from your history.
+</div>
+<div class="modal-actions">
+<button class="btn-cancel2" onclick="closeConfirmDeleteSnapshot()">Cancel</button>
+<button class="btn-save" style="background:var(--danger);color:#fff;" onclick="confirmDeleteSnapshot()">Delete</button>
 </div>
 </div>
 </div>
@@ -4202,12 +4217,63 @@ await saveHistoryToSheet();
 render();
 }
 
-async function deleteHistoryEntry() {
+// Transitions the edit-snapshot modal into the confirm-delete modal.
+// Only one modal visible at a time — Cancel brings the edit modal back;
+// Delete finishes and clears both.
+function deleteHistoryEntry() {
 if (editingHistoryIdx === null) return;
+const entry = state.history[editingHistoryIdx];
+if (!entry) return;
+// show the snapshot's date as the subject of the confirm
+const dateStr = new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+document.getElementById('confirm-delete-snapshot-date').textContent = dateStr;
+// hide the edit modal underneath so it feels like one continuous flow
+document.getElementById('history-overlay').style.display = 'none';
+const confirmOverlay = document.getElementById('confirm-delete-snapshot-overlay');
+confirmOverlay.style.display = 'flex';
+confirmOverlay.classList.add('open');
+}
+
+// Cancel: go back to the edit-snapshot modal the user came from
+function closeConfirmDeleteSnapshot() {
+const o = document.getElementById('confirm-delete-snapshot-overlay');
+o.classList.remove('open');
+o.style.display = 'none';
+// restore the edit modal — it was never fully closed, just hidden
+document.getElementById('history-overlay').style.display = 'flex';
+}
+
+async function confirmDeleteSnapshot() {
+if (editingHistoryIdx === null) return;
+const entry = state.history[editingHistoryIdx];
+// Delete the snapshot
 state.history.splice(editingHistoryIdx, 1);
-closeEditHistory();
-await saveHistoryToSheet();
-render();
+// Also clear any same-day account activity events (adds/removes) so the
+// day is fully undone from the history list — otherwise an orphan
+// "N accounts updated" row would linger with no snapshot behind it
+if (entry) {
+  const dayKey = new Date(entry.date).toDateString();
+  const before = state.events.length;
+  state.events = state.events.filter(e => {
+    if (e.type !== 'account_added' && e.type !== 'account_removed') return true;
+    return new Date(e.date).toDateString() !== dayKey;
+  });
+  const sameDayEventsRemoved = before !== state.events.length;
+  const o = document.getElementById('confirm-delete-snapshot-overlay');
+  o.classList.remove('open');
+  o.style.display = 'none';
+  closeEditHistory();
+  await saveHistoryToSheet();
+  if (sameDayEventsRemoved) await saveEventsToSheet();
+  render();
+} else {
+  const o = document.getElementById('confirm-delete-snapshot-overlay');
+  o.classList.remove('open');
+  o.style.display = 'none';
+  closeEditHistory();
+  await saveHistoryToSheet();
+  render();
+}
 }
 
 // ---- PROFILE ----
