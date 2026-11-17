@@ -3568,27 +3568,37 @@ await saveEventsToSheet();
 autoSnapshot();
 }
 
-// Opens a confirmation modal before removing the account
-// (destructive action, easy to misclick especially on mobile)
+// Transitions the edit modal into the confirm-remove modal.
+// Only one modal is visible at a time — Cancel brings the edit modal
+// back; Remove finishes the delete and clears both.
 function deleteAccount() {
 const acc = state.accounts.find(a => a.id === editingId);
 if (!acc) return;
 document.getElementById('confirm-delete-name').textContent = acc.name;
-document.getElementById('confirm-delete-overlay').style.display = 'flex';
-document.getElementById('confirm-delete-overlay').classList.add('open');
+// hide the edit modal underneath so it feels like one continuous flow
+document.getElementById('overlay').classList.remove('open');
+const confirmOverlay = document.getElementById('confirm-delete-overlay');
+confirmOverlay.style.display = 'flex';
+confirmOverlay.classList.add('open');
 }
 
+// Cancel: go back to the edit modal the user came from
 function closeConfirmDelete() {
 const o = document.getElementById('confirm-delete-overlay');
 o.classList.remove('open');
 o.style.display = 'none';
+// restore the edit modal — it was never fully closed, just hidden
+document.getElementById('overlay').classList.add('open');
 }
 
 async function confirmDeleteAccount() {
 const acc = state.accounts.find(a => a.id === editingId);
 if (acc) state.events.push({ date: Date.now(), type: 'account_removed', label: `${acc.name} removed` });
 state.accounts = state.accounts.filter(a=>a.id!==editingId);
-closeConfirmDelete();
+// clear both modals cleanly
+const o = document.getElementById('confirm-delete-overlay');
+o.classList.remove('open');
+o.style.display = 'none';
 closeModal();
 render();
 await saveAccountsToSheet();
